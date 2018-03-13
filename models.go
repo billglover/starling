@@ -114,3 +114,137 @@ type Account struct {
 	BIC           string `json:"bic"`
 	CreatedAt     string `json:"createdAt"`
 }
+
+type Balance struct {
+	ClearedBalance      float64 `json:"clearedBalance"`
+	EffectiveBalance    float64 `json:"effectiveBalance"`
+	PendingTransactions float64 `json:"pendingTransactions"`
+	AvailableToSpend    float64 `json:"availableToSpend"`
+	AcceptedOverdraft   float64 `json:"acceptedOverdraft"`
+	Currency            string  `json:"currency"`
+	Amount              float64 `json:"amount"`
+}
+
+// Address is the physical address of the customer
+type Address struct {
+	StreetAddress string `json:"streetAddress"`
+	City          string `json:"city"`
+	Country       string `json:"country"`
+	Postcode      string `json:"postcode"`
+}
+
+// Addresses are the current and previous physical addresses
+type Addresses struct {
+	Current  Address   `json:"current"`
+	Previous []Address `json:"previous"`
+}
+
+type Optional struct {
+	Present bool `json:"present"`
+}
+
+type OptionalContact struct {
+	Present bool `json:"present"`
+}
+
+// Contact represents the details of a payee
+type Contact struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// Contacts are a list of payees
+type Contacts struct {
+	Contacts []Contact
+}
+
+// ContactAccount holds payee account details
+type ContactAccount struct {
+	ID            string `json:"id"` // Unique account identifier of contact to be added
+	Type          string `json:"type"`
+	Name          string `json:"name"`          // Contact name
+	AccountNumber string `json:"accountNumber"` // Contact account number
+	SortCode      string `json:"sortCode"`      // Contact sort code
+}
+
+type OptionalContactAccounts struct {
+	Present bool `json:"present"`
+}
+
+// ContactAccounts holds a list of accounts for a payee
+type ContactAccounts struct {
+	ContactAccounts []ContactAccount `json:"contactAccounts"`
+}
+
+type OptionalContactAccount struct {
+	Present bool `json:"present"`
+}
+
+type OptionalCustomer struct {
+	Present bool `json:"present"`
+}
+
+// Customer represents the personal details of a customer
+type Customer struct {
+	CustomerUID       string `json:"customerUid"`
+	FirstName         string `json:"firstName"`
+	LastName          string `json:"lastName"`
+	DateOfBirth       string `json:"dateOfBirth"`
+	Email             string `json:"email"`
+	Phone             string `json:"phone"`
+	AccountHolderType string `json:"accountHolderType"`
+}
+
+// DirectDebitMandate represents a single mandate
+type DirectDebitMandate struct {
+	UID            string `json:"uid"`
+	Reference      string `json:"reference"`
+	Status         string `json:"status"`
+	Source         string `json:"source"`
+	Created        string `json:"created"`
+	Cancelled      string `json:"cancelled"`
+	OriginatorName string `json:"originatorName"`
+	OriginatorUID  string `json:"originatorUid"`
+}
+
+// DirectDebitMandates represents a list of mandates
+type DirectDebitMandates struct {
+	Mandates []DirectDebitMandate `json:"mandates"`
+}
+
+type Identity struct {
+	CustomerUID      string   `json:"customerUid"`
+	ExpiresAt        string   `json:"expiresAt"`
+	Authenticated    bool     `json:"authenticated"`
+	ExpiresInSeconds int64    `json:"expiresInSeconds"`
+	Scopes           []string `json:"scopes"`
+}
+
+type OptionalCard struct {
+	Present bool `json:"present"`
+}
+
+// Card holds card details
+type Card struct {
+	UID                 string  `json:"id"`
+	NameOnCard          string  `json:"nameOnCard"`
+	Type                string  `json:"type"`
+	Enabled             bool    `json:"enabled"`
+	Cancelled           bool    `json:"cancelled"`
+	ActivationRequested bool    `json:"activationRequested"`
+	Activated           bool    `json:"activated"`
+	DispatchDate        string  `json:"dispatchDate"`
+	LastFourDigits      string  `json:"lastFourDigits"`
+	Transactions        HALLink `json:"transactions"`
+}
+
+type HALLink struct {
+	HREF        string `json:"href"`
+	Templated   bool   `json:"templated"`
+	Type        string `json:"type"`
+	Deprecation string `json:"deprecation"`
+	Name        string `json:"name"`
+	Profile     string `json:"profile"`
+	Title       string `json:"title"`
+	HREFLang    string `json:"hreflang"`
+}
