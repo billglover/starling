@@ -1,5 +1,10 @@
 package starling
 
+/*
+- UID used as the identifier for each resource, renamed for consistency
+- TODO: could we extract common fields for similar types e.g. Transaction?
+*/
+
 type ErrorDetail struct {
 	Message string // The error message
 }
@@ -139,13 +144,9 @@ type Addresses struct {
 	Previous []Address `json:"previous"`
 }
 
-type Optional struct {
-	Present bool `json:"present"`
-}
+type Optional optional
 
-type OptionalContact struct {
-	Present bool `json:"present"`
-}
+type OptionalContact optional
 
 // Contact represents the details of a payee
 type Contact struct {
@@ -167,22 +168,16 @@ type ContactAccount struct {
 	SortCode      string `json:"sortCode"`      // Contact sort code
 }
 
-type OptionalContactAccounts struct {
-	Present bool `json:"present"`
-}
+type OptionalContactAccounts optional
 
 // ContactAccounts holds a list of accounts for a payee
 type ContactAccounts struct {
 	ContactAccounts []ContactAccount `json:"contactAccounts"`
 }
 
-type OptionalContactAccount struct {
-	Present bool `json:"present"`
-}
+type OptionalContactAccount optional
 
-type OptionalCustomer struct {
-	Present bool `json:"present"`
-}
+type OptionalCustomer optional
 
 // Customer represents the personal details of a customer
 type Customer struct {
@@ -220,9 +215,7 @@ type Identity struct {
 	Scopes           []string `json:"scopes"`
 }
 
-type OptionalCard struct {
-	Present bool `json:"present"`
-}
+type OptionalCard optional
 
 // Card holds card details
 type Card struct {
@@ -247,4 +240,102 @@ type HALLink struct {
 	Profile     string `json:"profile"`
 	Title       string `json:"title"`
 	HREFLang    string `json:"hreflang"`
+}
+
+type Merchant struct{}
+type MerchantLocation struct{}
+type PaymentAmount struct{}
+type ScheduledPayment struct{}
+type LocalPayment struct{}
+type PaymentOrder struct{}
+type PaymentOrders struct{}
+type SpendingCategory struct{}
+type DirectDebitTransaction struct{}
+type DirectDebitTransactions struct{}
+type FPSInTransaction struct{}
+type FPSInTransactions struct{}
+type FPSOutTransaction struct{}
+
+// FPSOutTransactions is a list of FPSOutTransaction items
+type FPSOutTransactions struct {
+	Transactions []FPSOutTransaction `json:"transactions"`
+}
+
+// MastercardTransaction represents the details of a card transaction
+type MastercardTransaction struct {
+	UID               string  `json:"id"`
+	Currency          string  `json:"currency"`
+	Amount            float64 `json:"amount"`
+	Direction         string  `json:"direction"`
+	Created           string  `json:"created"`
+	Narrative         string  `json:"narrative"`
+	Source            string  `json:"source"`
+	Method            string  `json:"mastercardTransactionMethod"`
+	Status            string  `json:"status"`
+	SourceAmount      float64 `json:"sourceAmount"`
+	SourceCurrency    string  `json:"sourceCurrency"`
+	MerchantUID       string  `json:"merchantId"`
+	SpendingCategory  string  `json:"spendingCategory"`
+	Country           string  `json:"country"`
+	POSTimestamp      int64   `json:"posTimestamp"`
+	AuthorisationCode string  `json:"authorisationCode"`
+	EventUID          string  `json:"eventUid"`
+	Receipt           Receipt `json:"receipt"`
+	CardLast4         string  `json:"cardLast4"`
+}
+
+// MastercardTransactions is a list of Mastercard transactions
+type MastercardTransactions struct {
+	NextPage     HALLink                 `json:"nextPage"`
+	Transactions []MastercardTransaction `json:"transactions"`
+}
+
+// Receipt is a receipt for a transaction
+type Receipt struct {
+	UID                string        `json:"receiptUid"`
+	EventUID           string        `json:"eventUid"`
+	MetadataSource     string        `json:"metadataSource"`
+	ReceiptIdentifier  string        `json:"receiptIdentifier"`
+	MerchantIdentifier string        `json:"merchantIdentifier"`
+	TotalAmount        float64       `json:"totalAmount"`
+	TotalTax           float64       `json:"totalTax"`
+	AuthCode           string        `json:"authCode"`
+	CardLast4          string        `json:"cardLast4"`
+	Items              []ReceiptItem `json:"items"`
+}
+
+// ReceiptItem is a single item on a Receipt
+type ReceiptItem struct {
+	UID         string  `json:"receiptItemUid"`
+	Description string  `json:"description"`
+	Quantity    int32   `json:"quantity"`
+	Amount      float64 `json:"amount"`
+	Tax         float64 `json:"tax"`
+}
+
+// ReceiptUID is an un-used type
+type ReceiptUID struct{}
+
+// TransactionSummary represents an individual transaction
+type TransactionSummary struct {
+	UID       string  `json:"id"`
+	Currency  string  `json:"currency"`
+	Amount    float64 `json:"amount"`
+	Direction string  `json:"direction"`
+	Created   string  `json:"created"`
+	Narrative string  `json:"narrative"`
+	Source    string  `json:"source"`
+	Balance   float64 `json:"balance"`
+}
+
+// Transactions is a list of transaction summaries
+type Transactions struct {
+	Transactions []TransactionSummary `json:"transactions"`
+}
+
+// OptionalTransactionSummary indicates the presence of a TransactionSummary
+type OptionalTransactionSummary optional
+
+type optional struct {
+	Present bool `json:"present"`
 }
