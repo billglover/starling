@@ -250,26 +250,66 @@ type LocalPayment struct{}
 type PaymentOrder struct{}
 type PaymentOrders struct{}
 type SpendingCategory struct{}
-type DirectDebitTransaction struct{}
-type DirectDebitTransactions struct{}
-type FPSInTransaction struct{}
-type FPSInTransactions struct{}
-type FPSOutTransaction struct{}
 
-// FPSOutTransactions is a list of FPSOutTransaction items
+// DirectDebitTransaction represents details of a direct debit transaction
+type DirectDebitTransaction struct {
+	transaction
+	MandateUID          string `json:"mandateId"`
+	Type                string `json:"type"`
+	MerchantUID         string `json:"merchantId"`
+	MerchantLocationUID string `json:"merchantLocationId"`
+	SpendingCategory    string `json:"spendingCategory"`
+	Country             string `json:"country"`
+}
+
+// DirectDebitTransactions is a list of direct debit transactions
+type DirectDebitTransactions struct {
+	NextPage     HALLink                  `json:"nextPage"`
+	Transactions []DirectDebitTransaction `json:"transactions"`
+}
+
+// transaction represents the details of a transaction
+type transaction struct {
+	UID       string  `json:"id"`
+	Currency  string  `json:"currency"`
+	Amount    float64 `json:"amount"`
+	Direction string  `json:"direction"`
+	Created   string  `json:"created"`
+	Narrative string  `json:"narrative"`
+	Source    string  `json:"source"`
+}
+
+// FPSInTransaction represents details of an inbound faster payments transaction
+type FPSInTransaction struct {
+	transaction
+	SendingContactUID        string  `json:"sendingContactId"`
+	SendingContactAccountUID string  `json:"sendingContactAccountId"`
+	SendingContactAccount    HALLink `json:"sendingContactAccount"`
+}
+
+// FPSInTransactions is a list of inbound faster payment transactions
+type FPSInTransactions struct {
+	NextPage     HALLink            `json:"nextPage"`
+	Transactions []FPSInTransaction `json:"transactions"`
+}
+
+// FPSOutTransaction represents details of an outbound faster payments transaction
+type FPSOutTransaction struct {
+	transaction
+	ReceivingContactUID        string  `json:"receivingContactId"`
+	ReceivingContactAccountUID string  `json:"receivingContactAccountId"`
+	ReceivingContactAccount    HALLink `json:"receivingContactAccount"`
+}
+
+// FPSOutTransactions is a list of outbound faster payment transactions
 type FPSOutTransactions struct {
+	NextPage     HALLink             `json:"nextPage"`
 	Transactions []FPSOutTransaction `json:"transactions"`
 }
 
 // MastercardTransaction represents the details of a card transaction
 type MastercardTransaction struct {
-	UID               string  `json:"id"`
-	Currency          string  `json:"currency"`
-	Amount            float64 `json:"amount"`
-	Direction         string  `json:"direction"`
-	Created           string  `json:"created"`
-	Narrative         string  `json:"narrative"`
-	Source            string  `json:"source"`
+	transaction
 	Method            string  `json:"mastercardTransactionMethod"`
 	Status            string  `json:"status"`
 	SourceAmount      float64 `json:"sourceAmount"`
@@ -318,14 +358,8 @@ type ReceiptUID struct{}
 
 // TransactionSummary represents an individual transaction
 type TransactionSummary struct {
-	UID       string  `json:"id"`
-	Currency  string  `json:"currency"`
-	Amount    float64 `json:"amount"`
-	Direction string  `json:"direction"`
-	Created   string  `json:"created"`
-	Narrative string  `json:"narrative"`
-	Source    string  `json:"source"`
-	Balance   float64 `json:"balance"`
+	transaction
+	Balance float64 `json:"balance"`
 }
 
 // Transactions is a list of transaction summaries
