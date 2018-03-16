@@ -1,12 +1,8 @@
 package starling
 
-/*
-- UID used as the identifier for each resource, renamed for consistency
-- TODO: could we extract common fields for similar types e.g. Transaction?
-*/
-
+// ErrorDetail holds the details of an error message
 type ErrorDetail struct {
-	Message string // The error message
+	Message string
 }
 
 // SavingsGoalTransferResponse represents the response received after attempting to make an immediate or recurring transfer
@@ -17,6 +13,7 @@ type SavingsGoalTransferResponse struct {
 	Errors  []ErrorDetail `json:"errors"`      // List of errors if the method request failed
 }
 
+// CurrencyAndAmount represents the value and currency of a monetary amount
 type CurrencyAndAmount struct {
 	Currency   string `json:"currency"`   // ISO-4217 3 character currency code
 	MinorUnits int64  `json:"minorUnits"` // Amount in the minor units of the given currency; eg pence in GBP, cents in EUR
@@ -27,6 +24,7 @@ type TopUpRequest struct {
 	Amount CurrencyAndAmount `json:"amount"`
 }
 
+// RecurrenceRule defines the pattern for recurring events
 type RecurrenceRule struct {
 	StartDate string `json:"startDate"`
 	Frequency string `json:"frequency"`
@@ -44,9 +42,9 @@ type ScheduledSavingsPaymentRequest struct {
 
 // CreateOrUpdateSavingsGoalResponse represents a response after attempting to create a savings goal
 type CreateOrUpdateSavingsGoalResponse struct {
-	SavingsGoalUid string        `json:"savingsGoalUid"`
-	success        bool          `json:"success"`
-	errors         []ErrorDetail `json:"errors"`
+	SavingsGoalUID string        `json:"savingsGoalUid"`
+	Success        bool          `json:"success"`
+	Errors         []ErrorDetail `json:"errors"`
 }
 
 // SavingsGoalRequest is a request to create a new savings goal
@@ -73,7 +71,7 @@ type SavingsGoals struct {
 
 // SavingsGoalPhoto is a photo associated to a savings goal
 type SavingsGoalPhoto struct {
-	base64EncodedPhoto string `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
+	Base64EncodedPhoto string `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
 }
 
 // WithdrawalRequest is a request to withdraw money from a savings goal
@@ -110,7 +108,7 @@ type MerchantPosData struct {
 
 // Account represents bank account details
 type Account struct {
-	ID            string `json:"id"`
+	UID           string `json:"id"`
 	Name          string `json:"name"`
 	AccountNUmber string `json:"accountNumber"`
 	SortCode      string `json:"sortCode"`
@@ -120,6 +118,7 @@ type Account struct {
 	CreatedAt     string `json:"createdAt"`
 }
 
+// Balance represents the balance on an account
 type Balance struct {
 	ClearedBalance      float64 `json:"clearedBalance"`
 	EffectiveBalance    float64 `json:"effectiveBalance"`
@@ -144,8 +143,7 @@ type Addresses struct {
 	Previous []Address `json:"previous"`
 }
 
-type Optional optional
-
+// OptionalContact identifies the presence of a contact
 type OptionalContact optional
 
 // Contact represents the details of a payee
@@ -161,13 +159,14 @@ type Contacts struct {
 
 // ContactAccount holds payee account details
 type ContactAccount struct {
-	ID            string `json:"id"` // Unique account identifier of contact to be added
+	UID           string `json:"id"`
 	Type          string `json:"type"`
-	Name          string `json:"name"`          // Contact name
-	AccountNumber string `json:"accountNumber"` // Contact account number
-	SortCode      string `json:"sortCode"`      // Contact sort code
+	Name          string `json:"name"`
+	AccountNumber string `json:"accountNumber"`
+	SortCode      string `json:"sortCode"`
 }
 
+// OptionalContactAccounts identifies the presence of a contact accounts
 type OptionalContactAccounts optional
 
 // ContactAccounts holds a list of accounts for a payee
@@ -175,13 +174,15 @@ type ContactAccounts struct {
 	ContactAccounts []ContactAccount `json:"contactAccounts"`
 }
 
+// OptionalContactAccount identifies the presence of a contact account
 type OptionalContactAccount optional
 
+// OptionalCustomer identifies the presence of a customer
 type OptionalCustomer optional
 
 // Customer represents the personal details of a customer
 type Customer struct {
-	CustomerUID       string `json:"customerUid"`
+	UID               string `json:"customerUid"`
 	FirstName         string `json:"firstName"`
 	LastName          string `json:"lastName"`
 	DateOfBirth       string `json:"dateOfBirth"`
@@ -207,17 +208,19 @@ type DirectDebitMandates struct {
 	Mandates []DirectDebitMandate `json:"mandates"`
 }
 
+// Identity is the identity of the customer
 type Identity struct {
-	CustomerUID      string   `json:"customerUid"`
+	UID              string   `json:"customerUid"`
 	ExpiresAt        string   `json:"expiresAt"`
 	Authenticated    bool     `json:"authenticated"`
 	ExpiresInSeconds int64    `json:"expiresInSeconds"`
 	Scopes           []string `json:"scopes"`
 }
 
+// OptionalCard identifies the presence of a card
 type OptionalCard optional
 
-// Card holds card details
+// Card represents card details
 type Card struct {
 	UID                 string  `json:"id"`
 	NameOnCard          string  `json:"nameOnCard"`
@@ -231,6 +234,7 @@ type Card struct {
 	Transactions        HALLink `json:"transactions"`
 }
 
+// HALLink is a link to another resource
 type HALLink struct {
 	HREF        string `json:"href"`
 	Templated   bool   `json:"templated"`
@@ -242,14 +246,74 @@ type HALLink struct {
 	HREFLang    string `json:"hreflang"`
 }
 
-type Merchant struct{}
-type MerchantLocation struct{}
-type PaymentAmount struct{}
-type ScheduledPayment struct{}
-type LocalPayment struct{}
-type PaymentOrder struct{}
-type PaymentOrders struct{}
-type SpendingCategory struct{}
+// Merchant represents details of a merchant
+type Merchant struct {
+	UID             string `json:"merchantUid"`
+	Name            string `json:"name"`
+	Website         string `json:"website"`
+	PhoneNumber     string `json:"phoneNumber"`
+	TwitterUsername string `json:"twitterUsername"`
+}
+
+// MerchantLocation represents details of a merchant location
+type MerchantLocation struct {
+	UID                            string  `json:"merchantLocationUid"`
+	MerchantUID                    string  `json:"merchantUid"`
+	Merchant                       HALLink `json:"merchant"`
+	MerchantName                   string  `json:"merchantName"`
+	LocationName                   string  `json:"locationName"`
+	Address                        string  `json:"address"`
+	PhoneNumber                    string  `json:"phoneNUmber"`
+	GooglePlaceID                  string  `json:"googlePlaceId"`
+	MastercardMerchantCategoryCode int32   `json:"mastercardMerchantCategoryCode"`
+}
+
+// PaymentAmount represents the currency and amount of a payment
+type PaymentAmount struct {
+	Currency string  `json:"currency"`
+	Amount   float64 `json:"amount"`
+}
+
+// ScheduledPayment represents a scheduled payment
+type ScheduledPayment struct {
+	LocalPayment
+	RecurrenceRule RecurrenceRule `json:"recurrenceRule"`
+}
+
+// LocalPayment represents a local payment
+type LocalPayment struct {
+	Payment               PaymentAmount `json:"payment"`
+	DestinationAccountUID string        `json:"destinationAccountUid"`
+	Reference             string        `json:"reference"`
+}
+
+// PaymentOrder is a single PaymentOrder
+type PaymentOrder struct {
+	UID                        string         `json:"paymentOrderId"`
+	Currency                   string         `json:"currency"`
+	Amount                     float64        `json:"amount"`
+	Reference                  string         `json:"reference"`
+	ReceivingContactAccountUID string         `json:"receivingContactAccountId"`
+	RecipientName              string         `json:"recipientName"`
+	Immediate                  bool           `json:"immediate"`
+	RecurrenceRule             RecurrenceRule `json:"recurrenceRule"`
+	StartDate                  string         `json:"startDate"`
+	NextDate                   string         `json:"nextDate"`
+	CancelledAt                string         `json:"cancelledAt"`
+	PaymentType                string         `json:"paymentType"`
+	MandateUID                 string         `json:"mandateId"`
+}
+
+// PaymentOrders is a list of PaymentOrders
+type PaymentOrders struct {
+	NextPage      HALLink        `json:"nextPage"`
+	PaymentOrders []PaymentOrder `json:"paymentOrders"`
+}
+
+// SpendingCategory is the category associated with a transaction
+type SpendingCategory struct {
+	SpendingCategory string `json:"spendingCategory"`
+}
 
 // DirectDebitTransaction represents details of a direct debit transaction
 type DirectDebitTransaction struct {
