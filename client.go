@@ -17,7 +17,6 @@ const (
 	defaultURL = prodURL
 
 	userAgent = "go-starling"
-	mediaType = "application/json"
 )
 
 // Client holds configuration items for the Starling client and provides methods
@@ -34,19 +33,23 @@ type Client struct {
 // authentication, provide an http.Client that will perform the authentication
 // for you (such as that provided by the golang.org/x/oauth2 library).
 // Inspiration: https://github.com/google/go-github/blob/master/github/github.go
-func NewClient(httpClient *http.Client) *Client {
-	if httpClient == nil {
-		httpClient = http.DefaultClient
+func NewClient(cc *http.Client) *Client {
+	if cc == nil {
+		cc = http.DefaultClient
 	}
 	baseURL, _ := url.Parse(defaultURL)
 
-	c := &Client{baseURL: baseURL, userAgent: userAgent, client: httpClient}
+	c := &Client{baseURL: baseURL, userAgent: userAgent, client: cc}
 	return c
 }
 
+// NewRequest creates an HTTP Request. The client baseURL is checked to confirm that it has a trailing
+// slash. A relative URL should be provided without the leading slash. If a non-nil body is provided
+// it will be JSON encoded and included in the request.
+// Inspiration: https://github.com/google/go-github/blob/master/github/github.go
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
-	if !strings.HasSuffix(c.baseURL.Path, "/") {
-		return nil, fmt.Errorf("baseURL must have a trailing slash, but %q does not", c.baseURL)
+	if strings.HasSuffix(c.baseURL.Path, "/") == false {
+		return nil, fmt.Errorf("client baseURL does not have a trailing slash: %q", c.baseURL)
 	}
 
 	u, err := c.baseURL.Parse(urlStr)
@@ -73,54 +76,43 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
-	req.Header.Set("Accept", mediaType)
+	req.Header.Set("Accept", "application/json")
 	if c.userAgent != "" {
 		req.Header.Set("User-Agent", c.userAgent)
 	}
 	return req, nil
 }
 
+// Do sends a request and returns the response. An error is returned if the request cannot
+// be sent or if the API returns an error. If a response is received, the body response body
+// is decoded and stored in the value pointed to by v.
+// Inspiration: https://github.com/google/go-github/blob/master/github/github.go
 func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*http.Response, error) {
 	req = req.WithContext(ctx)
 	resp, err := c.client.Do(req)
+
+	// Return the context error if it exists otherwise return the request error.
 	if err != nil {
-		// If we got an error, and the context has been canceled,
-		// the context's error is probably more useful.
 		select {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		default:
+			return nil, err
 		}
-
-		return nil, err
 	}
 	defer resp.Body.Close()
 
-	err = CheckResponse(resp)
-	if err != nil {
-		// even though there was an error, we still return the response
-		// in case the caller wants to inspect it further
-		return resp, err
+	// Anything other than a HTTP 2xx response code is treated as an error.
+	if c := resp.StatusCode; 200 <= c && c <= 299 {
+		return resp, fmt.Errorf("unexpected return code")
 	}
 
 	if v != nil {
-		if w, ok := v.(io.Writer); ok {
-			io.Copy(w, resp.Body)
-		} else {
-			err = json.NewDecoder(resp.Body).Decode(v)
-			if err == io.EOF {
-				err = nil // ignore EOF errors caused by empty response body
-			}
+		err = json.NewDecoder(resp.Body).Decode(v)
+		if err == io.EOF {
+			err = nil // ignore EOF errors caused by empty response body
 		}
 	}
 
 	return resp, err
-}
-
-func CheckResponse(r *http.Response) error {
-	if c := r.StatusCode; 200 <= c && c <= 299 {
-		return nil
-	}
-
-	return fmt.Errorf("unexpected return code: %s", r.Status)
 }

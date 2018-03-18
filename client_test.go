@@ -2,6 +2,7 @@ package starling
 
 import (
 	"io/ioutil"
+	"net/url"
 	"testing"
 )
 
@@ -16,6 +17,9 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
+// TestNewRequest confirms that NewRequest returns an API request with the
+// correct URL, a correctly encoded body and the correc User-Agent and
+// Content-Type headers set.
 func TestNewRequest(t *testing.T) {
 	c := NewClient(nil)
 
@@ -37,8 +41,62 @@ func TestNewRequest(t *testing.T) {
 		t.Errorf("NewRequest(%q) Body is %v, want %v", inBody, got, want)
 	}
 
-	// test that default user-agent is attached to the request
+	// test that default user-agent is set
 	if got, want := req.Header.Get("User-Agent"), c.userAgent; got != want {
 		t.Errorf("NewRequest() User-Agent is %v, want %v", got, want)
+	}
+
+	// test that default content-type is set
+	if got, want := req.Header.Get("Content-Type"), "application/json"; got != want {
+		t.Errorf("NewRequest() Content-Type is %v, want %v", got, want)
+	}
+}
+
+// TestNewRequest_invalidJSON confirms that NewRequest returns an error
+// if asked to encode a type that results in invalid JSON.
+func TestNewRequest_invalidJSON(t *testing.T) {
+	c := NewClient(nil)
+
+	type T struct {
+		A map[interface{}]interface{}
+	}
+	_, err := c.NewRequest("GET", ".", &T{})
+
+	if err == nil {
+		t.Error("Expected error to be returned.")
+	}
+
+}
+
+// TestNewRequest_badURL confirms that NewRequest returns an error
+// if passed a URL containing invalid characters.
+func TestNewRequest_badURL(t *testing.T) {
+	c := NewClient(nil)
+	_, err := c.NewRequest("GET", ":", nil)
+	if err == nil {
+		t.Error("expected error to be returned")
+	}
+}
+
+// TestNewRequest_badBasePath confirms that NewRequest returns an error
+// if called on a client that does not have a trailing slash for the
+// base path.
+func TestNewRequest_badBasePath(t *testing.T) {
+	c := NewClient(nil)
+	u, _ := url.Parse("http://test.local")
+	c.baseURL = u
+	_, err := c.NewRequest("GET", "/", nil)
+	if err == nil {
+		t.Error("expected error to be returned")
+	}
+}
+
+// TestNewRequest_badMethod confirms that NewRequest returns an error
+// if called with an invalid method.
+func TestNewRequest_badMethod(t *testing.T) {
+	c := NewClient(nil)
+	_, err := c.NewRequest("\n", "/", nil)
+	if err == nil {
+		t.Error("expected error to be returned")
 	}
 }
