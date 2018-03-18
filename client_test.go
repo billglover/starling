@@ -1,8 +1,13 @@
 package starling
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -18,7 +23,7 @@ func TestNewClient(t *testing.T) {
 }
 
 // TestNewRequest confirms that NewRequest returns an API request with the
-// correct URL, a correctly encoded body and the correc User-Agent and
+// correct URL, a correctly encoded body and the correct User-Agent and
 // Content-Type headers set.
 func TestNewRequest(t *testing.T) {
 	c := NewClient(nil)
@@ -99,4 +104,55 @@ func TestNewRequest_badMethod(t *testing.T) {
 	if err == nil {
 		t.Error("expected error to be returned")
 	}
+}
+
+// TestNewRequest_emptyBody confirms that NewRequest returns an API request with the
+// correct URL, an empty body and the correct User-Agent and Content-Type headers set.
+func TestNewRequest_emptyBody(t *testing.T) {
+	c := NewClient(nil)
+	req, err := c.NewRequest("GET", ".", nil)
+	if err != nil {
+		t.Fatalf("NewRequest returned unexpected error: %v", err)
+	}
+	if req.Body != nil {
+		t.Fatalf("constructed request contains a non-nil Body")
+	}
+}
+
+func TestDo(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	type foo struct {
+		A string
+	}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "GET"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+		fmt.Fprint(w, `{"A":"a"}`)
+	})
+
+	req, _ := client.NewRequest("GET", ".", nil)
+	body := new(foo)
+	client.Do(context.Background(), req, body)
+
+	want := &foo{"a"}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("Response body = %v, want %v", body, want)
+	}
+}
+
+func setup() (client *Client, mux *http.ServeMux, serverURL string, teardown func()) {
+	mux = http.NewServeMux()
+	server := httptest.NewServer(mux)
+
+	// client is the GitHub client being tested and is
+	// configured to use test server.
+	c := NewClient(nil)
+	url, _ := url.Parse(server.URL + "/")
+	c.baseURL = url
+
+	return c, mux, server.URL, server.Close
 }
