@@ -119,6 +119,9 @@ func TestNewRequest_emptyBody(t *testing.T) {
 	}
 }
 
+// TestDo confirms that Do returns a JSON decoded value when making a request. It
+// confirms the correct verb was used and that the decoded response value matches
+// the expected result.
 func TestDo(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -144,6 +147,8 @@ func TestDo(t *testing.T) {
 	}
 }
 
+// TestDo_HTTPError confirms that Do returns an error and a response value when
+// it receives a non HTTP 2xx response code.
 func TestDo_HTTPError(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -157,7 +162,6 @@ func TestDo_HTTPError(t *testing.T) {
 			t.Errorf("request method: %v, want %v", got, want)
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-
 	})
 
 	req, _ := client.NewRequest("GET", ".", nil)
@@ -170,6 +174,37 @@ func TestDo_HTTPError(t *testing.T) {
 
 	if err == nil {
 		t.Error("expected error to be returned")
+	}
+
+}
+
+// TestDo_NilPayload confirms that Do does not return an error when it receives
+// it receives an empty payload.
+func TestDo_NilPayload(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	type foo struct {
+		A string
+	}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "GET"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	req, _ := client.NewRequest("GET", ".", nil)
+	body := new(foo)
+	resp, err := client.Do(context.Background(), req, body)
+
+	if got, want := resp.StatusCode, http.StatusOK; got != want {
+		t.Errorf("Do() status code is %d, want %d", got, want)
+	}
+
+	if err != nil {
+		t.Error("unexpected error returned")
 	}
 
 }

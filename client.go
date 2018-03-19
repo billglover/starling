@@ -109,7 +109,6 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 
 	if v != nil {
 		err = json.NewDecoder(resp.Body).Decode(v)
-		fmt.Println("v:", v)
 		if err == io.EOF {
 			err = nil // ignore EOF errors caused by empty response body
 		}
