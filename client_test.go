@@ -2,6 +2,7 @@ package starling
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -153,10 +154,6 @@ func TestDo_HTTPError(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	type foo struct {
-		A string
-	}
-
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if got, want := r.Method, "GET"; got != want {
 			t.Errorf("request method: %v, want %v", got, want)
@@ -165,8 +162,7 @@ func TestDo_HTTPError(t *testing.T) {
 	})
 
 	req, _ := client.NewRequest("GET", ".", nil)
-	body := new(foo)
-	resp, err := client.Do(context.Background(), req, body)
+	resp, err := client.Do(context.Background(), req, nil)
 
 	if got, want := resp.StatusCode, http.StatusInternalServerError; got != want {
 		t.Errorf("Do() status code is %d, want %d", got, want)
@@ -205,6 +201,50 @@ func TestDo_NilPayload(t *testing.T) {
 
 	if err != nil {
 		t.Error("unexpected error returned")
+	}
+
+}
+
+// TestDo_Post confirms that Do correctly encodes the payload and submits it
+// as part of a post request.
+func TestDo_Post(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	type foo struct {
+		A string
+	}
+	body := &foo{"b"}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "POST"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+		defer r.Body.Close()
+
+		body := new(foo)
+		err := json.NewDecoder(r.Body).Decode(body)
+		if err != nil {
+			t.Error("unexpected error when decoding request body:", err)
+		}
+
+		want := &foo{"b"}
+		if !reflect.DeepEqual(body, want) {
+			t.Errorf("request body = %v, want %v", body, want)
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+	})
+
+	req, _ := client.NewRequest("POST", ".", body)
+	resp, err := client.Do(context.Background(), req, nil)
+
+	if got, want := resp.StatusCode, http.StatusAccepted; got != want {
+		t.Errorf("Do() status code is %d, want %d", got, want)
+	}
+
+	if err != nil {
+		t.Error("unexpected error returned:", err)
 	}
 
 }
