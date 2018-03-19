@@ -144,12 +144,43 @@ func TestDo(t *testing.T) {
 	}
 }
 
+func TestDo_HTTPError(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	type foo struct {
+		A string
+	}
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "GET"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+
+	})
+
+	req, _ := client.NewRequest("GET", ".", nil)
+	body := new(foo)
+	resp, err := client.Do(context.Background(), req, body)
+
+	if got, want := resp.StatusCode, http.StatusInternalServerError; got != want {
+		t.Errorf("Do() status code is %d, want %d", got, want)
+	}
+
+	if err == nil {
+		t.Error("expected error to be returned")
+	}
+
+}
+
+// Setup establishes a test Server that can be used to provide mock responses during testing.
+// It returns a pointer to a client, a mux, the server URL and a teardown function that
+// must be called when testing is complete.
 func setup() (client *Client, mux *http.ServeMux, serverURL string, teardown func()) {
 	mux = http.NewServeMux()
 	server := httptest.NewServer(mux)
 
-	// client is the GitHub client being tested and is
-	// configured to use test server.
 	c := NewClient(nil)
 	url, _ := url.Parse(server.URL + "/")
 	c.baseURL = url

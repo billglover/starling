@@ -104,7 +104,6 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 
 	// Anything other than a HTTP 2xx response code is treated as an error.
 	if c := resp.StatusCode; c >= 300 {
-		fmt.Println("no error")
 		return resp, fmt.Errorf("unexpected return code")
 	}
 
