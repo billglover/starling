@@ -55,20 +55,6 @@ type SavingsGoalRequest struct {
 	Base64EncodedPhoto string            `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
 }
 
-// SavingsGoal is a goal defined by a customer to hold savings
-type SavingsGoal struct {
-	UID             string            `json:"uid"`  // Unique identifier of the savings goal
-	Name            string            `json:"name"` // Name of the savings goal
-	Target          CurrencyAndAmount `json:"target"`
-	TotalSaved      CurrencyAndAmount `json:"totalSaved"`
-	SavedPercentage int32             `json:"savedPercentage"` // Percentage of target currently deposited in the savings goal
-}
-
-// SavingsGoals is a list containing all savings goals for customer
-type SavingsGoals struct {
-	SavingsGoalList []SavingsGoal `json:"savingsGoalList"`
-}
-
 // SavingsGoalPhoto is a photo associated to a savings goal
 type SavingsGoalPhoto struct {
 	Base64EncodedPhoto string `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
