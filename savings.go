@@ -37,3 +37,21 @@ func (c *Client) GetSavingsGoals(ctx context.Context) (*SavingsGoals, *http.Resp
 
 	return goals, resp, nil
 }
+
+// GetSavingsGoal returns an individual savings goal based on a UID. It also returns the http response
+// in case this is required for further processing. An error will be returned if unable to retrieve
+// goals from the API.
+func (c *Client) GetSavingsGoal(ctx context.Context, uid string) (*SavingsGoal, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var goal *SavingsGoal
+	resp, err := c.Do(ctx, req, &goal)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return goal, resp, nil
+}
