@@ -186,3 +186,49 @@ func TestGetSavingsGoal_Error(t *testing.T) {
 	}
 
 }
+
+// TestPutSavingsGoal confirms that the client is able to create a savings goal.
+func TestPutSavingsGoal(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	uid := "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b"
+	sgr := SavingsGoalRequest{
+		Name:     "test",
+		Currency: "GBP",
+		Target: CurrencyAndAmount{
+			Currency:   "GBP",
+			MinorUnits: 10000,
+		},
+		Base64EncodedPhoto: "",
+	}
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "PUT"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+
+		var sg = SavingsGoalRequest{}
+		err := json.NewDecoder(r.Body).Decode(&sg)
+		if err != nil {
+			t.Errorf("unable to decode savings goal request: %v", err)
+		}
+
+		if !reflect.DeepEqual(sgr, sg) {
+			t.Errorf("PutSavingsGoal got %+v, want %+v", sg, sgr)
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+
+	_, resp, err := client.PutSavingsGoal(context.Background(), uid, sgr)
+	if err != nil {
+		t.Error("unexpected error returned:", err)
+	}
+
+	if got, want := resp.StatusCode, http.StatusOK; got != want {
+		t.Errorf("response status: %v, want %v", got, want)
+	}
+
+}
+

@@ -40,21 +40,6 @@ type ScheduledSavingsPaymentRequest struct {
 	CurrencyAndAmount CurrencyAndAmount `json:"currencyAndAmount"`
 }
 
-// CreateOrUpdateSavingsGoalResponse represents a response after attempting to create a savings goal
-type CreateOrUpdateSavingsGoalResponse struct {
-	SavingsGoalUID string        `json:"savingsGoalUid"`
-	Success        bool          `json:"success"`
-	Errors         []ErrorDetail `json:"errors"`
-}
-
-// SavingsGoalRequest is a request to create a new savings goal
-type SavingsGoalRequest struct {
-	Name               string            `json:"name"`     // Name of the savings goal
-	Currency           string            `json:"currency"` // ISO-4217 3 character currency code of the savings goal
-	Target             CurrencyAndAmount `json:"target"`
-	Base64EncodedPhoto string            `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
-}
-
 // SavingsGoalPhoto is a photo associated to a savings goal
 type SavingsGoalPhoto struct {
 	Base64EncodedPhoto string `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
