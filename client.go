@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -100,20 +101,32 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 			return nil, err
 		}
 	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	// Anything other than a HTTP 2xx response code is treated as an error.
 	if c := resp.StatusCode; c >= 300 {
 		var e = ErrorDetail{}
-		err := json.NewDecoder(resp.Body).Decode(&e)
+		err := json.Unmarshal(data, &e)
 		if err != nil {
 			return resp, fmt.Errorf("API returned an error response but client was unable to parse the detail")
 		}
-		return resp, fmt.Errorf(e.Message)
+
+		// If we have been able to decode the error detail then return
+		if e.Message != "" {
+			return resp, fmt.Errorf(e.Message)
+		}
+
+		// some of the API responses handle errors as part of the response type
+		err = json.Unmarshal(data, v)
+		return resp, fmt.Errorf("validation error")
 	}
 
-	if v != nil {
-		err = json.NewDecoder(resp.Body).Decode(v)
+	if v != nil && len(data) != 0 {
+		err = json.Unmarshal(data, v)
 		if err == io.EOF {
 			err = nil // ignore EOF errors caused by empty response body
 		}

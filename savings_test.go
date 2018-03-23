@@ -232,3 +232,56 @@ func TestPutSavingsGoal(t *testing.T) {
 
 }
 
+// TestPutSavingsGoal_ValidateError confirms that the client is able to handle validation
+// errors when creating savings goals.
+func TestPutSavingsGoal_ValidateError(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	sgr := SavingsGoalRequest{
+		Name:     "test",
+		Currency: "GBP",
+		Target: CurrencyAndAmount{
+			Currency:   "GBP",
+			MinorUnits: 10000,
+		},
+		Base64EncodedPhoto: "",
+	}
+
+	json := `{
+		"savingsGoalUid": "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f",
+		"success": true,
+		"errors": [
+			{
+				"message": "Something about the validation error"
+			}
+		]
+	}`
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "PUT"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, json)
+	})
+
+	sgresp, _, err := client.PutSavingsGoal(context.Background(), "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f", sgr)
+	if err == nil {
+		t.Error("expected an error to be returned")
+	}
+
+	want := CreateOrUpdateSavingsGoalResponse{
+		UID:     "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f",
+		Success: true,
+		Errors: []ErrorDetail{
+			{
+				Message: "Something about the validation error",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(*sgresp, want) {
+		t.Errorf("GetSavingsGoal returned %+v, want %+v", sgresp, want)
+	}
+}

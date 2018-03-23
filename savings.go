@@ -84,7 +84,13 @@ func (c *Client) PutSavingsGoal(ctx context.Context, uid string, sgreq SavingsGo
 	var sgresp *CreateOrUpdateSavingsGoalResponse
 	resp, err := c.Do(ctx, req, &sgresp)
 	if err != nil {
-		fmt.Println(sgresp)
+
+		// Responses to validation errors don't adhere to the standard error schema. The should be
+		// parsed as if they were a standard API response
+		if resp.StatusCode == http.StatusBadRequest {
+			fmt.Println("bad request")
+			fmt.Println(sgresp)
+		}
 		return sgresp, resp, err
 	}
 

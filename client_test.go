@@ -199,7 +199,7 @@ func TestDo_NilPayload(t *testing.T) {
 	}
 
 	if err != nil {
-		t.Error("unexpected error returned")
+		t.Error("unexpected error returned:", err)
 	}
 
 }
