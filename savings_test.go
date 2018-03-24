@@ -107,7 +107,8 @@ func TestGetSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	json := `{
+	// Define our mock response and handler
+	mock := `{
 		"uid": "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b",
 		"name": "Trip to Paris",
 		"target": {
@@ -125,30 +126,20 @@ func TestGetSavingsGoal(t *testing.T) {
 		if got, want := r.Method, "GET"; got != want {
 			t.Errorf("request method: %v, want %v", got, want)
 		}
-		fmt.Fprint(w, json)
+		fmt.Fprint(w, mock)
 	})
 
-	goal, _, err := client.GetSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	// Define our request and execute the tests
+	got, _, err := client.GetSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	if err != nil {
 		t.Error("unexpected error returned:", err)
 	}
 
-	want := &SavingsGoal{
-		UID:  "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b",
-		Name: "Trip to Paris",
-		Target: CurrencyAndAmount{
-			Currency:   "GBP",
-			MinorUnits: 11223344,
-		},
-		TotalSaved: CurrencyAndAmount{
-			Currency:   "GBP",
-			MinorUnits: 11223344,
-		},
-		SavedPercentage: 50,
-	}
+	want := &SavingsGoal{}
+	json.Unmarshal([]byte(mock), want)
 
-	if !reflect.DeepEqual(goal, want) {
-		t.Errorf("GetSavingsGoal returned %+v, want %+v", goal, want)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("GetSavingsGoal returned %+v, want %+v", got, want)
 	}
 
 }
@@ -238,17 +229,8 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	sgr := SavingsGoalRequest{
-		Name:     "test",
-		Currency: "GBP",
-		Target: CurrencyAndAmount{
-			Currency:   "GBP",
-			MinorUnits: 10000,
-		},
-		Base64EncodedPhoto: "",
-	}
-
-	json := `{
+	// Define our mock response and handler
+	mock := `{
 		"savingsGoalUid": "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f",
 		"success": true,
 		"errors": [
@@ -263,25 +245,29 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 			t.Errorf("request method: %v, want %v", got, want)
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, json)
+		fmt.Fprint(w, mock)
 	})
 
-	sgresp, _, err := client.PutSavingsGoal(context.Background(), "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f", sgr)
+	// Define our request and execute the tests
+	sgr := SavingsGoalRequest{
+		Name:     "test",
+		Currency: "GBP",
+		Target: CurrencyAndAmount{
+			Currency:   "GBP",
+			MinorUnits: 10000,
+		},
+		Base64EncodedPhoto: "",
+	}
+
+	got, _, err := client.PutSavingsGoal(context.Background(), "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f", sgr)
 	if err == nil {
 		t.Error("expected an error to be returned")
 	}
 
-	want := CreateOrUpdateSavingsGoalResponse{
-		UID:     "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f",
-		Success: true,
-		Errors: []ErrorDetail{
-			{
-				Message: "Something about the validation error",
-			},
-		},
-	}
+	want := CreateOrUpdateSavingsGoalResponse{}
+	json.Unmarshal([]byte(mock), &want)
 
-	if !reflect.DeepEqual(*sgresp, want) {
-		t.Errorf("GetSavingsGoal returned %+v, want %+v", sgresp, want)
+	if !reflect.DeepEqual(*got, want) {
+		t.Errorf("GetSavingsGoal returned %+v, want %+v", got, want)
 	}
 }

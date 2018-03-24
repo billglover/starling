@@ -92,7 +92,6 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 	req = req.WithContext(ctx)
 	resp, err := c.client.Do(req)
 
-	// Return the context error if it exists otherwise return the request error.
 	if err != nil {
 		select {
 		case <-ctx.Done():
@@ -101,34 +100,43 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 			return nil, err
 		}
 	}
+
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	resp.Body.Close()
 
-	// Anything other than a HTTP 2xx response code is treated as an error.
+	// Anything other than a HTTP 2xx response code is treated as an error. But the structure of error
+	// responses differs depending on the API being called. Some APIs return validation errors as part
+	// of the standard response. Others respond with a standardised error structure.
 	if c := resp.StatusCode; c >= 300 {
+
+		// Try parsing the response using the standard error schema and returning the error.
 		var e = ErrorDetail{}
 		err := json.Unmarshal(data, &e)
 		if err != nil {
-			return resp, fmt.Errorf("API returned an error response but client was unable to parse the detail")
+			return resp, fmt.Errorf("API returned an error but client was unable to parse the detail: %v", err)
 		}
 
-		// If we have been able to decode the error detail then return
 		if e.Message != "" {
 			return resp, fmt.Errorf(e.Message)
 		}
 
-		// some of the API responses handle errors as part of the response type
+		// If we haven't been able to parse the standard error schema try parsing the response.
 		err = json.Unmarshal(data, v)
-		return resp, fmt.Errorf("validation error")
+		if err != nil {
+			return resp, fmt.Errorf("API returned an error but client was unable to parse the detail: %v", err)
+		}
+
+		// There isn't much more we can do to determine the cause of the error so return the HTTP status code.
+		return resp, fmt.Errorf(resp.Status)
 	}
 
 	if v != nil && len(data) != 0 {
 		err = json.Unmarshal(data, v)
 		if err == io.EOF {
-			err = nil // ignore EOF errors caused by empty response body
+			err = nil
 		}
 	}
 

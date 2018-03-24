@@ -2,7 +2,6 @@ package starling
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 )
 
@@ -48,7 +47,7 @@ func (c *Client) GetSavingsGoals(ctx context.Context) (*SavingsGoals, *http.Resp
 	var goals *SavingsGoals
 	resp, err := c.Do(ctx, req, &goals)
 	if err != nil {
-		return nil, resp, err
+		return goals, resp, err
 	}
 
 	return goals, resp, nil
@@ -66,7 +65,7 @@ func (c *Client) GetSavingsGoal(ctx context.Context, uid string) (*SavingsGoal, 
 	var goal *SavingsGoal
 	resp, err := c.Do(ctx, req, &goal)
 	if err != nil {
-		return nil, resp, err
+		return goal, resp, err
 	}
 
 	return goal, resp, nil
@@ -84,13 +83,6 @@ func (c *Client) PutSavingsGoal(ctx context.Context, uid string, sgreq SavingsGo
 	var sgresp *CreateOrUpdateSavingsGoalResponse
 	resp, err := c.Do(ctx, req, &sgresp)
 	if err != nil {
-
-		// Responses to validation errors don't adhere to the standard error schema. The should be
-		// parsed as if they were a standard API response
-		if resp.StatusCode == http.StatusBadRequest {
-			fmt.Println("bad request")
-			fmt.Println(sgresp)
-		}
 		return sgresp, resp, err
 	}
 
