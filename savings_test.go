@@ -75,29 +75,30 @@ func TestGetSavingsGoals_Error(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	msg := ErrorDetail{
-		Message: "this is an error message",
-	}
+	mock := `{"Message":"this is an error message"}`
 
 	mux.HandleFunc("/api/v1/savings-goals", func(w http.ResponseWriter, r *http.Request) {
 		if got, want := r.Method, "GET"; got != want {
 			t.Errorf("request method: %v, want %v", got, want)
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(msg)
+		fmt.Fprintln(w, mock)
 	})
 
-	goals, _, err := client.GetSavingsGoals(context.Background())
+	got, _, err := client.GetSavingsGoals(context.Background())
 	if err == nil {
 		t.Error("expected an error to be returned:")
 	}
 
-	if err.Error() != msg.Message {
-		t.Errorf("GetSavingsGoals returned '%v', want '%v'", err, msg.Message)
+	want := &ErrorDetail{}
+	json.Unmarshal([]byte(mock), want)
+
+	if err.Error() != want.Message {
+		t.Errorf("unexpected error message returned: %v", err)
 	}
 
-	if goals != nil {
-		t.Errorf("unexpected goals returned: %+v", goals)
+	if got != nil {
+		t.Errorf("unexpected goals returned: %+v", got)
 	}
 
 }
@@ -269,5 +270,50 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 
 	if !reflect.DeepEqual(*got, want) {
 		t.Errorf("GetSavingsGoal returned %+v, want %+v", got, want)
+	}
+}
+
+// TestPutSavingsGoal_ServerError confirms that the client is able to handle server errors when
+// making requests to the Savings Goal API.
+func TestPutSavingsGoal_ServerError(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	// Define our mock response and handler
+	mock := `{"Message":"this is an error message"}`
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "PUT"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, mock)
+	})
+
+	// Define our request and execute the tests
+	sgr := SavingsGoalRequest{
+		Name:     "test",
+		Currency: "GBP",
+		Target: CurrencyAndAmount{
+			Currency:   "GBP",
+			MinorUnits: 10000,
+		},
+		Base64EncodedPhoto: "",
+	}
+
+	got, _, err := client.PutSavingsGoal(context.Background(), "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f", sgr)
+	if err == nil {
+		t.Error("expected an error to be returned")
+	}
+
+	want := &ErrorDetail{}
+	json.Unmarshal([]byte(mock), want)
+
+	if err.Error() != want.Message {
+		t.Errorf("unexpected error message returned: %v", err)
+	}
+
+	if got != nil {
+		t.Errorf("unexpected goals returned: %+v", got)
 	}
 }
