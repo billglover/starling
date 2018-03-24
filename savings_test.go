@@ -317,3 +317,51 @@ func TestPutSavingsGoal_ServerError(t *testing.T) {
 		t.Errorf("unexpected goals returned: %+v", got)
 	}
 }
+
+// TestAddMoney confirms that the client is able to make a request to add money to a savings goal and parse
+// the successful response from the API.
+func TestAddMoney(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	sgUID := "28dff346-dd48-426f-96df-d7f33d29c379"
+	mock := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
+
+	tuReq := TopUpRequest{
+		Amount: CurrencyAndAmount{
+			Currency:   "GBP",
+			MinorUnits: 1050,
+		},
+	}
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Method, "PUT"; got != want {
+			t.Errorf("request method: %v, want %v", got, want)
+		}
+
+		var tu = TopUpRequest{}
+		err := json.NewDecoder(r.Body).Decode(&tu)
+		if err != nil {
+			t.Errorf("unable to decode top up request: %v", err)
+		}
+
+		if !reflect.DeepEqual(tu, tuReq) {
+			t.Errorf("AddMoney got %+v, want %+v", tu, tuReq)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, mock)
+	})
+
+	got, _, err := client.AddMoney(context.Background(), sgUID, tuReq)
+	if err != nil {
+		t.Error("unexpected error returned:", err)
+	}
+
+	want := &SavingsGoalTransferResponse{}
+	json.Unmarshal([]byte(mock), want)
+
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("AddMoney returned \n%+v, want \n%+v", got, want)
+	}
+}

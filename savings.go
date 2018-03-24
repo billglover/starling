@@ -88,3 +88,19 @@ func (c *Client) PutSavingsGoal(ctx context.Context, uid string, sgreq SavingsGo
 
 	return sgresp, resp, nil
 }
+
+// AddMoney transfers money into a savings goal. It returns the http response in case this is required for further
+// processing. An error will be returned if the API is unable to transfer the amount into the savings goal.
+func (c *Client) AddMoney(ctx context.Context, uid string, tuReq TopUpRequest) (*SavingsGoalTransferResponse, *http.Response, error) {
+	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid+"/add-money/"+uid, tuReq)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var tuResp *SavingsGoalTransferResponse
+	resp, err := c.Do(ctx, req, &tuResp)
+	if err != nil {
+		return tuResp, resp, err
+	}
+	return tuResp, resp, nil
+}
