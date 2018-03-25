@@ -10,103 +10,161 @@ import (
 	"time"
 )
 
+const (
+	tick  = "\u2713"
+	cross = "\u2717"
+)
+
+var testCases = []struct {
+	name      string
+	mock      string
+	dateRange *DateRange
+}{
+	{
+		name: "with date range",
+		dateRange: &DateRange{
+			From: time.Date(2017, time.January, 01, 0, 0, 0, 0, time.Local),
+			To:   time.Date(2017, time.January, 03, 0, 0, 0, 0, time.Local),
+		},
+		mock: `{
+			"transactions": [
+			  {
+				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
+				"currency": "GBP",
+				"amount": -23.45,
+				"direction": "OUTBOUND",
+				"created": "2017-07-05T18:27:02.335Z",
+				"narrative": "Borough Barista",
+				"source": "MASTER_CARD",
+				"balance": 254.12
+			  }
+			]
+		  }`,
+	},
+	{
+		name:      "without date range",
+		dateRange: nil,
+		mock: `{
+			"transactions": [
+			  {
+				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
+				"currency": "GBP",
+				"amount": -23.45,
+				"direction": "OUTBOUND",
+				"created": "2017-07-05T18:27:02.335Z",
+				"narrative": "Borough Barista",
+				"source": "MASTER_CARD",
+				"balance": 254.12
+			  }
+			]
+		  }`,
+	},
+	{
+		name:      "with multiple transactions",
+		dateRange: nil,
+		mock: `{
+			"transactions": [
+			  {
+				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
+				"currency": "GBP",
+				"amount": -23.45,
+				"direction": "OUTBOUND",
+				"created": "2017-07-05T18:27:02.335Z",
+				"narrative": "Borough Barista",
+				"source": "MASTER_CARD",
+				"balance": 254.12
+			  },
+			  {
+				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
+				"currency": "GBP",
+				"amount": -23.45,
+				"direction": "OUTBOUND",
+				"created": "2017-07-05T18:27:02.335Z",
+				"narrative": "Borough Barista",
+				"source": "MASTER_CARD",
+				"balance": 254.12
+			  }
+			]
+		  }`,
+	},
+}
+
 func TestGetTransactions(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
 
-	mock := `{
-		"transactions": [
-		  {
-			"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
-			"currency": "GBP",
-			"amount": -23.45,
-			"direction": "OUTBOUND",
-			"created": "2017-07-05T18:27:02.335Z",
-			"narrative": "Borough Barista",
-			"source": "MASTER_CARD",
-			"balance": 254.12
-		  }
-		]
-	  }`
-	to := time.Now()
-	from := to.Add(time.Hour * -24)
+	t.Log("Given the need to test fetching transactions:")
 
-	mux.HandleFunc("/api/v1/transactions", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "GET"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
-		}
-
-		params := r.URL.Query()
-		if got, want := params.Get("from"), from.Format("2006-01-02"); got != want {
-			t.Errorf("query string 'from': %v, want %v", got, want)
-		}
-
-		if got, want := params.Get("to"), to.Format("2006-01-02"); got != want {
-			t.Errorf("query string 'to': %v, want %v", got, want)
-		}
-
-		fmt.Fprint(w, mock)
-	})
-
-	dr := &DateRange{From: from, To: to}
-	got, _, err := client.GetTransactions(context.Background(), dr)
-	if err != nil {
-		t.Error("unexpected error returned:", err)
-	}
-
-	want := &Transactions{}
-	json.Unmarshal([]byte(mock), want)
-
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetTransactions returned %+v, want %+v", got, want)
+	// Run each of the test cases a subtest.
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			testGetTransactions(t, tc.name, tc.mock, tc.dateRange)
+		})
 	}
 }
 
-func TestGetTransactions_withoutRange(t *testing.T) {
+func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
+	t.Logf("\tWhen making a call to GetTransactions() %s:", name)
+
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mock := `{
-		"transactions": [
-		  {
-			"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
-			"currency": "GBP",
-			"amount": -23.45,
-			"direction": "OUTBOUND",
-			"created": "2017-07-05T18:27:02.335Z",
-			"narrative": "Borough Barista",
-			"source": "MASTER_CARD",
-			"balance": 254.12
-		  }
-		]
-	  }`
-
 	mux.HandleFunc("/api/v1/transactions", func(w http.ResponseWriter, r *http.Request) {
 		if got, want := r.Method, "GET"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
+			t.Errorf("\t\tshould send a %s request to the API %s %s", want, cross, got)
+		} else {
+			t.Logf("\t\tshould send a %s request to the API %s", want, tick)
 		}
 
 		params := r.URL.Query()
-		if got, want := params.Get("from"), ""; got != want {
-			t.Errorf("query string 'from': %v, want %v", got, want)
+
+		if dr != nil {
+
+			// If we are expecting a date range to be passed to the API, validate that it was
+			// passed correctly as part of the query string.
+			if got, want := params.Get("from"), dr.From.Format("2006-01-02"); got != want {
+				t.Errorf("\t\tshould include 'from=%s' query string parameter %s 'from=%s'", want, cross, got)
+			} else {
+				t.Logf("\t\tshould include 'from=%s' query string parameter %s", want, tick)
+			}
+
+			if got, want := params.Get("to"), dr.To.Format("2006-01-02"); got != want {
+				t.Errorf("\t\tshould include 'to=%s' query string parameter %s 'to=%s'", want, cross, got)
+			} else {
+				t.Logf("\t\tshould include 'to=%s' query string parameter %s", want, tick)
+			}
+		} else {
+
+			// If we weren't expecting a date range to be passed to the API, validate that the
+			// API was called without the 'from' and 'to' query parameters.
+			if got, want := params.Get("from"), ""; got != want {
+				t.Errorf("\t\tshould not include 'from' query string parameter %s 'from=%s'", cross, got)
+			} else {
+				t.Logf("\t\tshould not include 'from' query string parameter %s", tick)
+			}
+
+			if got, want := params.Get("to"), ""; got != want {
+				t.Errorf("\t\tshould not include 'to' query string parameter %s 'to=%s'", cross, got)
+			} else {
+				t.Logf("\t\tshould not include 'to' query string parameter %s", tick)
+			}
 		}
 
-		if got, want := params.Get("to"), ""; got != want {
-			t.Errorf("query string 'to': %v, want %v", got, want)
-		}
-
+		// Return the mock response to the client.
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetTransactions(context.Background(), nil)
+	got, _, err := client.GetTransactions(context.Background(), dr)
 	if err != nil {
-		t.Error("unexpected error returned:", err)
+		t.Fatal("\t\tshould be able to make the request", cross, err)
+	} else {
+		t.Log("\t\tshould be able to make the request", tick)
 	}
 
 	want := &Transactions{}
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("GetTransactions returned %+v, want %+v", got, want)
+		t.Error("\t\tshould return a list matching the mock response", cross)
+	} else {
+		t.Log("\t\tshould return a transaction list matching the mock response", tick)
 	}
 }
