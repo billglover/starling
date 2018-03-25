@@ -15,7 +15,7 @@ import (
 const (
 	prodURL    = "https://api.starlingbank.com/"
 	sandboxURL = "https://api-sandbox.starlingbank.com/"
-	defaultURL = prodURL
+	defaultURL = sandboxURL
 
 	userAgent = "go-starling"
 )
