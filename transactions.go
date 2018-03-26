@@ -6,6 +6,17 @@ import (
 	"time"
 )
 
+// TransactionSummary represents an individual transaction
+type TransactionSummary struct {
+	transaction
+	Balance float64 `json:"balance"`
+}
+
+// Transactions is a list of transaction summaries
+type Transactions struct {
+	Transactions []TransactionSummary `json:"transactions"`
+}
+
 // DateRange holds two dates that represent a range. It is typically
 // used when providing a range when querying the API.
 type DateRange struct {

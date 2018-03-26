@@ -391,17 +391,6 @@ type ReceiptItem struct {
 // ReceiptUID is an un-used type
 type ReceiptUID struct{}
 
-// TransactionSummary represents an individual transaction
-type TransactionSummary struct {
-	transaction
-	Balance float64 `json:"balance"`
-}
-
-// Transactions is a list of transaction summaries
-type Transactions struct {
-	Transactions []TransactionSummary `json:"transactions"`
-}
-
 // OptionalTransactionSummary indicates the presence of a TransactionSummary
 type OptionalTransactionSummary optional
 
