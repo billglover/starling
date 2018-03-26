@@ -87,6 +87,37 @@ var testCases = []struct {
 			]
 		  }`,
 	},
+	{
+		name:      "with HAL wrapper",
+		dateRange: nil,
+		mock: `{
+			"_links": {
+			  "nextPage": {
+				 "href": "NOT_YET_IMPLEMENTED"
+			  }
+			},
+			"_embedded": {
+			  "transactions": [
+				 {
+					"_links": {
+					  "detail": {
+						 "href": "api/v1/transactions/mastercard/0e70192c-e602-40ac-b306-c21630e6874e",
+						 "templated": false
+					  }
+					},
+					"id": "0e70192c-e602-40ac-b306-c21630e6874e",
+					"currency": "GBP",
+					"amount": -13.99,
+					"direction": "OUTBOUND",
+					"created": "2018-03-25T11:55:26.865Z",
+					"narrative": "Mastercard",
+					"source": "MASTER_CARD",
+					"balance": 13081.32
+				 }
+			  ]
+			}
+		 }`,
+	},
 }
 
 func TestGetTransactions(t *testing.T) {
@@ -167,4 +198,11 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 	} else {
 		t.Log("\t\tshould return a transaction list matching the mock response", tick)
 	}
+
+	if len(got.Transactions) == 0 {
+		t.Errorf("\t\tshould have at least one transaction %s %d", cross, len(got.Transactions))
+	} else {
+		t.Log("\t\tshould have at least one transaction", tick)
+	}
+
 }
