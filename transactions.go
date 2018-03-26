@@ -3,7 +3,6 @@ package starling
 import (
 	"context"
 	"net/http"
-	"time"
 )
 
 // TransactionSummary represents an individual transaction
@@ -15,13 +14,6 @@ type TransactionSummary struct {
 // Transactions is a list of transaction summaries
 type Transactions struct {
 	Transactions []TransactionSummary `json:"transactions"`
-}
-
-// DateRange holds two dates that represent a range. It is typically
-// used when providing a range when querying the API.
-type DateRange struct {
-	From time.Time
-	To   time.Time
 }
 
 // GetTransactions returns a list of transaction summaries for the current user. It accepts optional

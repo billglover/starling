@@ -1,5 +1,7 @@
 package starling
 
+import "time"
+
 // ErrorDetail holds the details of an error message
 type ErrorDetail struct {
 	Message string
@@ -396,4 +398,11 @@ type OptionalTransactionSummary optional
 
 type optional struct {
 	Present bool `json:"present"`
+}
+
+// DateRange holds two dates that represent a range. It is typically
+// used when providing a range when querying the API.
+type DateRange struct {
+	From time.Time
+	To   time.Time
 }
