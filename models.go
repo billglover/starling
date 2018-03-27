@@ -305,17 +305,6 @@ type DirectDebitTransactions struct {
 	Transactions []DirectDebitTransaction `json:"transactions"`
 }
 
-// transaction represents the details of a transaction
-type transaction struct {
-	UID       string  `json:"id"`
-	Currency  string  `json:"currency"`
-	Amount    float64 `json:"amount"`
-	Direction string  `json:"direction"`
-	Created   string  `json:"created"`
-	Narrative string  `json:"narrative"`
-	Source    string  `json:"source"`
-}
-
 // FPSInTransaction represents details of an inbound faster payments transaction
 type FPSInTransaction struct {
 	transaction

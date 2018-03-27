@@ -5,15 +5,32 @@ import (
 	"net/http"
 )
 
-// TransactionSummary represents an individual transaction
+// TransactionSummary represents an individual transaction.
 type TransactionSummary struct {
 	transaction
 	Balance float64 `json:"balance"`
 }
 
-// Transactions is a list of transaction summaries
+// Transactions is a list of transaction summaries.
 type Transactions struct {
 	Transactions []TransactionSummary `json:"transactions"`
+}
+
+// HALTransactions is a HAL wrapper around the Transactions type.
+type HALTransactions struct {
+	Links    struct{}      `json:"_links"`
+	Embedded *Transactions `json:"_embedded"`
+}
+
+// Transaction represents the details of a transaction.
+type transaction struct {
+	UID       string  `json:"id"`
+	Currency  string  `json:"currency"`
+	Amount    float64 `json:"amount"`
+	Direction string  `json:"direction"`
+	Created   string  `json:"created"`
+	Narrative string  `json:"narrative"`
+	Source    string  `json:"source"`
 }
 
 // GetTransactions returns a list of transaction summaries for the current user. It accepts optional
@@ -33,10 +50,15 @@ func (c *Client) GetTransactions(ctx context.Context, dr *DateRange) (*Transacti
 		req.URL.RawQuery = q.Encode()
 	}
 
+	var halResp *HALTransactions
 	var txns *Transactions
-	resp, err := c.Do(ctx, req, &txns)
+	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
 		return txns, resp, err
+	}
+
+	if halResp.Embedded != nil {
+		txns = halResp.Embedded
 	}
 
 	return txns, resp, nil

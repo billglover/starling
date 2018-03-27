@@ -27,68 +27,35 @@ var testCases = []struct {
 			To:   time.Date(2017, time.January, 03, 0, 0, 0, 0, time.Local),
 		},
 		mock: `{
-			"transactions": [
-			  {
-				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
-				"currency": "GBP",
-				"amount": -23.45,
-				"direction": "OUTBOUND",
-				"created": "2017-07-05T18:27:02.335Z",
-				"narrative": "Borough Barista",
-				"source": "MASTER_CARD",
-				"balance": 254.12
+			"_links": {
+			  "nextPage": {
+				 "href": "NOT_YET_IMPLEMENTED"
 			  }
-			]
-		  }`,
+			},
+			"_embedded": {
+			  "transactions": [
+				 {
+					"_links": {
+					  "detail": {
+						 "href": "api/v1/transactions/mastercard/0e70192c-e602-40ac-b306-c21630e6874e",
+						 "templated": false
+					  }
+					},
+					"id": "0e70192c-e602-40ac-b306-c21630e6874e",
+					"currency": "GBP",
+					"amount": -13.99,
+					"direction": "OUTBOUND",
+					"created": "2018-03-25T11:55:26.865Z",
+					"narrative": "Mastercard",
+					"source": "MASTER_CARD",
+					"balance": 13081.32
+				 }
+			  ]
+			}
+		 }`,
 	},
 	{
 		name:      "without date range",
-		dateRange: nil,
-		mock: `{
-			"transactions": [
-			  {
-				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
-				"currency": "GBP",
-				"amount": -23.45,
-				"direction": "OUTBOUND",
-				"created": "2017-07-05T18:27:02.335Z",
-				"narrative": "Borough Barista",
-				"source": "MASTER_CARD",
-				"balance": 254.12
-			  }
-			]
-		  }`,
-	},
-	{
-		name:      "with multiple transactions",
-		dateRange: nil,
-		mock: `{
-			"transactions": [
-			  {
-				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
-				"currency": "GBP",
-				"amount": -23.45,
-				"direction": "OUTBOUND",
-				"created": "2017-07-05T18:27:02.335Z",
-				"narrative": "Borough Barista",
-				"source": "MASTER_CARD",
-				"balance": 254.12
-			  },
-			  {
-				"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
-				"currency": "GBP",
-				"amount": -23.45,
-				"direction": "OUTBOUND",
-				"created": "2017-07-05T18:27:02.335Z",
-				"narrative": "Borough Barista",
-				"source": "MASTER_CARD",
-				"balance": 254.12
-			  }
-			]
-		  }`,
-	},
-	{
-		name:      "with HAL wrapper",
 		dateRange: nil,
 		mock: `{
 			"_links": {
@@ -117,6 +84,53 @@ var testCases = []struct {
 			  ]
 			}
 		 }`,
+	},
+	{
+		name:      "with multiple transactions",
+		dateRange: nil,
+		mock: `{
+			"_links": {
+			  "nextPage": {
+				 "href": "NOT_YET_IMPLEMENTED"
+			  }
+			},
+			"_embedded": {
+			  "transactions": [
+					{
+						"_links": {
+							"detail": {
+							 "href": "api/v1/transactions/mastercard/6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
+							 "templated": false
+							}
+						},
+						"id": "6f03a23a-bbfc-4479-8d4d-abb6a9119d27",
+						"currency": "GBP",
+						"amount": -23.45,
+						"direction": "OUTBOUND",
+						"created": "2017-07-05T18:27:02.335Z",
+						"narrative": "Borough Barista",
+						"source": "MASTER_CARD",
+						"balance": 254.12
+					},
+					{
+						"_links": {
+					  	"detail": {
+						 	"href": "api/v1/transactions/mastercard/0e70192c-e602-40ac-b306-c21630e6874e",
+						 	"templated": false
+					  	}
+						},
+						"id": "0e70192c-e602-40ac-b306-c21630e6874e",
+						"currency": "GBP",
+						"amount": -13.99,
+						"direction": "OUTBOUND",
+						"created": "2018-03-25T11:55:26.865Z",
+						"narrative": "Mastercard",
+						"source": "MASTER_CARD",
+						"balance": 13081.32
+					}
+			  ]
+			}
+		}`,
 	},
 }
 
@@ -190,8 +204,15 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Log("\t\tshould be able to make the request", tick)
 	}
 
-	want := &Transactions{}
-	json.Unmarshal([]byte(mock), want)
+	hal := &HALTransactions{}
+	json.Unmarshal([]byte(mock), hal)
+	want := hal.Embedded
+
+	if got == nil {
+		t.Fatal("\t\tshould not return 'nil'", cross)
+	} else {
+		t.Log("\t\tshould not return 'nil'", tick)
+	}
 
 	if !reflect.DeepEqual(got, want) {
 		t.Error("\t\tshould return a list matching the mock response", cross)
