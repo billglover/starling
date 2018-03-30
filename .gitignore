@@ -15,3 +15,6 @@
 
 # Ignore the vendor folder... for now
 vendor/
+
+# Ignore OS specific files
+.DS_Store
