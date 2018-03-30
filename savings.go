@@ -3,6 +3,8 @@ package starling
 import (
 	"context"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 // SavingsGoal is a goal defined by a customer to hold savings
@@ -91,8 +93,13 @@ func (c *Client) PutSavingsGoal(ctx context.Context, uid string, sgreq SavingsGo
 
 // AddMoney transfers money into a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount into the savings goal.
-func (c *Client) AddMoney(ctx context.Context, uid string, tuReq TopUpRequest) (*SavingsGoalTransferResponse, *http.Response, error) {
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid+"/add-money/"+uid, tuReq)
+func (c *Client) AddMoney(ctx context.Context, goalUID string, tuReq TopUpRequest) (*SavingsGoalTransferResponse, *http.Response, error) {
+	txnUID, err := uuid.NewRandom()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/add-money/"+txnUID.String(), tuReq)
 	if err != nil {
 		return nil, nil, err
 	}
