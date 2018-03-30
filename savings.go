@@ -76,19 +76,19 @@ func (c *Client) GetSavingsGoal(ctx context.Context, uid string) (*SavingsGoal, 
 // PutSavingsGoal creates an individual savings goal based on a UID. It returns the http response
 // in case this is required for further processing. An error will be returned if the API is unable
 // to create the goal.
-func (c *Client) PutSavingsGoal(ctx context.Context, uid string, sgreq SavingsGoalRequest) (*CreateOrUpdateSavingsGoalResponse, *http.Response, error) {
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid, sgreq)
+func (c *Client) PutSavingsGoal(ctx context.Context, uid string, sgReq SavingsGoalRequest) (*CreateOrUpdateSavingsGoalResponse, *http.Response, error) {
+	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid, sgReq)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var sgresp *CreateOrUpdateSavingsGoalResponse
-	resp, err := c.Do(ctx, req, &sgresp)
+	var sgResp *CreateOrUpdateSavingsGoalResponse
+	resp, err := c.Do(ctx, req, &sgResp)
 	if err != nil {
-		return sgresp, resp, err
+		return sgResp, resp, err
 	}
 
-	return sgresp, resp, nil
+	return sgResp, resp, nil
 }
 
 // AddMoney transfers money into a savings goal. It returns the http response in case this is required for further
