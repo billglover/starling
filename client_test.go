@@ -11,6 +11,11 @@ import (
 	"testing"
 )
 
+const (
+	tick  = "\u2713"
+	cross = "\u2717"
+)
+
 func TestNewClient(t *testing.T) {
 	c := NewClient(nil)
 
@@ -240,4 +245,12 @@ func setup() (client *Client, mux *http.ServeMux, serverURL string, teardown fun
 	c.baseURL = url
 
 	return c, mux, server.URL, server.Close
+}
+
+func checkMethod(t *testing.T, r *http.Request, want string) {
+	if got := r.Method; got != want {
+		t.Errorf("\t\tshould send a %s request to the API %s %s", want, cross, got)
+	} else {
+		t.Logf("\t\tshould send a %s request to the API %s", want, tick)
+	}
 }

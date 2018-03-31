@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-const (
-	tick  = "\u2713"
-	cross = "\u2717"
-)
-
 var testCases = []struct {
 	name      string
 	mock      string

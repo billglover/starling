@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 	"reflect"
 	"testing"
+
+	"github.com/google/uuid"
 )
 
 // TestGetSavingsGoals confirms that the client is able to query a list of savings goals.
@@ -61,21 +64,24 @@ func TestGetSavingsGoals(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return a list matching the mock response", cross)
+		t.Error("\t\tshould return a list of savings goals matching the mock response", cross)
 	} else {
-		t.Log("\t\tshould return a transaction list matching the mock response", tick)
+		t.Log("\t\tshould return a list of savings goals matching the mock response", tick)
 	}
 
 	if len(got.SavingsGoalList) == 0 {
-		t.Errorf("\t\tshould have at least one transaction %s %d", cross, len(got.SavingsGoalList))
+		t.Errorf("\t\tshould return a list with at least one savings goal %s %d", cross, len(got.SavingsGoalList))
 	} else {
-		t.Log("\t\tshould have at least one transaction", tick)
+		t.Log("\t\tshould return a list with at least one savings goal", tick)
 	}
 
 }
 
 // TestGetSavingsGoals confirms that the client is able to query a single savings goal.
 func TestGetSavingsGoal(t *testing.T) {
+
+	t.Log("Given the need to test fetching an individual savings goal:")
+
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -121,26 +127,29 @@ func TestGetSavingsGoal(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return a list matching the mock response", cross)
+		t.Error("\t\tshould return a savings goal that matches the mock response", cross)
 	} else {
-		t.Log("\t\tshould return a transaction list matching the mock response", tick)
+		t.Log("\t\tshould return a savings goal that matches the mock response", tick)
 	}
 
 	if len(got.UID) == 0 {
-		t.Errorf("\t\tshould have a UID %s %d", cross, len(got.UID))
+		t.Errorf("\t\tshould return a savings goal that has a UID %s %d", cross, len(got.UID))
 	} else {
-		t.Log("\t\tshould have a UID", tick)
+		t.Log("\t\tshould return a savings goal that has a UID", tick)
 	}
 
 }
 
 // TestPutSavingsGoal confirms that the client is able to create a savings goal.
 func TestPutSavingsGoal(t *testing.T) {
+
+	t.Log("Given the need to test creating a savings goal:")
+
 	client, mux, _, teardown := setup()
 	defer teardown()
 
 	uid := "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b"
-	sgr := SavingsGoalRequest{
+	mockReq := SavingsGoalRequest{
 		Name:     "test",
 		Currency: "GBP",
 		Target: CurrencyAndAmount{
@@ -149,32 +158,73 @@ func TestPutSavingsGoal(t *testing.T) {
 		},
 		Base64EncodedPhoto: "",
 	}
+	mockResp := `{
+		"savingsGoalUid": "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b",
+		"success": true,
+		"errors": []
+	  }`
+
+	t.Log("\tWhen making a call to PutSavingsGoal():")
 
 	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "PUT"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
-		}
+		checkMethod(t, r, "PUT")
 
 		var sg = SavingsGoalRequest{}
 		err := json.NewDecoder(r.Body).Decode(&sg)
 		if err != nil {
-			t.Errorf("unable to decode savings goal request: %v", err)
+			t.Fatal("\t\tshould send a request that the API can parse", cross, err)
+		} else {
+			t.Log("\t\tshould send a request that the API can parse", tick)
 		}
 
-		if !reflect.DeepEqual(sgr, sg) {
-			t.Errorf("PutSavingsGoal got %+v, want %+v", sg, sgr)
+		if !reflect.DeepEqual(mockReq, sg) {
+			t.Error("\t\tshould send a savings goal that matches the mock", cross)
+		} else {
+			t.Log("\t\tshould send a savings goal that matches the mock", tick)
+		}
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("\t\tshould send a savings goal with the correct UID", cross, reqUID)
+		} else {
+			t.Log("\t\tshould send a savings goal with the correct UID", tick)
 		}
 
 		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, mockResp)
 	})
 
-	_, resp, err := client.PutSavingsGoal(context.Background(), uid, sgr)
+	sgResp, resp, err := client.PutSavingsGoal(context.Background(), uid, mockReq)
 	if err != nil {
-		t.Error("unexpected error returned:", err)
+		t.Fatal("\t\tshould be able to make the request", cross, err)
+	} else {
+		t.Log("\t\tshould be able to make the request", tick)
 	}
 
+	t.Log("\tWhen parsing the response from the API:")
+
 	if got, want := resp.StatusCode, http.StatusOK; got != want {
-		t.Errorf("response status: %v, want %v", got, want)
+		t.Errorf("\t\tshould receive a %d status code %s %d", want, cross, got)
+	} else {
+		t.Logf("\t\tshould receive a %d status code %s", want, tick)
+	}
+
+	if got, want := sgResp.UID, uid; got != want {
+		t.Fatal("\t\tshould be receive the UID assigned to the savings goal", cross, got)
+	} else {
+		t.Log("\t\tshould be receive the UID assigned to the savings goal", tick)
+	}
+
+	if got, want := sgResp.Success, true; got != want {
+		t.Fatal("\t\tshould be receive a success status", cross, got)
+	} else {
+		t.Log("\t\tshould be receive a success status", tick)
+	}
+
+	if got, want := len(sgResp.Errors), 0; got != want {
+		t.Fatal("\t\tshould be receive no validation errors", cross, got)
+	} else {
+		t.Log("\t\tshould be receive no validation errors", tick)
 	}
 
 }
@@ -182,11 +232,23 @@ func TestPutSavingsGoal(t *testing.T) {
 // TestPutSavingsGoal_ValidateError confirms that the client is able to handle validation
 // errors when creating savings goals.
 func TestPutSavingsGoal_ValidateError(t *testing.T) {
+
+	t.Log("Given the need to test handling validation errors when creating a savings goal:")
+
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	// Define our mock response and handler
-	mock := `{
+	uid := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
+	mockReq := SavingsGoalRequest{
+		Name:     "test",
+		Currency: "GBP",
+		Target: CurrencyAndAmount{
+			Currency:   "GBP",
+			MinorUnits: 10000,
+		},
+		Base64EncodedPhoto: "",
+	}
+	mockResp := `{
 		"savingsGoalUid": "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f",
 		"success": true,
 		"errors": [
@@ -196,90 +258,160 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 		]
 	}`
 
+	t.Log("\tWhen making a call to PutSavingsGoal():")
+
 	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "PUT"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
+		checkMethod(t, r, "PUT")
+
+		var sg = SavingsGoalRequest{}
+		err := json.NewDecoder(r.Body).Decode(&sg)
+		if err != nil {
+			t.Fatal("\t\tshould send a request that the API can parse", cross, err)
+		} else {
+			t.Log("\t\tshould send a request that the API can parse", tick)
 		}
+
+		if !reflect.DeepEqual(mockReq, sg) {
+			t.Error("\t\tshould send a savings goal that matches the mock", cross)
+		} else {
+			t.Log("\t\tshould send a savings goal that matches the mock", tick)
+		}
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("\t\tshould send a savings goal with the correct UID", cross, reqUID)
+		} else {
+			t.Log("\t\tshould send a savings goal with the correct UID", tick)
+		}
+
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, mock)
+		fmt.Fprintln(w, mockResp)
 	})
 
-	// Define our request and execute the tests
-	sgr := SavingsGoalRequest{
-		Name:     "test",
-		Currency: "GBP",
-		Target: CurrencyAndAmount{
-			Currency:   "GBP",
-			MinorUnits: 10000,
-		},
-		Base64EncodedPhoto: "",
-	}
-
-	got, _, err := client.PutSavingsGoal(context.Background(), "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f", sgr)
+	sgResp, resp, err := client.PutSavingsGoal(context.Background(), uid, mockReq)
 	if err == nil {
-		t.Error("expected an error to be returned")
+		t.Fatal("\t\texpected an error to be returned", cross)
+	} else {
+		t.Log("\t\texpected an error to be returned", tick)
 	}
 
-	want := CreateOrUpdateSavingsGoalResponse{}
-	json.Unmarshal([]byte(mock), &want)
+	t.Log("\tWhen parsing the response from the API:")
 
-	if !reflect.DeepEqual(*got, want) {
-		t.Errorf("GetSavingsGoal returned %+v, want %+v", got, want)
+	if got, want := resp.StatusCode, http.StatusBadRequest; got != want {
+		t.Errorf("\t\tshould receive a %d status code %s %d", want, cross, got)
+	} else {
+		t.Logf("\t\tshould receive a %d status code %s", want, tick)
 	}
+
+	if got, want := sgResp.UID, uid; got != want {
+		t.Fatal("\t\tshould be receive the UID assigned to the savings goal", cross, got)
+	} else {
+		t.Log("\t\tshould be receive the UID assigned to the savings goal", tick)
+	}
+
+	if got, want := sgResp.Success, true; got != want {
+		t.Fatal("\t\tshould be receive a success status", cross, got)
+	} else {
+		t.Log("\t\tshould be receive a success status", tick)
+	}
+
+	if got, want := len(sgResp.Errors), 1; got != want {
+		t.Fatal("\t\tshould be receive one validation error", cross, got)
+	} else {
+		t.Log("\t\tshould be receive one validation error", tick)
+	}
+
+	if got, want := sgResp.Errors[0].Message, "Something about the validation error"; got != want {
+		t.Fatal("\t\tshould contain the mock validation error", cross, got)
+	} else {
+		t.Log("\t\tshould contain the mock validation error", tick)
+	}
+
 }
 
 // TestAddMoney confirms that the client is able to make a request to add money to a savings goal and parse
 // the successful response from the API.
 func TestAddMoney(t *testing.T) {
+
+	t.Log("Given the need to test adding money to a savings goal:")
+
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	sgUID := "28dff346-dd48-426f-96df-d7f33d29c379"
-	mock := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
+	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
+	txnUID := "28dff346-dd48-426f-96df-d7f33d29c379"
+	mockResp := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
 
-	tuReq := TopUpRequest{
+	mockReq := TopUpRequest{
 		Amount: CurrencyAndAmount{
 			Currency:   "GBP",
 			MinorUnits: 1050,
 		},
 	}
 
+	t.Log("\tWhen making a call to AddMoney():")
+
 	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "PUT"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
-		}
+		checkMethod(t, r, "PUT")
 
 		var tu = TopUpRequest{}
 		err := json.NewDecoder(r.Body).Decode(&tu)
 		if err != nil {
-			t.Errorf("unable to decode top up request: %v", err)
+			t.Fatal("\t\tshould send a request that the API can parse", cross, err)
+		} else {
+			t.Log("\t\tshould send a request that the API can parse", tick)
 		}
 
-		if !reflect.DeepEqual(tu, tuReq) {
-			t.Errorf("AddMoney got %+v, want %+v", tu, tuReq)
+		if !reflect.DeepEqual(mockReq, tu) {
+			t.Error("\t\tshould send a top-up request that matches the mock", cross)
+		} else {
+			t.Log("\t\tshould send a top-up request that matches the mock", tick)
+		}
+
+		reqUID, err := uuid.Parse(path.Base(r.URL.Path))
+		if err != nil {
+			t.Error("\t\tshould send a top-up request with a valid UID", cross, reqUID)
+		} else {
+			t.Log("\t\tshould send a top-up request with a valid UID", tick)
 		}
 
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, mock)
+		fmt.Fprintln(w, mockResp)
 	})
 
-	got, _, err := client.AddMoney(context.Background(), sgUID, tuReq)
+	tuResp, resp, err := client.AddMoney(context.Background(), goalUID, mockReq)
 	if err != nil {
-		t.Error("unexpected error returned:", err)
+		t.Fatal("\t\tshould be able to make the request", cross, err)
+	} else {
+		t.Log("\t\tshould be able to make the request", tick)
 	}
+
+	t.Log("\tWhen parsing the response from the API:")
 
 	want := &SavingsGoalTransferResponse{}
-	json.Unmarshal([]byte(mock), want)
+	json.Unmarshal([]byte(mockResp), want)
 
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("AddMoney returned \n%+v, want \n%+v", got, want)
-	}
-}
-
-func checkMethod(t *testing.T, r *http.Request, want string) {
-	if got := r.Method; got != want {
-		t.Errorf("\t\tshould send a %s request to the API %s %s", want, cross, got)
+	if got, want := resp.StatusCode, http.StatusOK; got != want {
+		t.Errorf("\t\tshould receive a %d status code %s %d", want, cross, got)
 	} else {
-		t.Logf("\t\tshould send a %s request to the API %s", want, tick)
+		t.Logf("\t\tshould receive a %d status code %s", want, tick)
+	}
+
+	if got, want := tuResp.UID, txnUID; got != want {
+		t.Fatal("\t\tshould be receive the UID assigned to the transaction", cross, got)
+	} else {
+		t.Log("\t\tshould be receive the UID assigned to the transaction", tick)
+	}
+
+	if got, want := tuResp.Success, true; got != want {
+		t.Fatal("\t\tshould be receive a success status", cross, got)
+	} else {
+		t.Log("\t\tshould be receive a success status", tick)
+	}
+
+	if got, want := len(tuResp.Errors), 0; got != want {
+		t.Fatal("\t\tshould be receive no validation errors", cross, got)
+	} else {
+		t.Log("\t\tshould be receive no validation errors", tick)
 	}
 }
