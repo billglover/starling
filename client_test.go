@@ -17,13 +17,36 @@ const (
 )
 
 func TestNewClient(t *testing.T) {
+	t.Log("Given the need to test that clients can be created with a default configuration:")
+	t.Log("\tWhen creating a client with a default configuration:")
 	c := NewClient(nil)
 
 	if got, want := c.baseURL.String(), defaultURL; got != want {
-		t.Errorf("NewClient baseURL is %v, want %v", got, want)
+		t.Error("\t\tshould configure the client to use the default url", cross, got)
+	} else {
+		t.Log("\t\tshould configure the client to use the default url", tick)
 	}
 	if got, want := c.userAgent, userAgent; got != want {
-		t.Errorf("NewClient userAgent is %v, want %v", got, want)
+		t.Error("\t\tshould configure the client to use the default user-agent", cross, got)
+	} else {
+		t.Log("\t\tshould configure the client to use the default user-agent", tick)
+	}
+}
+
+func TestNewClientWithOptions(t *testing.T) {
+	t.Log("Given the need to test that clients can be created with options:")
+	t.Log("\tWhen creating a client with a custom base URL:")
+
+	baseURL, _ := url.Parse("https://dummyurl:4000")
+	opts := ClientOptions{
+		BaseURL: baseURL,
+	}
+	c := NewClientWithOptions(nil, opts)
+
+	if got, want := c.baseURL.String(), baseURL.String(); got != want {
+		t.Error("\t\tshould configure the client to use the custom url", cross, got)
+	} else {
+		t.Log("\t\tshould configure the client to use the custom url", tick)
 	}
 }
 

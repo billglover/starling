@@ -13,12 +13,22 @@ import (
 )
 
 const (
-	prodURL    = "https://api.starlingbank.com/"
-	sandboxURL = "https://api-sandbox.starlingbank.com/"
-	defaultURL = sandboxURL
+	// ProdURL for the production instance of the Starling API
+	ProdURL = "https://api.starlingbank.com/"
+
+	// SandboxURL for the sandbox instance of the Starling API
+	SandboxURL = "https://api-sandbox.starlingbank.com/"
+
+	// defaultURL sets the default to using the sandbox API
+	defaultURL = SandboxURL
 
 	userAgent = "go-starling"
 )
+
+// ClientOptions is a set of options that can be specified when creating a Starling client
+type ClientOptions struct {
+	BaseURL *url.URL
+}
 
 // Client holds configuration items for the Starling client and provides methods
 // that interact with the Starling API.
@@ -41,6 +51,13 @@ func NewClient(cc *http.Client) *Client {
 	baseURL, _ := url.Parse(defaultURL)
 
 	c := &Client{baseURL: baseURL, userAgent: userAgent, client: cc}
+	return c
+}
+
+// NewClientWithOptions takes ClientOptions, configures and returns a new client.
+func NewClientWithOptions(cc *http.Client, opts ClientOptions) *Client {
+	c := NewClient(cc)
+	c.baseURL = opts.BaseURL
 	return c
 }
 
