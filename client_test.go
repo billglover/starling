@@ -54,35 +54,50 @@ func TestNewClientWithOptions(t *testing.T) {
 // correct URL, a correctly encoded body and the correct User-Agent and
 // Content-Type headers set.
 func TestNewRequest(t *testing.T) {
+	t.Log("Given the need to test that we can create a request:")
+
 	c := NewClient(nil)
 
-	inURL, outURL := "/foo", defaultURL+"foo"
-	inBody, outBody := &TopUpRequest{Amount: CurrencyAndAmount{Currency: "GBP", MinorUnits: 1973}}, `{"amount":{"currency":"GBP","minorUnits":1973}}`+"\n"
-	req, err := c.NewRequest("GET", inURL, inBody)
-	if err != nil {
-		t.Fatalf("NewRequest(%q) resulted in an error: %v", inURL, err)
-	}
+	t.Run("valid request", func(tc *testing.T) {
 
-	// test that relative URL was expanded
-	if got, want := req.URL.String(), outURL; got != want {
-		t.Errorf("NewRequest(%q) URL is %v, want %v", inURL, got, want)
-	}
+		tc.Log("\tWhen creating a:", tc.Name())
+		inURL, outURL := "/foo", defaultURL+"foo"
+		inBody, outBody := &TopUpRequest{Amount: CurrencyAndAmount{Currency: "GBP", MinorUnits: 1973}}, `{"amount":{"currency":"GBP","minorUnits":1973}}`+"\n"
 
-	// test that body was JSON encoded
-	body, _ := ioutil.ReadAll(req.Body)
-	if got, want := string(body), outBody; got != want {
-		t.Errorf("NewRequest(%q) Body is %v, want %v", inBody, got, want)
-	}
+		req, err := c.NewRequest("GET", inURL, inBody)
+		if err != nil {
+			tc.Fatal("\t\tshould create a request without error", cross, err)
+		} else {
+			t.Log("\t\tshould create a request without error", tick)
+		}
 
-	// test that default user-agent is set
-	if got, want := req.Header.Get("User-Agent"), c.userAgent; got != want {
-		t.Errorf("NewRequest() User-Agent is %v, want %v", got, want)
-	}
+		if got, want := req.URL.String(), outURL; got != want {
+			t.Error("\t\tshould expand relative URLs to absolute URLs", cross, got)
+		} else {
+			tc.Log("\t\tshould expand relative URLs to absolute URLs", tick)
+		}
 
-	// test that default content-type is set
-	if got, want := req.Header.Get("Content-Type"), "application/json"; got != want {
-		t.Errorf("NewRequest() Content-Type is %v, want %v", got, want)
-	}
+		body, _ := ioutil.ReadAll(req.Body)
+		if got, want := string(body), outBody; got != want {
+			tc.Error("\t\tshould encode the request body as JSON", cross, got)
+		} else {
+			tc.Log("\t\tshould encode the request body as JSON", tick)
+		}
+
+		if got, want := req.Header.Get("User-Agent"), c.userAgent; got != want {
+			tc.Error("\t\tshould pass the correct user agent", cross, got)
+		} else {
+			tc.Log("\t\tshould pass the correct user agent", tick)
+		}
+
+		if got, want := req.Header.Get("Content-Type"), "application/json"; got != want {
+			tc.Error("\t\tshould set the content-type as application/json", cross, got)
+		} else {
+			tc.Log("\t\tshould set the content-type as application/json", tick)
+		}
+
+	})
+
 }
 
 // TestNewRequest_invalidJSON confirms that NewRequest returns an error
