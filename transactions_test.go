@@ -148,11 +148,7 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 	defer teardown()
 
 	mux.HandleFunc("/api/v1/transactions", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "GET"; got != want {
-			t.Errorf("\t\tshould send a %s request to the API %s %s", want, cross, got)
-		} else {
-			t.Logf("\t\tshould send a %s request to the API %s", want, tick)
-		}
+		checkMethod(t, r, http.MethodGet)
 
 		params := r.URL.Query()
 
