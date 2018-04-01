@@ -42,11 +42,22 @@ If you want to use the production API rather than the sandbox, you need to creat
 
 
 ```go
-baseURL, _ := url.Parse("https://dummyurl:4000")
+package main
+
+import (
+    "context"
+    "fmt"
+
+    "github.com/billglover/starling"
+    "golang.org/x/oauth2"
+)
+
+func main() {
     ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
     ctx := context.Background()
     tc := oauth2.NewClient(ctx, ts)
 
+    baseURL, _ := url.Parse("https://dummyurl:4000")
 	opts := ClientOptions{BaseURL: baseURL,
 	}
     client := NewClientWithOptions(nil, opts)
