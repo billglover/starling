@@ -16,6 +16,8 @@ const (
 	cross = "\u2717"
 )
 
+// TestNewClient confirms that a client can be created with the defaul baseURL
+// and default User-Agent.
 func TestNewClient(t *testing.T) {
 	t.Log("Given the need to test that clients can be created with a default configuration:")
 	t.Log("\tWhen creating a client with a default configuration:")
@@ -33,6 +35,8 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
+// TestNewClientWithOptions confirms that a new client can be created by passing
+// in custom ClientOptions.
 func TestNewClientWithOptions(t *testing.T) {
 	t.Log("Given the need to test that clients can be created with options:")
 	t.Log("\tWhen creating a client with a custom base URL:")
@@ -65,11 +69,7 @@ func TestNewRequest(t *testing.T) {
 		inBody, outBody := &TopUpRequest{Amount: CurrencyAndAmount{Currency: "GBP", MinorUnits: 1973}}, `{"amount":{"currency":"GBP","minorUnits":1973}}`+"\n"
 
 		req, err := c.NewRequest("GET", inURL, inBody)
-		if err != nil {
-			tc.Fatal("\t\tshould create a request without error", cross, err)
-		} else {
-			t.Log("\t\tshould create a request without error", tick)
-		}
+		checkNoError(tc, err)
 
 		if got, want := req.URL.String(), outURL; got != want {
 			t.Error("\t\tshould expand relative URLs to absolute URLs", cross, got)
@@ -95,180 +95,154 @@ func TestNewRequest(t *testing.T) {
 		} else {
 			tc.Log("\t\tshould set the content-type as application/json", tick)
 		}
-
 	})
 
-}
+	t.Run("request with invalid JSON", func(tc *testing.T) {
 
-// TestNewRequest_invalidJSON confirms that NewRequest returns an error
-// if asked to encode a type that results in invalid JSON.
-func TestNewRequest_invalidJSON(t *testing.T) {
-	c := NewClient(nil)
+		tc.Log("\tWhen creating a:", tc.Name())
 
-	type T struct {
-		A map[interface{}]interface{}
-	}
-	_, err := c.NewRequest("GET", ".", &T{})
+		type T struct{ A map[interface{}]interface{} }
+		_, err := c.NewRequest("GET", ".", &T{})
+		checkHasError(tc, err)
+	})
 
-	if err == nil {
-		t.Error("Expected error to be returned.")
-	}
+	t.Run("request with an invalid URL", func(tc *testing.T) {
 
-}
+		tc.Log("\tWhen creating a:", tc.Name())
 
-// TestNewRequest_badURL confirms that NewRequest returns an error
-// if passed a URL containing invalid characters.
-func TestNewRequest_badURL(t *testing.T) {
-	c := NewClient(nil)
-	_, err := c.NewRequest("GET", ":", nil)
-	if err == nil {
-		t.Error("expected error to be returned")
-	}
-}
+		_, err := c.NewRequest("GET", ":", nil)
+		checkHasError(tc, err)
+	})
 
-// TestNewRequest_badBasePath confirms that NewRequest returns an error
-// if called on a client that does not have a trailing slash for the
-// base path.
-func TestNewRequest_badBasePath(t *testing.T) {
-	c := NewClient(nil)
-	u, _ := url.Parse("http://test.local")
-	c.baseURL = u
-	_, err := c.NewRequest("GET", "/", nil)
-	if err == nil {
-		t.Error("expected error to be returned")
-	}
-}
+	t.Run("request with an invalid base path", func(tc *testing.T) {
 
-// TestNewRequest_badMethod confirms that NewRequest returns an error
-// if called with an invalid method.
-func TestNewRequest_badMethod(t *testing.T) {
-	c := NewClient(nil)
-	_, err := c.NewRequest("\n", "/", nil)
-	if err == nil {
-		t.Error("expected error to be returned")
-	}
-}
+		tc.Log("\tWhen creating a:", tc.Name())
 
-// TestNewRequest_emptyBody confirms that NewRequest returns an API request with the
-// correct URL, an empty body and the correct User-Agent and Content-Type headers set.
-func TestNewRequest_emptyBody(t *testing.T) {
-	c := NewClient(nil)
-	req, err := c.NewRequest("GET", ".", nil)
-	if err != nil {
-		t.Fatalf("NewRequest returned unexpected error: %v", err)
-	}
-	if req.Body != nil {
-		t.Fatalf("constructed request contains a non-nil Body")
-	}
+		u, _ := url.Parse("http://test.local")
+		o := ClientOptions{BaseURL: u}
+		lc := NewClientWithOptions(nil, o)
+
+		_, err := lc.NewRequest("GET", "/", nil)
+		checkHasError(tc, err)
+	})
+
+	t.Run("request with an invalid Method", func(tc *testing.T) {
+
+		tc.Log("\tWhen creating a:", tc.Name())
+
+		_, err := c.NewRequest("\n", "/", nil)
+		checkHasError(tc, err)
+	})
+
+	t.Run("request with an empty body", func(tc *testing.T) {
+
+		tc.Log("\tWhen creating a:", tc.Name())
+
+		req, err := c.NewRequest("GET", ".", nil)
+		checkNoError(tc, err)
+
+		if req.Body != nil {
+			tc.Error("\t\tshould return an empty body", cross)
+		} else {
+			tc.Log("\t\tshould return an empty body", tick)
+		}
+	})
+
 }
 
 // TestDo confirms that Do returns a JSON decoded value when making a request. It
 // confirms the correct verb was used and that the decoded response value matches
 // the expected result.
 func TestDo(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+	t.Log("Given the need to test that we can execute a request:")
 
-	type foo struct {
-		A string
-	}
+	t.Run("successful GET request", func(tc *testing.T) {
+		tc.Log("\tWhen executing a:", tc.Name())
+		client, mux, _, teardown := setup()
+		defer teardown()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "GET"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
+		type foo struct{ A string }
+
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			checkMethod(tc, r, "GET")
+			fmt.Fprint(w, `{"A":"a"}`)
+		})
+
+		want := &foo{"a"}
+		got := new(foo)
+
+		req, _ := client.NewRequest("GET", ".", nil)
+		client.Do(context.Background(), req, got)
+
+		if !reflect.DeepEqual(got, want) {
+			tc.Error("\t\tshould return a response that matches the mock response", cross)
+		} else {
+			tc.Log("\t\tshould return a response that matches the mock response", tick)
 		}
-		fmt.Fprint(w, `{"A":"a"}`)
 	})
 
-	req, _ := client.NewRequest("GET", ".", nil)
-	body := new(foo)
-	client.Do(context.Background(), req, body)
+	t.Run("GET request that returns an HTTP error", func(tc *testing.T) {
+		tc.Log("\tWhen executing a:", tc.Name())
 
-	want := &foo{"a"}
-	if !reflect.DeepEqual(body, want) {
-		t.Errorf("Response body = %v, want %v", body, want)
-	}
-}
+		client, mux, _, teardown := setup()
+		defer teardown()
 
-// TestDo_HTTPError confirms that Do returns an error and a response value when
-// it receives a non HTTP 2xx response code.
-func TestDo_HTTPError(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			checkMethod(tc, r, http.MethodGet)
+			w.WriteHeader(http.StatusInternalServerError)
+		})
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "GET"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
+		req, _ := client.NewRequest("GET", ".", nil)
+		resp, err := client.Do(context.Background(), req, nil)
+
+		checkStatus(tc, resp, http.StatusInternalServerError)
+		checkHasError(tc, err)
+	})
+
+	t.Run("GET request that recieves an empty payload", func(tc *testing.T) {
+		tc.Log("\tWhen executing a:", tc.Name())
+
+		client, mux, _, teardown := setup()
+		defer teardown()
+
+		type foo struct{ A string }
+
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			checkMethod(tc, r, http.MethodGet)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req, _ := client.NewRequest("GET", ".", nil)
+		got := new(foo)
+		resp, err := client.Do(context.Background(), req, got)
+
+		checkStatus(tc, resp, http.StatusOK)
+		checkNoError(tc, err)
+	})
+
+	t.Run("request on a cancelled context", func(tc *testing.T) {
+		tc.Log("\tWhen executing a:", tc.Name())
+
+		client, mux, _, teardown := setup()
+		defer teardown()
+
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			checkMethod(tc, r, http.MethodGet)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req, _ := client.NewRequest("GET", ".", nil)
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+		resp, err := client.Do(ctx, req, nil)
+
+		checkHasError(tc, err)
+		if resp != nil {
+			tc.Error("should not return a response", cross)
+		} else {
+			tc.Log("should not return a response", tick)
 		}
-		w.WriteHeader(http.StatusInternalServerError)
 	})
-
-	req, _ := client.NewRequest("GET", ".", nil)
-	resp, err := client.Do(context.Background(), req, nil)
-
-	if got, want := resp.StatusCode, http.StatusInternalServerError; got != want {
-		t.Errorf("Do() status code is %d, want %d", got, want)
-	}
-
-	if err == nil {
-		t.Error("expected error to be returned")
-	}
-
-}
-
-// TestDo_NilPayload confirms that Do does not return an error when it receives
-// it receives an empty payload.
-func TestDo_NilPayload(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
-
-	type foo struct {
-		A string
-	}
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if got, want := r.Method, "GET"; got != want {
-			t.Errorf("request method: %v, want %v", got, want)
-		}
-		w.WriteHeader(http.StatusOK)
-	})
-
-	req, _ := client.NewRequest("GET", ".", nil)
-	body := new(foo)
-	resp, err := client.Do(context.Background(), req, body)
-
-	if got, want := resp.StatusCode, http.StatusOK; got != want {
-		t.Errorf("Do() status code is %d, want %d", got, want)
-	}
-
-	if err != nil {
-		t.Error("unexpected error returned:", err)
-	}
-
-}
-
-// TestDo_ContextErr confirms that Do correctly returns an error when the context is cancelled.
-func TestDo_Post(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	req, _ := client.NewRequest("GET", ".", nil)
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-	resp, err := client.Do(ctx, req, nil)
-
-	if err == nil {
-		t.Error("expected an error to be returned")
-	}
-
-	if resp != nil {
-		t.Errorf("unexpected response returned")
-	}
-
 }
 
 // Setup establishes a test Server that can be used to provide mock responses during testing.
@@ -290,5 +264,29 @@ func checkMethod(t *testing.T, r *http.Request, want string) {
 		t.Errorf("\t\tshould send a %s request to the API %s %s", want, cross, got)
 	} else {
 		t.Logf("\t\tshould send a %s request to the API %s", want, tick)
+	}
+}
+
+func checkHasError(t *testing.T, err error) {
+	if err == nil {
+		t.Error("\t\tshould creturn an error", cross)
+	} else {
+		t.Log("\t\tshould return an error", tick)
+	}
+}
+
+func checkNoError(t *testing.T, err error) {
+	if err != nil {
+		t.Error("\t\tshould return without error", cross, err)
+	} else {
+		t.Log("\t\tshould return without error", tick)
+	}
+}
+
+func checkStatus(t *testing.T, r *http.Response, status int) {
+	if r.StatusCode != status {
+		t.Errorf("\t\tshould return status HTTP %d %s HTTP %d", status, cross, r.StatusCode)
+	} else {
+		t.Logf("\t\tshould return status HTTP %d %s", status, tick)
 	}
 }
