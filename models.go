@@ -181,15 +181,6 @@ type DirectDebitMandates struct {
 	Mandates []DirectDebitMandate `json:"mandates"`
 }
 
-// Identity is the identity of the customer
-type Identity struct {
-	UID              string   `json:"customerUid"`
-	ExpiresAt        string   `json:"expiresAt"`
-	Authenticated    bool     `json:"authenticated"`
-	ExpiresInSeconds int64    `json:"expiresInSeconds"`
-	Scopes           []string `json:"scopes"`
-}
-
 // OptionalCard identifies the presence of a card
 type OptionalCard optional
 

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var testCases = []struct {
+var txnTestCases = []struct {
 	name      string
 	mock      string
 	dateRange *DateRange
@@ -134,7 +134,7 @@ func TestGetTransactions(t *testing.T) {
 	t.Log("Given the need to test fetching transactions:")
 
 	// Run each of the test cases a subtest.
-	for _, tc := range testCases {
+	for _, tc := range txnTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			testGetTransactions(t, tc.name, tc.mock, tc.dateRange)
 		})
