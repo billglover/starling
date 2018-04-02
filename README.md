@@ -123,7 +123,7 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/customers                                                   |             |
+| GET    | /api/v1/customers                                                   | Done        |
 
 ### Direct Debit Mandates
 
