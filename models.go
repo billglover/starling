@@ -79,18 +79,6 @@ type MerchantPosData struct {
 	MerchantIdentifier string `json:"merchantIdentifier"` // The merchant identifier as reported by Mastercard AKA mid
 }
 
-// Account represents bank account details
-type Account struct {
-	UID           string `json:"id"`
-	Name          string `json:"name"`
-	AccountNUmber string `json:"accountNumber"`
-	SortCode      string `json:"sortCode"`
-	Currency      string `json:"currency"`
-	IBAN          string `json:"iban"`
-	BIC           string `json:"bic"`
-	CreatedAt     string `json:"createdAt"`
-}
-
 // Balance represents the balance on an account
 type Balance struct {
 	ClearedBalance      float64 `json:"clearedBalance"`

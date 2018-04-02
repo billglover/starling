@@ -99,7 +99,7 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/accounts                                                    |             |
+| GET    | /api/v1/accounts                                                    | Done        |
 | GET    | /api/v1/accounts/balance                                            |             |
 
 ### Addresses
