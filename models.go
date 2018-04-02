@@ -150,20 +150,6 @@ type ContactAccounts struct {
 // OptionalContactAccount identifies the presence of a contact account
 type OptionalContactAccount optional
 
-// OptionalCustomer identifies the presence of a customer
-type OptionalCustomer optional
-
-// Customer represents the personal details of a customer
-type Customer struct {
-	UID               string `json:"customerUid"`
-	FirstName         string `json:"firstName"`
-	LastName          string `json:"lastName"`
-	DateOfBirth       string `json:"dateOfBirth"`
-	Email             string `json:"email"`
-	Phone             string `json:"phone"`
-	AccountHolderType string `json:"accountHolderType"`
-}
-
 // DirectDebitMandate represents a single mandate
 type DirectDebitMandate struct {
 	UID            string `json:"uid"`
