@@ -33,13 +33,12 @@ func main() {
     txns, _, _ := client.GetTransactions(ctx, dr)
 
     for i, txn := range txns.Transactions {
-			fmt.Println(txn.Created, tx.Amount, txn.Currency, txn.Narrative)
-	}
+        fmt.Println(txn.Created, tx.Amount, txn.Currency, txn.Narrative)
+    }
 }
 ```
 
 If you want to use the production API rather than the sandbox, you need to create a client with additional options.
-
 
 ```go
 package main
@@ -71,7 +70,7 @@ func main() {
 
 ## Starling Developer Documentation
 
-* https://developer.starlingbank.com/
+* [Developer Documentation](https://developer.starlingbank.com/)
 
 ## Features
 
@@ -120,7 +119,6 @@ func main() {
 | GET    | /api/v1/contacts/{id}/accounts                                      |             |
 | GET    | /api/v1/contacts/{contactId}/accounts/{accountId}                   |             |
 
-
 ### Customers
 
 | Method | Resource                                                            | Status      |
@@ -135,7 +133,7 @@ func main() {
 | GET    | /api/v1/direct-debit/mandates/{mandateUid}                          |             |
 | DELETE | /api/v1/direct-debit/mandates/{mandateUid}                          |             |
 
-### Who am I?
+### Who am I
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
