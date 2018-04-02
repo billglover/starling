@@ -79,20 +79,6 @@ type MerchantPosData struct {
 	MerchantIdentifier string `json:"merchantIdentifier"` // The merchant identifier as reported by Mastercard AKA mid
 }
 
-// Address is the physical address of the customer
-type Address struct {
-	StreetAddress string `json:"streetAddress"`
-	City          string `json:"city"`
-	Country       string `json:"country"`
-	Postcode      string `json:"postcode"`
-}
-
-// Addresses are the current and previous physical addresses
-type Addresses struct {
-	Current  Address   `json:"current"`
-	Previous []Address `json:"previous"`
-}
-
 // OptionalContact identifies the presence of a contact
 type OptionalContact optional
 

@@ -106,7 +106,7 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/addresses                                                   |             |
+| GET    | /api/v1/addresses                                                   | Done        |
 
 ### Contacts
 
