@@ -99,3 +99,77 @@ func testGetAccount(t *testing.T, name, mock string) {
 		t.Log("\t\tshould return an account matching the mock response", tick)
 	}
 }
+
+var balanceTestCases = []struct {
+	name string
+	mock string
+}{
+	{
+		name: "positive balance",
+		mock: `{
+			"clearedBalance": 15260.82,
+			"effectiveBalance": 15260.82,
+			"pendingTransactions": 0,
+			"availableToSpend": 15260.82,
+			"currency": "GBP",
+			"amount": 15260.82
+		}`,
+	},
+	{
+		name: "negative balance",
+		mock: `{
+			"clearedBalance": -15260.82,
+			"effectiveBalance": -15260.82,
+			"pendingTransactions": 0,
+			"availableToSpend": 0,
+			"currency": "GBP",
+			"amount": -15260.82
+		}`,
+	},
+	{
+		name: "very large balance",
+		mock: `{
+			"clearedBalance": -15260.82,
+			"effectiveBalance": -15260.82,
+			"pendingTransactions": 0,
+			"availableToSpend": 0,
+			"currency": "GBP",
+			"amount": 1.797693134862315708145274237317043567981e+308
+		}`,
+	},
+}
+
+func TestGetAccountBalance(t *testing.T) {
+
+	t.Log("Given the need to test fetching account balance:")
+
+	for _, tc := range balanceTestCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testGetAccountBalance(st, tc.name, tc.mock)
+		})
+	}
+}
+
+func testGetAccountBalance(t *testing.T, name, mock string) {
+	t.Logf("\tWhen making a call to GetAccountBalance() with a %s:", name)
+
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/accounts/balance", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.GetAccountBalance(context.Background())
+	checkNoError(t, err)
+
+	want := &Balance{}
+	json.Unmarshal([]byte(mock), want)
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("\t\tshould return an account balance matching the mock response", cross)
+	} else {
+		t.Log("\t\tshould return an account balancne matching the mock response", tick)
+	}
+}

@@ -79,17 +79,6 @@ type MerchantPosData struct {
 	MerchantIdentifier string `json:"merchantIdentifier"` // The merchant identifier as reported by Mastercard AKA mid
 }
 
-// Balance represents the balance on an account
-type Balance struct {
-	ClearedBalance      float64 `json:"clearedBalance"`
-	EffectiveBalance    float64 `json:"effectiveBalance"`
-	PendingTransactions float64 `json:"pendingTransactions"`
-	AvailableToSpend    float64 `json:"availableToSpend"`
-	AcceptedOverdraft   float64 `json:"acceptedOverdraft"`
-	Currency            string  `json:"currency"`
-	Amount              float64 `json:"amount"`
-}
-
 // Address is the physical address of the customer
 type Address struct {
 	StreetAddress string `json:"streetAddress"`
