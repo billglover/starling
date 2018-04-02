@@ -144,23 +144,6 @@ type DirectDebitMandates struct {
 	Mandates []DirectDebitMandate `json:"mandates"`
 }
 
-// OptionalCard identifies the presence of a card
-type OptionalCard optional
-
-// Card represents card details
-type Card struct {
-	UID                 string  `json:"id"`
-	NameOnCard          string  `json:"nameOnCard"`
-	Type                string  `json:"type"`
-	Enabled             bool    `json:"enabled"`
-	Cancelled           bool    `json:"cancelled"`
-	ActivationRequested bool    `json:"activationRequested"`
-	Activated           bool    `json:"activated"`
-	DispatchDate        string  `json:"dispatchDate"`
-	LastFourDigits      string  `json:"lastFourDigits"`
-	Transactions        HALLink `json:"transactions"`
-}
-
 // HALLink is a link to another resource
 type HALLink struct {
 	HREF        string `json:"href"`

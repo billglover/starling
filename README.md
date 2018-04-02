@@ -143,7 +143,7 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/cards                                                       |             |
+| GET    | /api/v1/cards                                                       | Done        |
 
 ### Merchants
 
