@@ -79,40 +79,6 @@ type MerchantPosData struct {
 	MerchantIdentifier string `json:"merchantIdentifier"` // The merchant identifier as reported by Mastercard AKA mid
 }
 
-// OptionalContact identifies the presence of a contact
-type OptionalContact optional
-
-// Contact represents the details of a payee
-type Contact struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// Contacts are a list of payees
-type Contacts struct {
-	Contacts []Contact
-}
-
-// ContactAccount holds payee account details
-type ContactAccount struct {
-	UID           string `json:"id"`
-	Type          string `json:"type"`
-	Name          string `json:"name"`
-	AccountNumber string `json:"accountNumber"`
-	SortCode      string `json:"sortCode"`
-}
-
-// OptionalContactAccounts identifies the presence of a contact accounts
-type OptionalContactAccounts optional
-
-// ContactAccounts holds a list of accounts for a payee
-type ContactAccounts struct {
-	ContactAccounts []ContactAccount `json:"contactAccounts"`
-}
-
-// OptionalContactAccount identifies the presence of a contact account
-type OptionalContactAccount optional
-
 // DirectDebitMandate represents a single mandate
 type DirectDebitMandate struct {
 	UID            string `json:"uid"`

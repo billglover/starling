@@ -116,7 +116,7 @@ func main() {
 | POST   | /api/v1/contacts                                                    |             |
 | GET    | /api/v1/contacts/{id}                                               | Done        |
 | DELETE | /api/v1/contacts/{id}                                               | Done        |
-| GET    | /api/v1/contacts/{id}/accounts                                      |             |
+| GET    | /api/v1/contacts/{id}/accounts                                      | Done        |
 | GET    | /api/v1/contacts/{contactId}/accounts/{accountId}                   |             |
 
 ### Customers

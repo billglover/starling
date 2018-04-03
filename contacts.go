@@ -22,6 +22,20 @@ type HALContacts struct {
 	Embedded *Contacts `json:"_embedded"`
 }
 
+// ContactAccount holds payee account details
+type ContactAccount struct {
+	UID           string `json:"id"`
+	Type          string `json:"type"`
+	Name          string `json:"name"`
+	AccountNumber string `json:"accountNumber"`
+	SortCode      string `json:"sortCode"`
+}
+
+// ContactAccounts holds a list of accounts for a payee
+type ContactAccounts struct {
+	ContactAccounts []ContactAccount `json:"contactAccounts"`
+}
+
 // GetContacts returns the contacts for the current customer.
 func (c *Client) GetContacts(ctx context.Context) (*Contacts, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/contacts", nil)
@@ -65,4 +79,16 @@ func (c *Client) DeleteContact(ctx context.Context, uid string) (*http.Response,
 
 	resp, err := c.Do(ctx, req, nil)
 	return resp, nil
+}
+
+// GetContactAccounts returns the accounts for a given contact.
+func (c *Client) GetContactAccounts(ctx context.Context, uid string) (*ContactAccounts, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/contacts/"+uid+"/accounts", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var cas *ContactAccounts
+	resp, err := c.Do(ctx, req, &cas)
+	return cas, resp, nil
 }
