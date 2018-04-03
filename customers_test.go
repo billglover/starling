@@ -65,7 +65,7 @@ func TestGetCustomer(t *testing.T) {
 
 	t.Log("Given the need to test fetching customer details:")
 
-	for _, tc := range userTestCases {
+	for _, tc := range customersTestCases {
 		t.Run(tc.name, func(st *testing.T) {
 			testGetCustomer(st, tc.name, tc.mock)
 		})
