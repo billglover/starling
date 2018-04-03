@@ -112,10 +112,10 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/contacts                                                    |             |
+| GET    | /api/v1/contacts                                                    | Done        |
 | POST   | /api/v1/contacts                                                    |             |
-| GET    | /api/v1/contacts/{id}                                               |             |
-| DELETE | /api/v1/contacts/{id}                                               |             |
+| GET    | /api/v1/contacts/{id}                                               | Done        |
+| DELETE | /api/v1/contacts/{id}                                               | Done        |
 | GET    | /api/v1/contacts/{id}/accounts                                      |             |
 | GET    | /api/v1/contacts/{contactId}/accounts/{accountId}                   |             |
 
