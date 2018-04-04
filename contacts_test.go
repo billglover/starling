@@ -393,3 +393,98 @@ func testGetContactAccounts(t *testing.T, name, mock, uid string) {
 		t.Log("\t\tshould have at least one contact account", tick)
 	}
 }
+
+var contactAccountTestCases = []struct {
+	name       string
+	contactUID string
+	accountUID string
+	mock       string
+}{
+	{
+		name:       "sample customer contact account",
+		contactUID: "8a7d4b0c-e4a0-4687-86ae-2f859f75d17c",
+		accountUID: "64834e9a-a920-4329-b28d-24246d332f83",
+		mock: `{
+			"self": {
+				 "href": "api/v1/contacts/8a7d4b0c-e4a0-4687-86ae-2f859f75d17c/accounts/64834e9a-a920-4329-b28d-24246d332f83",
+				 "templated": false
+			},
+			"id": "64834e9a-a920-4329-b28d-24246d332f83",
+			"type": "UK_ACCOUNT_AND_SORT_CODE",
+			"name": "UK account",
+			"accountNumber": "00000825",
+			"sortCode": "204514"
+	  }`,
+	},
+	{
+		name:       "sample customer contact account without HAL links",
+		contactUID: "8a7d4b0c-e4a0-4687-86ae-2f859f75d17c",
+		accountUID: "64834e9a-a920-4329-b28d-24246d332f83",
+		mock: `{
+			"id": "64834e9a-a920-4329-b28d-24246d332f83",
+			"type": "UK_ACCOUNT_AND_SORT_CODE",
+			"name": "UK account",
+			"accountNumber": "00000825",
+			"sortCode": "204514"
+	  }`,
+	},
+}
+
+func TestGetContactAccount(t *testing.T) {
+
+	t.Log("Given the need to test retrieving customer contact accounts:")
+
+	for _, tc := range contactAccountTestCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testGetContactAccount(st, tc.name, tc.mock, tc.contactUID, tc.accountUID)
+		})
+	}
+}
+
+func testGetContactAccount(t *testing.T, name, mock, cUID, aUID string) {
+	t.Logf("\tWhen making a call to GetContactAccount() with a %s:", name)
+
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/contacts/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		reqAccountUID := path.Base(r.URL.Path)
+
+		if reqAccountUID != aUID {
+			t.Error("\t\tshould send a request with the correct UID", cross, reqAccountUID)
+		} else {
+			t.Log("\t\tshould send a request with the correct UID", tick)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, mock)
+	})
+
+	got, _, err := client.GetContactAccount(context.Background(), cUID, aUID)
+	checkNoError(t, err)
+
+	t.Log("\tWhen parsing the response from the API:")
+
+	want := &ContactAccount{}
+	json.Unmarshal([]byte(mock), want)
+
+	if got.AccountNumber == "" {
+		t.Error("\t\tshould have an account number", cross)
+	} else {
+		t.Log("\t\tshould have an account number", tick)
+	}
+
+	if got.SortCode == "" {
+		t.Error("\t\tshould have an sort code", cross)
+	} else {
+		t.Log("\t\tshould have an sort code", tick)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("\t\tshould return a contact account matching the mock response", cross)
+	} else {
+		t.Log("\t\tshould return a contact account matching the mock response", tick)
+	}
+}

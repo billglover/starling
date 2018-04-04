@@ -92,3 +92,16 @@ func (c *Client) GetContactAccounts(ctx context.Context, uid string) (*ContactAc
 	resp, err := c.Do(ctx, req, &cas)
 	return cas, resp, nil
 }
+
+// GetContactAccount returns the specified account for a given contact.
+func (c *Client) GetContactAccount(ctx context.Context, cUID, aUID string) (*ContactAccount, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/contacts/"+cUID+"/accounts/"+aUID, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var ca *ContactAccount
+	resp, err := c.Do(ctx, req, &ca)
+	return ca, resp, nil
+}
+}
