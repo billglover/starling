@@ -66,7 +66,7 @@ func (c *Client) GetContact(ctx context.Context, uid string) (*Contact, *http.Re
 
 	var contact *Contact
 	resp, err := c.Do(ctx, req, &contact)
-	return contact, resp, nil
+	return contact, resp, err
 }
 
 // DeleteContact deletes an individual contact for the current customer. It returns http.StatusNoContent
@@ -78,7 +78,7 @@ func (c *Client) DeleteContact(ctx context.Context, uid string) (*http.Response,
 	}
 
 	resp, err := c.Do(ctx, req, nil)
-	return resp, nil
+	return resp, err
 }
 
 // GetContactAccounts returns the accounts for a given contact.
