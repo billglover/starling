@@ -488,3 +488,87 @@ func testGetContactAccount(t *testing.T, name, mock, cUID, aUID string) {
 		t.Log("\t\tshould return a contact account matching the mock response", tick)
 	}
 }
+
+var createContactAcctTestCases = []struct {
+	name       string
+	contAct    ContactAccount
+	respBody   string
+	respStatus int
+}{
+	{
+		name: "sample customer contact account",
+		contAct: ContactAccount{
+			UID:           "8cdab926-1d16-46a7-b4a9-6cb38f0c9b49",
+			Name:          "Dave Bowman",
+			Type:          "UK_ACCOUNT_AND_SORT_CODE",
+			AccountNumber: "70872490",
+			SortCode:      "404784",
+		},
+		respBody:   "",
+		respStatus: http.StatusCreated,
+	},
+	{
+		name: "sample customer contact account",
+		contAct: ContactAccount{
+			UID:           "8cdab926-1d16-46a7-b4a9-6cb38f0c9b49",
+			Name:          "Dave Bowman",
+			Type:          "UK_ACCOUNT_AND_SORT_CODE",
+			AccountNumber: "12345678",
+			SortCode:      "404784",
+		},
+		respBody: `[
+    "INVALID_SORT_CODE_OR_ACCOUNT_NUMBER"
+]`,
+		respStatus: http.StatusBadRequest,
+	},
+}
+
+func TestPostContactAccount(t *testing.T) {
+
+	t.Log("Given the need to test retrieving customer contact accounts:")
+
+	for _, tc := range createContactAcctTestCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testPostContactAccount(st, tc.name, tc.contAct, tc.respBody, tc.respStatus)
+		})
+	}
+}
+
+func testPostContactAccount(t *testing.T, name string, ca ContactAccount, respBody string, respStatus int) {
+	t.Logf("\tWhen making a call to PostContactAccount() with a %s:", name)
+
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/contacts", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPost)
+
+		var reqCA = ContactAccount{}
+		err := json.NewDecoder(r.Body).Decode(&reqCA)
+		if err != nil {
+			t.Fatal("\t\tshould send a request that the API can parse", cross, err)
+		} else {
+			t.Log("\t\tshould send a request that the API can parse", tick)
+		}
+
+		if !reflect.DeepEqual(ca, reqCA) {
+			t.Error("\t\tshould send a contact account that matches the mock", cross)
+		} else {
+			t.Log("\t\tshould send a contact account that matches the mock", tick)
+		}
+
+		w.WriteHeader(respStatus)
+		fmt.Fprintln(w, respBody)
+	})
+
+	resp, err := client.PostContactAccount(context.Background(), ca)
+	if respStatus <= 299 {
+		checkNoError(t, err)
+	} else {
+		checkHasError(t, err)
+	}
+
+	t.Log("\tWhen parsing the response from the API:")
+
+	checkStatus(t, resp, respStatus)
+}

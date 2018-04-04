@@ -104,4 +104,14 @@ func (c *Client) GetContactAccount(ctx context.Context, cUID, aUID string) (*Con
 	resp, err := c.Do(ctx, req, &ca)
 	return ca, resp, nil
 }
+
+// PostContactAccount returns the specified account for a given contact.
+func (c *Client) PostContactAccount(ctx context.Context, ca ContactAccount) (*http.Response, error) {
+	req, err := c.NewRequest("POST", "/api/v1/contacts", ca)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	return resp, err
 }
