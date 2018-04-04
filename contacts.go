@@ -90,7 +90,7 @@ func (c *Client) GetContactAccounts(ctx context.Context, uid string) (*ContactAc
 
 	var cas *ContactAccounts
 	resp, err := c.Do(ctx, req, &cas)
-	return cas, resp, nil
+	return cas, resp, err
 }
 
 // GetContactAccount returns the specified account for a given contact.
