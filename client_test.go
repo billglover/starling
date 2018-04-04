@@ -269,7 +269,7 @@ func checkMethod(t *testing.T, r *http.Request, want string) {
 
 func checkHasError(t *testing.T, err error) {
 	if err == nil {
-		t.Error("\t\tshould creturn an error", cross)
+		t.Error("\t\tshould return an error", cross)
 	} else {
 		t.Log("\t\tshould return an error", tick)
 	}

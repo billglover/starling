@@ -390,6 +390,6 @@ func testGetContactAccounts(t *testing.T, name, mock, uid string) {
 	if len(got.ContactAccounts) == 0 {
 		t.Errorf("\t\tshould have at least one contact account %s %d", cross, len(got.ContactAccounts))
 	} else {
-		t.Log("\t\tshould have at least one contact account ", tick)
+		t.Log("\t\tshould have at least one contact account", tick)
 	}
 }
