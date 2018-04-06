@@ -78,7 +78,7 @@ func (c *Client) DeleteContact(ctx context.Context, uid string) (*http.Response,
 	}
 
 	resp, err := c.Do(ctx, req, nil)
-	return resp, nil
+	return resp, err
 }
 
 // GetContactAccounts returns the accounts for a given contact.
@@ -90,5 +90,28 @@ func (c *Client) GetContactAccounts(ctx context.Context, uid string) (*ContactAc
 
 	var cas *ContactAccounts
 	resp, err := c.Do(ctx, req, &cas)
-	return cas, resp, nil
+	return cas, resp, err
+}
+
+// GetContactAccount returns the specified account for a given contact.
+func (c *Client) GetContactAccount(ctx context.Context, cUID, aUID string) (*ContactAccount, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/contacts/"+cUID+"/accounts/"+aUID, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var ca *ContactAccount
+	resp, err := c.Do(ctx, req, &ca)
+	return ca, resp, nil
+}
+
+// PostContactAccount returns the specified account for a given contact.
+func (c *Client) PostContactAccount(ctx context.Context, ca ContactAccount) (*http.Response, error) {
+	req, err := c.NewRequest("POST", "/api/v1/contacts", ca)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	return resp, err
 }

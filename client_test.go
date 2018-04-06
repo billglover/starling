@@ -260,6 +260,8 @@ func setup() (client *Client, mux *http.ServeMux, serverURL string, teardown fun
 }
 
 func checkMethod(t *testing.T, r *http.Request, want string) {
+	t.Helper()
+
 	if got := r.Method; got != want {
 		t.Errorf("\t\tshould send a %s request to the API %s %s", want, cross, got)
 	} else {
@@ -268,14 +270,18 @@ func checkMethod(t *testing.T, r *http.Request, want string) {
 }
 
 func checkHasError(t *testing.T, err error) {
+	t.Helper()
+
 	if err == nil {
-		t.Error("\t\tshould creturn an error", cross)
+		t.Error("\t\tshould return an error", cross)
 	} else {
 		t.Log("\t\tshould return an error", tick)
 	}
 }
 
 func checkNoError(t *testing.T, err error) {
+	t.Helper()
+
 	if err != nil {
 		t.Error("\t\tshould return without error", cross, err)
 	} else {
@@ -284,6 +290,8 @@ func checkNoError(t *testing.T, err error) {
 }
 
 func checkStatus(t *testing.T, r *http.Response, status int) {
+	t.Helper()
+
 	if r.StatusCode != status {
 		t.Errorf("\t\tshould return status HTTP %d %s HTTP %d", status, cross, r.StatusCode)
 	} else {
