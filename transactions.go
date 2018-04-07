@@ -18,7 +18,6 @@ type Transactions struct {
 
 // HALTransactions is a HAL wrapper around the Transactions type.
 type HALTransactions struct {
-	Links    struct{}      `json:"_links"`
 	Embedded *Transactions `json:"_embedded"`
 }
 
