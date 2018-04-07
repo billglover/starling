@@ -178,53 +178,53 @@ type SpendingCategory struct {
 }
 
 // DirectDebitTransaction represents details of a direct debit transaction
-type DirectDebitTransaction struct {
-	transaction
-	MandateUID          string `json:"mandateId"`
-	Type                string `json:"type"`
-	MerchantUID         string `json:"merchantId"`
-	MerchantLocationUID string `json:"merchantLocationId"`
-	SpendingCategory    string `json:"spendingCategory"`
-	Country             string `json:"country"`
-}
+// type DirectDebitTransaction struct {
+// 	transaction
+// 	MandateUID          string `json:"mandateId"`
+// 	Type                string `json:"type"`
+// 	MerchantUID         string `json:"merchantId"`
+// 	MerchantLocationUID string `json:"merchantLocationId"`
+// 	SpendingCategory    string `json:"spendingCategory"`
+// 	Country             string `json:"country"`
+// }
 
 // DirectDebitTransactions is a list of direct debit transactions
-type DirectDebitTransactions struct {
-	NextPage     HALLink                  `json:"nextPage"`
-	Transactions []DirectDebitTransaction `json:"transactions"`
-}
+// type DirectDebitTransactions struct {
+// 	NextPage     HALLink                  `json:"nextPage"`
+// 	Transactions []DirectDebitTransaction `json:"transactions"`
+// }
 
 // FPSInTransaction represents details of an inbound faster payments transaction
-type FPSInTransaction struct {
-	transaction
-	SendingContactUID        string  `json:"sendingContactId"`
-	SendingContactAccountUID string  `json:"sendingContactAccountId"`
-	SendingContactAccount    HALLink `json:"sendingContactAccount"`
-}
+// type FPSInTransaction struct {
+// 	transaction
+// 	SendingContactUID        string  `json:"sendingContactId"`
+// 	SendingContactAccountUID string  `json:"sendingContactAccountId"`
+// 	SendingContactAccount    HALLink `json:"sendingContactAccount"`
+// }
 
 // FPSInTransactions is a list of inbound faster payment transactions
-type FPSInTransactions struct {
-	NextPage     HALLink            `json:"nextPage"`
-	Transactions []FPSInTransaction `json:"transactions"`
-}
+// type FPSInTransactions struct {
+// 	NextPage     HALLink            `json:"nextPage"`
+// 	Transactions []FPSInTransaction `json:"transactions"`
+// }
 
 // FPSOutTransaction represents details of an outbound faster payments transaction
-type FPSOutTransaction struct {
-	transaction
-	ReceivingContactUID        string  `json:"receivingContactId"`
-	ReceivingContactAccountUID string  `json:"receivingContactAccountId"`
-	ReceivingContactAccount    HALLink `json:"receivingContactAccount"`
-}
+// type FPSOutTransaction struct {
+// 	transaction
+// 	ReceivingContactUID        string  `json:"receivingContactId"`
+// 	ReceivingContactAccountUID string  `json:"receivingContactAccountId"`
+// 	ReceivingContactAccount    HALLink `json:"receivingContactAccount"`
+// }
 
 // FPSOutTransactions is a list of outbound faster payment transactions
-type FPSOutTransactions struct {
-	NextPage     HALLink             `json:"nextPage"`
-	Transactions []FPSOutTransaction `json:"transactions"`
-}
+// type FPSOutTransactions struct {
+// 	NextPage     HALLink             `json:"nextPage"`
+// 	Transactions []FPSOutTransaction `json:"transactions"`
+// }
 
 // MastercardTransaction represents the details of a card transaction
 type MastercardTransaction struct {
-	transaction
+	Transaction
 	Method            string  `json:"mastercardTransactionMethod"`
 	Status            string  `json:"status"`
 	SourceAmount      float64 `json:"sourceAmount"`

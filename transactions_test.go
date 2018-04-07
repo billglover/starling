@@ -188,7 +188,7 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetTransactions(context.Background(), dr)
+	got, _, err := client.Transactions(context.Background(), dr)
 	if err != nil {
 		t.Fatal("\t\tshould be able to make the request", cross, err)
 	} else {
@@ -205,14 +205,14 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Log("\t\tshould not return 'nil'", tick)
 	}
 
-	if !reflect.DeepEqual(got, want) {
+	if !reflect.DeepEqual(*got, want.Transactions) {
 		t.Error("\t\tshould return a list matching the mock response", cross)
 	} else {
 		t.Log("\t\tshould return a transaction list matching the mock response", tick)
 	}
 
-	if len(got.Transactions) == 0 {
-		t.Errorf("\t\tshould have at least one transaction %s %d", cross, len(got.Transactions))
+	if len(*got) == 0 {
+		t.Errorf("\t\tshould have at least one transaction %s %d", cross, len(*got))
 	} else {
 		t.Log("\t\tshould have at least one transaction", tick)
 	}

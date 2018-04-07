@@ -5,25 +5,8 @@ import (
 	"net/http"
 )
 
-// TransactionSummary represents an individual transaction.
-type TransactionSummary struct {
-	transaction
-	Balance float64 `json:"balance"`
-}
-
-// Transactions is a list of transaction summaries.
-type Transactions struct {
-	Transactions []TransactionSummary `json:"transactions"`
-}
-
-// HALTransactions is a HAL wrapper around the Transactions type.
-type HALTransactions struct {
-	Links    struct{}      `json:"_links"`
-	Embedded *Transactions `json:"_embedded"`
-}
-
 // Transaction represents the details of a transaction.
-type transaction struct {
+type Transaction struct {
 	UID       string  `json:"id"`
 	Currency  string  `json:"currency"`
 	Amount    float64 `json:"amount"`
@@ -31,12 +14,23 @@ type transaction struct {
 	Created   string  `json:"created"`
 	Narrative string  `json:"narrative"`
 	Source    string  `json:"source"`
+	Balance   float64 `json:"balance,omitempty"`
 }
 
-// GetTransactions returns a list of transaction summaries for the current user. It accepts optional
+// Transactions is a list of transaction summaries.
+type Transactions struct {
+	Transactions []Transaction `json:"transactions"`
+}
+
+// HALTransactions is a HAL wrapper around the Transactions type.
+type HALTransactions struct {
+	Embedded *Transactions `json:"_embedded"`
+}
+
+// Transactions returns a list of transaction summaries for the current user. It accepts optional
 // time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
-func (c *Client) GetTransactions(ctx context.Context, dr *DateRange) (*Transactions, *http.Response, error) {
+func (c *Client) Transactions(ctx context.Context, dr *DateRange) (*[]Transaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions", nil)
 	if err != nil {
@@ -54,12 +48,12 @@ func (c *Client) GetTransactions(ctx context.Context, dr *DateRange) (*Transacti
 	var txns *Transactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return txns, resp, err
+		return &txns.Transactions, resp, err
 	}
 
 	if halResp.Embedded != nil {
 		txns = halResp.Embedded
 	}
 
-	return txns, resp, nil
+	return &txns.Transactions, resp, nil
 }
