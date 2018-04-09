@@ -9,7 +9,7 @@ import (
 type Account struct {
 	UID           string `json:"id"`
 	Name          string `json:"name"`
-	AccountNUmber string `json:"accountNumber"`
+	AccountNumber string `json:"accountNumber"`
 	SortCode      string `json:"sortCode"`
 	Currency      string `json:"currency"`
 	IBAN          string `json:"iban"`
@@ -17,8 +17,8 @@ type Account struct {
 	CreatedAt     string `json:"createdAt"`
 }
 
-// GetAccount returns the the account details for the current customer.
-func (c *Client) GetAccount(ctx context.Context) (*Account, *http.Response, error) {
+// Account returns the the account details for the current customer.
+func (c *Client) Account(ctx context.Context) (*Account, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/accounts", nil)
 	if err != nil {
 		return nil, nil, err
@@ -34,17 +34,17 @@ func (c *Client) GetAccount(ctx context.Context) (*Account, *http.Response, erro
 
 // Balance represents the balance on an account
 type Balance struct {
-	ClearedBalance      float64 `json:"clearedBalance"`
-	EffectiveBalance    float64 `json:"effectiveBalance"`
-	PendingTransactions float64 `json:"pendingTransactions"`
-	AvailableToSpend    float64 `json:"availableToSpend"`
-	AcceptedOverdraft   float64 `json:"acceptedOverdraft"`
-	Currency            string  `json:"currency"`
-	Amount              float64 `json:"amount"`
+	Cleared     float64 `json:"clearedBalance"`
+	Effective   float64 `json:"effectiveBalance"`
+	PendingTxns float64 `json:"pendingTransactions"`
+	Available   float64 `json:"availableToSpend"`
+	Overdraft   float64 `json:"acceptedOverdraft"`
+	Currency    string  `json:"currency"`
+	Amount      float64 `json:"amount"`
 }
 
-// GetAccountBalance returns the the account balance for the current customer.
-func (c *Client) GetAccountBalance(ctx context.Context) (*Balance, *http.Response, error) {
+// AccountBalance returns the the account balance for the current customer.
+func (c *Client) AccountBalance(ctx context.Context) (*Balance, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/accounts/balance", nil)
 	if err != nil {
 		return nil, nil, err

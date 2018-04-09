@@ -65,19 +65,19 @@ var accountTestCases = []struct {
 	},
 }
 
-func TestGetAccount(t *testing.T) {
+func TestAccount(t *testing.T) {
 
 	t.Log("Given the need to test fetching account details:")
 
 	for _, tc := range accountTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetAccount(st, tc.name, tc.mock)
+			testAccount(st, tc.name, tc.mock)
 		})
 	}
 }
 
-func testGetAccount(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to GetAccount() with %s:", name)
+func testAccount(t *testing.T, name, mock string) {
+	t.Logf("\tWhen making a call to Account() with %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -87,7 +87,7 @@ func testGetAccount(t *testing.T, name, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetAccount(context.Background())
+	got, _, err := client.Account(context.Background())
 	checkNoError(t, err)
 
 	want := &Account{}
@@ -139,19 +139,19 @@ var balanceTestCases = []struct {
 	},
 }
 
-func TestGetAccountBalance(t *testing.T) {
+func TestAccountBalance(t *testing.T) {
 
 	t.Log("Given the need to test fetching account balance:")
 
 	for _, tc := range balanceTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetAccountBalance(st, tc.name, tc.mock)
+			testAccountBalance(st, tc.name, tc.mock)
 		})
 	}
 }
 
-func testGetAccountBalance(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to GetAccountBalance() with a %s:", name)
+func testAccountBalance(t *testing.T, name, mock string) {
+	t.Logf("\tWhen making a call to AccountBalance() with a %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -161,7 +161,7 @@ func testGetAccountBalance(t *testing.T, name, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetAccountBalance(context.Background())
+	got, _, err := client.AccountBalance(context.Background())
 	checkNoError(t, err)
 
 	want := &Balance{}
@@ -170,6 +170,6 @@ func testGetAccountBalance(t *testing.T, name, mock string) {
 	if !reflect.DeepEqual(got, want) {
 		t.Error("\t\tshould return an account balance matching the mock response", cross)
 	} else {
-		t.Log("\t\tshould return an account balancne matching the mock response", tick)
+		t.Log("\t\tshould return an account balance matching the mock response", tick)
 	}
 }
