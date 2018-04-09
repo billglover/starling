@@ -67,19 +67,19 @@ var addressesTestCases = []struct {
 	},
 }
 
-func TestGetAddresses(t *testing.T) {
+func TestAddressHistory(t *testing.T) {
 
 	t.Log("Given the need to test fetching customer addresses:")
 
 	for _, tc := range addressesTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetAddresses(st, tc.name, tc.mock)
+			testAddressHistory(st, tc.name, tc.mock)
 		})
 	}
 }
 
-func testGetAddresses(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to GetAddresses() with a %s:", name)
+func testAddressHistory(t *testing.T, name, mock string) {
+	t.Logf("\tWhen making a call to AddressHistory() with a %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -89,10 +89,10 @@ func testGetAddresses(t *testing.T, name, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetAddresses(context.Background())
+	got, _, err := client.AddressHistory(context.Background())
 	checkNoError(t, err)
 
-	want := &Addresses{}
+	want := &AddressHistory{}
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
