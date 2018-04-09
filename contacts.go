@@ -64,8 +64,8 @@ func (c *Client) GetContact(ctx context.Context, uid string) (*Contact, *http.Re
 		return nil, nil, err
 	}
 
-	var contact *Contact
-	resp, err := c.Do(ctx, req, &contact)
+	contact := new(Contact)
+	resp, err := c.Do(ctx, req, contact)
 	return contact, resp, err
 }
 
