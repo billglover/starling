@@ -104,19 +104,19 @@ var contactsTestCases = []struct {
 	},
 }
 
-func TestGetContacts(t *testing.T) {
+func TestContacts(t *testing.T) {
 
 	t.Log("Given the need to test fetching customer contacts:")
 
 	for _, tc := range contactsTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetContacts(st, tc.name, tc.mock)
+			testContacts(st, tc.name, tc.mock)
 		})
 	}
 }
 
-func testGetContacts(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to GetContacts() with %s:", name)
+func testContacts(t *testing.T, name, mock string) {
+	t.Logf("\tWhen making a call to Contacts() with %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -126,21 +126,21 @@ func testGetContacts(t *testing.T, name, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetContacts(context.Background())
+	got, _, err := client.Contacts(context.Background())
 	checkNoError(t, err)
 
 	hal := &HALContacts{}
 	json.Unmarshal([]byte(mock), hal)
 	want := hal.Embedded
 
-	if !reflect.DeepEqual(got, want) {
+	if !reflect.DeepEqual(got, &want.Contacts) {
 		t.Error("\t\tshould return a list of contacts matching the mock response", cross)
 	} else {
 		t.Log("\t\tshould return a list of contacts matching the mock response", tick)
 	}
 
-	if len(got.Contacts) == 0 {
-		t.Errorf("\t\tshould have at least one contact %s %d", cross, len(got.Contacts))
+	if len(*got) == 0 {
+		t.Errorf("\t\tshould have at least one contact %s %d", cross, len(*got))
 	} else {
 		t.Log("\t\tshould have at least one contact", tick)
 	}
@@ -183,19 +183,19 @@ var contactTestCases = []struct {
 	},
 }
 
-func TestGetContact(t *testing.T) {
+func TestContact(t *testing.T) {
 
 	t.Log("Given the need to test fetching an individual customer contact:")
 
 	for _, tc := range contactTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetContact(st, tc.name, tc.uid, tc.mock)
+			testContact(st, tc.name, tc.uid, tc.mock)
 		})
 	}
 }
 
-func testGetContact(t *testing.T, name, uid, mock string) {
-	t.Logf("\tWhen making a call to GetContact() with a %s:", name)
+func testContact(t *testing.T, name, uid, mock string) {
+	t.Logf("\tWhen making a call to Contact() with a %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -213,7 +213,7 @@ func testGetContact(t *testing.T, name, uid, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetContact(context.Background(), uid)
+	got, _, err := client.Contact(context.Background(), uid)
 	checkNoError(t, err)
 
 	t.Log("\tWhen parsing the response from the API:")
@@ -341,19 +341,19 @@ var contactAccountsTestCases = []struct {
 	},
 }
 
-func TestGetContactAccounts(t *testing.T) {
+func TestContactAccounts(t *testing.T) {
 
 	t.Log("Given the need to test retrieving customer contact accounts:")
 
 	for _, tc := range contactAccountsTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetContactAccounts(st, tc.name, tc.mock, tc.uid)
+			testContactAccounts(st, tc.name, tc.mock, tc.uid)
 		})
 	}
 }
 
-func testGetContactAccounts(t *testing.T, name, mock, uid string) {
-	t.Logf("\tWhen making a call to GetContactAccounts() with a %s:", name)
+func testContactAccounts(t *testing.T, name, mock, uid string) {
+	t.Logf("\tWhen making a call to ContactAccounts() with a %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -373,7 +373,7 @@ func testGetContactAccounts(t *testing.T, name, mock, uid string) {
 		fmt.Fprintln(w, mock)
 	})
 
-	got, _, err := client.GetContactAccounts(context.Background(), uid)
+	got, _, err := client.ContactAccounts(context.Background(), uid)
 	checkNoError(t, err)
 
 	t.Log("\tWhen parsing the response from the API:")
@@ -381,14 +381,14 @@ func testGetContactAccounts(t *testing.T, name, mock, uid string) {
 	want := &ContactAccounts{}
 	json.Unmarshal([]byte(mock), want)
 
-	if !reflect.DeepEqual(got, want) {
+	if !reflect.DeepEqual(got, &want.ContactAccounts) {
 		t.Error("\t\tshould return a list of contact accounts matching the mock response", cross)
 	} else {
 		t.Log("\t\tshould return a list of contact accounts matching the mock response", tick)
 	}
 
-	if len(got.ContactAccounts) == 0 {
-		t.Errorf("\t\tshould have at least one contact account %s %d", cross, len(got.ContactAccounts))
+	if len(*got) == 0 {
+		t.Errorf("\t\tshould have at least one contact account %s %d", cross, len(*got))
 	} else {
 		t.Log("\t\tshould have at least one contact account", tick)
 	}
@@ -430,19 +430,19 @@ var contactAccountTestCases = []struct {
 	},
 }
 
-func TestGetContactAccount(t *testing.T) {
+func TestContactAccount(t *testing.T) {
 
 	t.Log("Given the need to test retrieving customer contact accounts:")
 
 	for _, tc := range contactAccountTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetContactAccount(st, tc.name, tc.mock, tc.contactUID, tc.accountUID)
+			testContactAccount(st, tc.name, tc.mock, tc.contactUID, tc.accountUID)
 		})
 	}
 }
 
-func testGetContactAccount(t *testing.T, name, mock, cUID, aUID string) {
-	t.Logf("\tWhen making a call to GetContactAccount() with a %s:", name)
+func testContactAccount(t *testing.T, name, mock, cUID, aUID string) {
+	t.Logf("\tWhen making a call to ContactAccount() with a %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -462,7 +462,7 @@ func testGetContactAccount(t *testing.T, name, mock, cUID, aUID string) {
 		fmt.Fprintln(w, mock)
 	})
 
-	got, _, err := client.GetContactAccount(context.Background(), cUID, aUID)
+	got, _, err := client.ContactAccount(context.Background(), cUID, aUID)
 	checkNoError(t, err)
 
 	t.Log("\tWhen parsing the response from the API:")
@@ -535,7 +535,7 @@ func TestPostContactAccount(t *testing.T) {
 }
 
 func testPostContactAccount(t *testing.T, name string, ca ContactAccount, respBody string, respStatus int) {
-	t.Logf("\tWhen making a call to PostContactAccount() with a %s:", name)
+	t.Logf("\tWhen making a call to CreateContactAccount() with a %s:", name)
 
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -561,7 +561,7 @@ func testPostContactAccount(t *testing.T, name string, ca ContactAccount, respBo
 		fmt.Fprintln(w, respBody)
 	})
 
-	resp, err := client.PostContactAccount(context.Background(), ca)
+	resp, err := client.CreateContactAccount(context.Background(), ca)
 	if respStatus <= 299 {
 		checkNoError(t, err)
 	} else {
