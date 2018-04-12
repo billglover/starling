@@ -19,8 +19,8 @@ type Card struct {
 	Transactions        HALLink `json:"transactions"`
 }
 
-// GetCards returns the the customer details for the current customer.
-func (c *Client) GetCards(ctx context.Context) (*Card, *http.Response, error) {
+// Card returns the the customer details for the current customer.
+func (c *Client) Card(ctx context.Context) (*Card, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/cards", nil)
 	if err != nil {
 		return nil, nil, err

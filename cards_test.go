@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-var cardsTestCases = []struct {
+var cardTestCases = []struct {
 	name string
 	mock string
 }{
@@ -49,18 +49,18 @@ var cardsTestCases = []struct {
 	},
 }
 
-func TestGetCards(t *testing.T) {
+func TestCard(t *testing.T) {
 
 	t.Log("Given the need to test fetching card details:")
 
-	for _, tc := range cardsTestCases {
+	for _, tc := range cardTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetCards(st, tc.name, tc.mock)
+			testCard(st, tc.name, tc.mock)
 		})
 	}
 }
 
-func testGetCards(t *testing.T, name, mock string) {
+func testCard(t *testing.T, name, mock string) {
 	t.Logf("\tWhen making a call to GetCards() with a %s:", name)
 
 	client, mux, _, teardown := setup()
@@ -71,7 +71,7 @@ func testGetCards(t *testing.T, name, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetCards(context.Background())
+	got, _, err := client.Card(context.Background())
 	checkNoError(t, err)
 
 	want := &Card{}
