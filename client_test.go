@@ -16,7 +16,7 @@ const (
 	cross = "\u2717"
 )
 
-// TestNewClient confirms that a client can be created with the defaul baseURL
+// TestNewClient confirms that a client can be created with the default baseURL
 // and default User-Agent.
 func TestNewClient(t *testing.T) {
 	t.Log("Given the need to test that clients can be created with a default configuration:")
@@ -199,7 +199,7 @@ func TestDo(t *testing.T) {
 		checkHasError(tc, err)
 	})
 
-	t.Run("GET request that recieves an empty payload", func(tc *testing.T) {
+	t.Run("GET request that receives an empty payload", func(tc *testing.T) {
 		tc.Log("\tWhen executing a:", tc.Name())
 
 		client, mux, _, teardown := setup()
