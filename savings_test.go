@@ -334,7 +334,7 @@ func TestAddMoney(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	tuResp, resp, err := client.AddMoney(context.Background(), goalUID, mockReq)
+	id, resp, err := client.AddMoney(context.Background(), goalUID, mockReq)
 	if err != nil {
 		t.Fatal("\t\tshould be able to make the request", cross, err)
 	} else {
@@ -343,7 +343,7 @@ func TestAddMoney(t *testing.T) {
 
 	t.Log("\tWhen parsing the response from the API:")
 
-	want := &SavingsGoalTransferResponse{}
+	want := &savingsGoalTransferResponse{}
 	json.Unmarshal([]byte(mockResp), want)
 
 	if got, want := resp.StatusCode, http.StatusOK; got != want {
@@ -352,21 +352,9 @@ func TestAddMoney(t *testing.T) {
 		t.Logf("\t\tshould receive a %d status code %s", want, tick)
 	}
 
-	if got, want := tuResp.UID, txnUID; got != want {
+	if got, want := id, txnUID; got != want {
 		t.Fatal("\t\tshould be receive the UID assigned to the transaction", cross, got)
 	} else {
 		t.Log("\t\tshould be receive the UID assigned to the transaction", tick)
-	}
-
-	if got, want := tuResp.Success, true; got != want {
-		t.Fatal("\t\tshould be receive a success status", cross, got)
-	} else {
-		t.Log("\t\tshould be receive a success status", tick)
-	}
-
-	if got, want := len(tuResp.Errors), 0; got != want {
-		t.Fatal("\t\tshould be receive no validation errors", cross, got)
-	} else {
-		t.Log("\t\tshould be receive no validation errors", tick)
 	}
 }

@@ -7,14 +7,6 @@ type ErrorDetail struct {
 	Message string
 }
 
-// SavingsGoalTransferResponse represents the response received after attempting to make an immediate or recurring transfer
-// into/out of a savings goal.
-type SavingsGoalTransferResponse struct {
-	UID     string        `json:"transferUid"` // Unique identifier for the transfer
-	Success bool          `json:"success"`     // True if the method completed successfully
-	Errors  []ErrorDetail `json:"errors"`      // List of errors if the method request failed
-}
-
 // Amount represents the value and currency of a monetary amount
 type Amount struct {
 	Currency   string `json:"currency"`   // ISO-4217 3 character currency code

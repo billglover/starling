@@ -38,6 +38,14 @@ type savingsGoalResponse struct {
 	Errors  []ErrorDetail `json:"errors"`
 }
 
+// SavingsGoalTransferResponse represents the response received after attempting to make an immediate or recurring transfer
+// into/out of a savings goal.
+type savingsGoalTransferResponse struct {
+	UID     string        `json:"transferUid"` // Unique identifier for the transfer
+	Success bool          `json:"success"`     // True if the method completed successfully
+	Errors  []ErrorDetail `json:"errors"`      // List of errors if the method request failed
+}
+
 // SavingsGoals returns the savings goals for the current user. It also returns the http response
 // in case this is required for further processing. It is possible that the user has no savings goals
 // in which case a nil value will be returned. An error will be returned if unable to retrieve goals
@@ -104,21 +112,21 @@ func (c *Client) CreateSavingsGoal(ctx context.Context, uid string, sgReq Saving
 
 // AddMoney transfers money into a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount into the savings goal.
-func (c *Client) AddMoney(ctx context.Context, goalUID string, tuReq TopUpRequest) (*SavingsGoalTransferResponse, *http.Response, error) {
+func (c *Client) AddMoney(ctx context.Context, goalUID string, tuReq TopUpRequest) (string, *http.Response, error) {
 	txnUID, err := uuid.NewRandom()
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
 
 	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/add-money/"+txnUID.String(), tuReq)
 	if err != nil {
-		return nil, nil, err
+		return "", nil, err
 	}
 
-	var tuResp *SavingsGoalTransferResponse
+	var tuResp *savingsGoalTransferResponse
 	resp, err := c.Do(ctx, req, &tuResp)
 	if err != nil {
-		return tuResp, resp, err
+		return tuResp.UID, resp, err
 	}
-	return tuResp, resp, nil
+	return tuResp.UID, resp, nil
 }
