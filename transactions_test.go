@@ -195,7 +195,7 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Log("\t\tshould be able to make the request", tick)
 	}
 
-	hal := &HALTransactions{}
+	hal := &halTransactions{}
 	json.Unmarshal([]byte(mock), hal)
 	want := hal.Embedded
 

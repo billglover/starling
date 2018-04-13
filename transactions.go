@@ -18,13 +18,13 @@ type Transaction struct {
 }
 
 // Transactions is a list of transaction summaries.
-type Transactions struct {
+type transactions struct {
 	Transactions []Transaction `json:"transactions"`
 }
 
 // HALTransactions is a HAL wrapper around the Transactions type.
-type HALTransactions struct {
-	Embedded *Transactions `json:"_embedded"`
+type halTransactions struct {
+	Embedded *transactions `json:"_embedded"`
 }
 
 // Transactions returns a list of transaction summaries for the current user. It accepts optional
@@ -44,8 +44,8 @@ func (c *Client) Transactions(ctx context.Context, dr *DateRange) (*[]Transactio
 		req.URL.RawQuery = q.Encode()
 	}
 
-	var halResp *HALTransactions
-	var txns *Transactions
+	var halResp *halTransactions
+	var txns *transactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
 		return &txns.Transactions, resp, err

@@ -66,7 +66,7 @@ func TestNewRequest(t *testing.T) {
 
 		tc.Log("\tWhen creating a:", tc.Name())
 		inURL, outURL := "/foo", defaultURL+"foo"
-		inBody, outBody := &TopUpRequest{Amount: CurrencyAndAmount{Currency: "GBP", MinorUnits: 1973}}, `{"amount":{"currency":"GBP","minorUnits":1973}}`+"\n"
+		inBody, outBody := &TopUpRequest{Amount: Amount{Currency: "GBP", MinorUnits: 1973}}, `{"amount":{"currency":"GBP","minorUnits":1973}}`+"\n"
 
 		req, err := c.NewRequest("GET", inURL, inBody)
 		checkNoError(tc, err)

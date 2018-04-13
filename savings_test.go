@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// TestGetSavingsGoals confirms that the client is able to query a list of savings goals.
-func TestGetSavingsGoals(t *testing.T) {
+// TestSavingsGoals confirms that the client is able to query a list of savings goals.
+func TestSavingsGoals(t *testing.T) {
 
 	t.Log("Given the need to test fetching savings goals:")
 
@@ -45,7 +45,7 @@ func TestGetSavingsGoals(t *testing.T) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetSavingsGoals(context.Background())
+	got, _, err := client.SavingsGoals(context.Background())
 	if err != nil {
 		t.Fatal("\t\tshould be able to make the request", cross, err)
 	} else {
@@ -54,7 +54,7 @@ func TestGetSavingsGoals(t *testing.T) {
 
 	t.Log("\tWhen parsing the response from the API:")
 
-	want := &SavingsGoals{}
+	want := &savingsGoals{}
 	json.Unmarshal([]byte(mock), want)
 
 	if got == nil {
@@ -63,14 +63,14 @@ func TestGetSavingsGoals(t *testing.T) {
 		t.Log("\t\tshould not return 'nil'", tick)
 	}
 
-	if !reflect.DeepEqual(got, want) {
+	if !reflect.DeepEqual(got, &want.SavingsGoals) {
 		t.Error("\t\tshould return a list of savings goals matching the mock response", cross)
 	} else {
 		t.Log("\t\tshould return a list of savings goals matching the mock response", tick)
 	}
 
-	if len(got.SavingsGoalList) == 0 {
-		t.Errorf("\t\tshould return a list with at least one savings goal %s %d", cross, len(got.SavingsGoalList))
+	if len(*got) == 0 {
+		t.Errorf("\t\tshould return a list with at least one savings goal %s %d", cross, len(*got))
 	} else {
 		t.Log("\t\tshould return a list with at least one savings goal", tick)
 	}
@@ -107,8 +107,7 @@ func TestGetSavingsGoal(t *testing.T) {
 		fmt.Fprint(w, mock)
 	})
 
-	// Define our request and execute the tests
-	got, _, err := client.GetSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	got, _, err := client.SavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	if err != nil {
 		t.Fatal("\t\tshould be able to make the request", cross, err)
 	} else {
@@ -152,7 +151,7 @@ func TestPutSavingsGoal(t *testing.T) {
 	mockReq := SavingsGoalRequest{
 		Name:     "test",
 		Currency: "GBP",
-		Target: CurrencyAndAmount{
+		Target: Amount{
 			Currency:   "GBP",
 			MinorUnits: 10000,
 		},
@@ -194,7 +193,7 @@ func TestPutSavingsGoal(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	sgResp, resp, err := client.PutSavingsGoal(context.Background(), uid, mockReq)
+	resp, err := client.CreateSavingsGoal(context.Background(), uid, mockReq)
 	if err != nil {
 		t.Fatal("\t\tshould be able to make the request", cross, err)
 	} else {
@@ -208,25 +207,6 @@ func TestPutSavingsGoal(t *testing.T) {
 	} else {
 		t.Logf("\t\tshould receive a %d status code %s", want, tick)
 	}
-
-	if got, want := sgResp.UID, uid; got != want {
-		t.Fatal("\t\tshould be receive the UID assigned to the savings goal", cross, got)
-	} else {
-		t.Log("\t\tshould be receive the UID assigned to the savings goal", tick)
-	}
-
-	if got, want := sgResp.Success, true; got != want {
-		t.Fatal("\t\tshould be receive a success status", cross, got)
-	} else {
-		t.Log("\t\tshould be receive a success status", tick)
-	}
-
-	if got, want := len(sgResp.Errors), 0; got != want {
-		t.Fatal("\t\tshould be receive no validation errors", cross, got)
-	} else {
-		t.Log("\t\tshould be receive no validation errors", tick)
-	}
-
 }
 
 // TestPutSavingsGoal_ValidateError confirms that the client is able to handle validation
@@ -242,7 +222,7 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 	mockReq := SavingsGoalRequest{
 		Name:     "test",
 		Currency: "GBP",
-		Target: CurrencyAndAmount{
+		Target: Amount{
 			Currency:   "GBP",
 			MinorUnits: 10000,
 		},
@@ -288,7 +268,7 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	sgResp, resp, err := client.PutSavingsGoal(context.Background(), uid, mockReq)
+	resp, err := client.CreateSavingsGoal(context.Background(), uid, mockReq)
 	if err == nil {
 		t.Fatal("\t\texpected an error to be returned", cross)
 	} else {
@@ -302,31 +282,6 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 	} else {
 		t.Logf("\t\tshould receive a %d status code %s", want, tick)
 	}
-
-	if got, want := sgResp.UID, uid; got != want {
-		t.Fatal("\t\tshould be receive the UID assigned to the savings goal", cross, got)
-	} else {
-		t.Log("\t\tshould be receive the UID assigned to the savings goal", tick)
-	}
-
-	if got, want := sgResp.Success, true; got != want {
-		t.Fatal("\t\tshould be receive a success status", cross, got)
-	} else {
-		t.Log("\t\tshould be receive a success status", tick)
-	}
-
-	if got, want := len(sgResp.Errors), 1; got != want {
-		t.Fatal("\t\tshould be receive one validation error", cross, got)
-	} else {
-		t.Log("\t\tshould be receive one validation error", tick)
-	}
-
-	if got, want := sgResp.Errors[0].Message, "Something about the validation error"; got != want {
-		t.Fatal("\t\tshould contain the mock validation error", cross, got)
-	} else {
-		t.Log("\t\tshould contain the mock validation error", tick)
-	}
-
 }
 
 // TestAddMoney confirms that the client is able to make a request to add money to a savings goal and parse
@@ -343,7 +298,7 @@ func TestAddMoney(t *testing.T) {
 	mockResp := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
 
 	mockReq := TopUpRequest{
-		Amount: CurrencyAndAmount{
+		Amount: Amount{
 			Currency:   "GBP",
 			MinorUnits: 1050,
 		},

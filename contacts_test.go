@@ -129,7 +129,7 @@ func testContacts(t *testing.T, name, mock string) {
 	got, _, err := client.Contacts(context.Background())
 	checkNoError(t, err)
 
-	hal := &HALContacts{}
+	hal := &halContacts{}
 	json.Unmarshal([]byte(mock), hal)
 	want := hal.Embedded
 
@@ -378,7 +378,7 @@ func testContactAccounts(t *testing.T, name, mock, uid string) {
 
 	t.Log("\tWhen parsing the response from the API:")
 
-	want := &ContactAccounts{}
+	want := &contactAccounts{}
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, &want.ContactAccounts) {

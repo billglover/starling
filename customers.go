@@ -16,8 +16,8 @@ type Customer struct {
 	AccountHolderType string `json:"accountHolderType"`
 }
 
-// GetCustomer returns the the customer details for the current customer.
-func (c *Client) GetCustomer(ctx context.Context) (*Customer, *http.Response, error) {
+// Customer returns the the customer details for the current customer.
+func (c *Client) Customer(ctx context.Context) (*Customer, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/customers", nil)
 	if err != nil {
 		return nil, nil, err

@@ -15,15 +15,15 @@ type SavingsGoalTransferResponse struct {
 	Errors  []ErrorDetail `json:"errors"`      // List of errors if the method request failed
 }
 
-// CurrencyAndAmount represents the value and currency of a monetary amount
-type CurrencyAndAmount struct {
+// Amount represents the value and currency of a monetary amount
+type Amount struct {
 	Currency   string `json:"currency"`   // ISO-4217 3 character currency code
 	MinorUnits int64  `json:"minorUnits"` // Amount in the minor units of the given currency; eg pence in GBP, cents in EUR
 }
 
 // TopUpRequest represents request to make an immediate transfer into a savings goal
 type TopUpRequest struct {
-	Amount CurrencyAndAmount `json:"amount"`
+	Amount `json:"amount"`
 }
 
 // RecurrenceRule defines the pattern for recurring events
@@ -38,8 +38,8 @@ type RecurrenceRule struct {
 
 // ScheduledSavingsPaymentRequest represents a request to create scheduled payment into a savings goal
 type ScheduledSavingsPaymentRequest struct {
-	RecurrenceRule    RecurrenceRule    `json:"recurrenceRule"`
-	CurrencyAndAmount CurrencyAndAmount `json:"currencyAndAmount"`
+	RecurrenceRule RecurrenceRule `json:"recurrenceRule"`
+	Amount         `json:"currencyAndAmount"`
 }
 
 // SavingsGoalPhoto is a photo associated to a savings goal
@@ -49,25 +49,25 @@ type SavingsGoalPhoto struct {
 
 // WithdrawalRequest is a request to withdraw money from a savings goal
 type WithdrawalRequest struct {
-	Amount CurrencyAndAmount `json:"amount"`
+	Amount `json:"amount"`
 }
 
 // MastercardTransactionPayload is the webhook payload for mastercard transactions
 type MastercardTransactionPayload struct {
-	WebhookNotificationUID string            `json:"webhookNotificationUid"` // Unique identifier of the webhook dispatch event
-	CustomerUID            string            `json:"customerUid"`            // Unique identifier of the customer
-	WebhookType            string            `json:"webhookType"`            // The type of the event
-	EventUID               string            `json:"eventUid"`               // Unique identifier of the customer transaction event
-	TransactionAmount      CurrencyAndAmount `json:"transactionAmount"`
-	SourceAmount           CurrencyAndAmount `json:"sourceAmount"`
-	Direction              string            `json:"direction"`            // The cashflow direction of the card transaction
-	Description            string            `json:"description"`          // The transaction description, usually the name of the merchant
-	MerchantUID            string            `json:"merchantUid"`          // The unique identifier of the merchant
-	MerchantLocationUID    string            `json:"merchantLocationUid"`  // The unique identifier of the merchant location
-	Status                 string            `json:"status"`               // The status of the transaction
-	TransactionMethod      string            `json:"transactionMethod"`    // The method of card usage
-	TransactionTimestamp   string            `json:"transactionTimestamp"` // Timestamp of the card transaction
-	MerchantPosData        MerchantPosData   `json:"merchantPosData"`
+	WebhookNotificationUID string          `json:"webhookNotificationUid"` // Unique identifier of the webhook dispatch event
+	CustomerUID            string          `json:"customerUid"`            // Unique identifier of the customer
+	WebhookType            string          `json:"webhookType"`            // The type of the event
+	EventUID               string          `json:"eventUid"`               // Unique identifier of the customer transaction event
+	TransactionAmount      Amount          `json:"transactionAmount"`
+	SourceAmount           Amount          `json:"sourceAmount"`
+	Direction              string          `json:"direction"`            // The cashflow direction of the card transaction
+	Description            string          `json:"description"`          // The transaction description, usually the name of the merchant
+	MerchantUID            string          `json:"merchantUid"`          // The unique identifier of the merchant
+	MerchantLocationUID    string          `json:"merchantLocationUid"`  // The unique identifier of the merchant location
+	Status                 string          `json:"status"`               // The status of the transaction
+	TransactionMethod      string          `json:"transactionMethod"`    // The method of card usage
+	TransactionTimestamp   string          `json:"transactionTimestamp"` // Timestamp of the card transaction
+	MerchantPosData        MerchantPosData `json:"merchantPosData"`
 }
 
 // MerchantPosData is data relating to the merchant at the point-of-sale

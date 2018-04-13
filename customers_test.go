@@ -61,18 +61,18 @@ var customersTestCases = []struct {
 	},
 }
 
-func TestGetCustomer(t *testing.T) {
+func TestCustomer(t *testing.T) {
 
 	t.Log("Given the need to test fetching customer details:")
 
 	for _, tc := range customersTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testGetCustomer(st, tc.name, tc.mock)
+			testCustomer(st, tc.name, tc.mock)
 		})
 	}
 }
 
-func testGetCustomer(t *testing.T, name, mock string) {
+func testCustomer(t *testing.T, name, mock string) {
 	t.Logf("\tWhen making a call to GetCustomer() with %s:", name)
 
 	client, mux, _, teardown := setup()
@@ -83,7 +83,7 @@ func testGetCustomer(t *testing.T, name, mock string) {
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.GetCustomer(context.Background())
+	got, _, err := client.Customer(context.Background())
 	checkNoError(t, err)
 
 	want := &Customer{}

@@ -12,14 +12,14 @@ type Contact struct {
 }
 
 // Contacts are a list of payees
-type Contacts struct {
+type contacts struct {
 	Contacts []Contact
 }
 
 // HALContacts is a HAL wrapper around the Contacts type.
-type HALContacts struct {
+type halContacts struct {
 	Links    struct{}  `json:"_links"`
-	Embedded *Contacts `json:"_embedded"`
+	Embedded *contacts `json:"_embedded"`
 }
 
 // ContactAccount holds payee account details
@@ -32,7 +32,7 @@ type ContactAccount struct {
 }
 
 // ContactAccounts holds a list of accounts for a payee
-type ContactAccounts struct {
+type contactAccounts struct {
 	ContactAccounts []ContactAccount `json:"contactAccounts"`
 }
 
@@ -43,8 +43,8 @@ func (c *Client) Contacts(ctx context.Context) (*[]Contact, *http.Response, erro
 		return nil, nil, err
 	}
 
-	var halResp *HALContacts
-	var contacts *Contacts
+	var halResp *halContacts
+	var contacts *contacts
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
 		return &contacts.Contacts, resp, err
@@ -88,7 +88,7 @@ func (c *Client) ContactAccounts(ctx context.Context, uid string) (*[]ContactAcc
 		return nil, nil, err
 	}
 
-	var cas *ContactAccounts
+	var cas *contactAccounts
 	resp, err := c.Do(ctx, req, &cas)
 	return &cas.ContactAccounts, resp, err
 }
