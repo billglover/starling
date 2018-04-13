@@ -297,19 +297,15 @@ func TestAddMoney(t *testing.T) {
 	txnUID := "28dff346-dd48-426f-96df-d7f33d29c379"
 	mockResp := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
 
-	mockReq := TopUpRequest{
-		Amount: Amount{
-			Currency:   "GBP",
-			MinorUnits: 1050,
-		},
-	}
+	mockAmount := Amount{Currency: "GBP", MinorUnits: 1050}
+	mockReq := topUpRequest{Amount: mockAmount}
 
 	t.Log("\tWhen making a call to AddMoney():")
 
 	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
-		var tu = TopUpRequest{}
+		var tu = topUpRequest{}
 		err := json.NewDecoder(r.Body).Decode(&tu)
 		if err != nil {
 			t.Fatal("\t\tshould send a request that the API can parse", cross, err)
@@ -334,7 +330,7 @@ func TestAddMoney(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	id, resp, err := client.AddMoney(context.Background(), goalUID, mockReq)
+	id, resp, err := client.AddMoney(context.Background(), goalUID, mockAmount)
 	if err != nil {
 		t.Fatal("\t\tshould be able to make the request", cross, err)
 	} else {

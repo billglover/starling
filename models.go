@@ -13,11 +13,6 @@ type Amount struct {
 	MinorUnits int64  `json:"minorUnits"` // Amount in the minor units of the given currency; eg pence in GBP, cents in EUR
 }
 
-// TopUpRequest represents request to make an immediate transfer into a savings goal
-type TopUpRequest struct {
-	Amount `json:"amount"`
-}
-
 // RecurrenceRule defines the pattern for recurring events
 type RecurrenceRule struct {
 	StartDate string `json:"startDate"`

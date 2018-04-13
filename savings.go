@@ -46,6 +46,11 @@ type savingsGoalTransferResponse struct {
 	Errors  []ErrorDetail `json:"errors"`      // List of errors if the method request failed
 }
 
+// TopUpRequest represents request to make an immediate transfer into a savings goal
+type topUpRequest struct {
+	Amount `json:"amount"`
+}
+
 // SavingsGoals returns the savings goals for the current user. It also returns the http response
 // in case this is required for further processing. It is possible that the user has no savings goals
 // in which case a nil value will be returned. An error will be returned if unable to retrieve goals
@@ -112,13 +117,13 @@ func (c *Client) CreateSavingsGoal(ctx context.Context, uid string, sgReq Saving
 
 // AddMoney transfers money into a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount into the savings goal.
-func (c *Client) AddMoney(ctx context.Context, goalUID string, tuReq TopUpRequest) (string, *http.Response, error) {
+func (c *Client) AddMoney(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
 	txnUID, err := uuid.NewRandom()
 	if err != nil {
 		return "", nil, err
 	}
 
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/add-money/"+txnUID.String(), tuReq)
+	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/add-money/"+txnUID.String(), topUpRequest{Amount: a})
 	if err != nil {
 		return "", nil, err
 	}
