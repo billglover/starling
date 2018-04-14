@@ -147,3 +147,22 @@ func (c *Client) DeleteSavingsGoal(ctx context.Context, uid string) (*http.Respo
 	resp, err := c.Do(ctx, req, nil)
 	return resp, err
 }
+
+// SavingsGoalPhoto returns the photo for savings goal based on a UID. It also returns the http response
+// in case this is required for further processing. An error will be returned if unable to retrieve
+// the photo from the API.
+func (c *Client) SavingsGoalPhoto(ctx context.Context, uid string) (*SavingsGoalPhoto, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid+"/photo", nil)
+	fmt.Println(req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var photo *SavingsGoalPhoto
+	resp, err := c.Do(ctx, req, &photo)
+	if err != nil {
+		return photo, resp, err
+	}
+
+	return photo, resp, nil
+}

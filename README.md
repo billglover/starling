@@ -83,7 +83,7 @@ func main() {
 | PUT    | /api/v1/savings-goals/{savingsGoalUid}                              | Done        |
 | DELETE | /api/v1/savings-goals/{savingsGoalUid}                              | Done        |
 | GET    | /api/v1/savings-goals                                               | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}/photo                        |             |
+| GET    | /api/v1/savings-goals/{savingsGoalUid}/photo                        | Done        |
 | PUT    | /api/v1/savings-goals/{savingsGoalUid}/withdraw-money/{transferUid} |             |
 | GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           |             |
 | PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           |             |
