@@ -1,5 +1,5 @@
 /*
-Package github provides a client for using the Starling API.
+Package starling provides a client for using the Starling API.
 
 Usage:
 
