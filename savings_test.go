@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"reflect"
@@ -352,5 +353,54 @@ func TestAddMoney(t *testing.T) {
 		t.Fatal("\t\tshould be receive the UID assigned to the transaction", cross, got)
 	} else {
 		t.Log("\t\tshould be receive the UID assigned to the transaction", tick)
+	}
+}
+
+var deleteSavingsGoalCases = []struct {
+	name string
+	uid  string
+	mock string
+}{
+	{
+		name: "sample savings goal",
+		uid:  "840e4030-b94c-4e71-a1d3-1319a233dd3c",
+	},
+}
+
+func TestDeleteSavingsGoal(t *testing.T) {
+	for _, tc := range deleteSavingsGoalCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testDeleteSavingsGoal(st, tc.name, tc.uid)
+		})
+	}
+}
+
+func testDeleteSavingsGoal(t *testing.T, name, uid string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodDelete)
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("\t\tshould send a request with the correct UID", cross, reqUID)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	resp, err := client.DeleteSavingsGoal(context.Background(), uid)
+	checkNoError(t, err)
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Error("\t\tshould return an HTTP 204 status", cross, resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	checkNoError(t, err)
+
+	if len(body) != 0 {
+		t.Error("\t\tshould return an empty body", cross, len(body))
 	}
 }

@@ -135,3 +135,15 @@ func (c *Client) AddMoney(ctx context.Context, goalUID string, a Amount) (string
 	}
 	return tuResp.UID, resp, nil
 }
+
+// DeleteSavingsGoal deletes a savings goal for the current customer. It returns http.StatusNoContent
+// on success. No payload is returned.
+func (c *Client) DeleteSavingsGoal(ctx context.Context, uid string) (*http.Response, error) {
+	req, err := c.NewRequest("DELETE", "/api/v1/savings-goals/"+uid, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	return resp, err
+}
