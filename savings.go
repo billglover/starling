@@ -46,6 +46,11 @@ type savingsGoalTransferResponse struct {
 	Errors  []ErrorDetail `json:"errors"`      // List of errors if the method request failed
 }
 
+// WithdrawalRequest is a request to withdraw money from a savings goal
+type withdrawalRequest struct {
+	Amount `json:"amount"`
+}
+
 // TopUpRequest represents request to make an immediate transfer into a savings goal
 type topUpRequest struct {
 	Amount `json:"amount"`
@@ -136,6 +141,27 @@ func (c *Client) AddMoney(ctx context.Context, goalUID string, a Amount) (string
 	return tuResp.UID, resp, nil
 }
 
+// Withdraw transfers money out of a savings goal. It returns the http response in case this is required for further
+// processing. An error will be returned if the API is unable to transfer the amount out of the savings goal.
+func (c *Client) Withdraw(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
+	txnUID, err := uuid.NewRandom()
+	if err != nil {
+		return "", nil, err
+	}
+
+	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/withdraw-money/"+txnUID.String(), topUpRequest{Amount: a})
+	if err != nil {
+		return "", nil, err
+	}
+
+	var tuResp *savingsGoalTransferResponse
+	resp, err := c.Do(ctx, req, &tuResp)
+	if err != nil {
+		return "", resp, err
+	}
+	return tuResp.UID, resp, nil
+}
+
 // DeleteSavingsGoal deletes a savings goal for the current customer. It returns http.StatusNoContent
 // on success. No payload is returned.
 func (c *Client) DeleteSavingsGoal(ctx context.Context, uid string) (*http.Response, error) {
@@ -151,14 +177,13 @@ func (c *Client) DeleteSavingsGoal(ctx context.Context, uid string) (*http.Respo
 // SavingsGoalPhoto returns the photo for savings goal based on a UID. It also returns the http response
 // in case this is required for further processing. An error will be returned if unable to retrieve
 // the photo from the API.
-func (c *Client) SavingsGoalPhoto(ctx context.Context, uid string) (*SavingsGoalPhoto, *http.Response, error) {
+func (c *Client) SavingsGoalPhoto(ctx context.Context, uid string) (*Photo, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid+"/photo", nil)
-	fmt.Println(req)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var photo *SavingsGoalPhoto
+	var photo *Photo
 	resp, err := c.Do(ctx, req, &photo)
 	if err != nil {
 		return photo, resp, err

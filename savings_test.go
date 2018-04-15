@@ -462,7 +462,7 @@ func testSavingsGoalPhoto(t *testing.T, name, uid string, mock string) {
 		t.Error("\t\tshould return an HTTP 200 status", cross, resp.Status)
 	}
 
-	want := &SavingsGoalPhoto{}
+	want := &Photo{}
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(photo, want) {
@@ -471,5 +471,108 @@ func testSavingsGoalPhoto(t *testing.T, name, uid string, mock string) {
 
 	if len(photo.Base64EncodedPhoto) == 0 {
 		t.Error("\t\tshould return a base64 encoded photo", cross)
+	}
+}
+
+// TestWithdraw confirms that the client is able to make a request to withdraw money from a savings goal.
+func TestWithdraw(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
+	txnUID := "28dff346-dd48-426f-96df-d7f33d29c379"
+	mockResp := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
+
+	mockAmount := Amount{Currency: "GBP", MinorUnits: 1050}
+	mockReq := withdrawalRequest{Amount: mockAmount}
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, "PUT")
+
+		var wr = withdrawalRequest{}
+		err := json.NewDecoder(r.Body).Decode(&wr)
+		if err != nil {
+			t.Fatal("should send a request that the API can parse", cross, err)
+		}
+
+		if !reflect.DeepEqual(mockReq, wr) {
+			t.Error("should send a top-up request that matches the mock", cross)
+		}
+
+		resource := path.Base(path.Dir(r.URL.Path))
+		if resource != "withdraw-money" {
+			t.Error("should make a request to withdraw-money", cross, resource)
+		}
+
+		reqUID, err := uuid.Parse(path.Base(r.URL.Path))
+		if err != nil {
+			t.Error("should send a top-up request with a valid UID", cross, reqUID)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, mockResp)
+	})
+
+	id, resp, err := client.Withdraw(context.Background(), goalUID, mockAmount)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	want := &savingsGoalTransferResponse{}
+	json.Unmarshal([]byte(mockResp), want)
+
+	if got, want := resp.StatusCode, http.StatusOK; got != want {
+		t.Errorf("should receive a %d status code %s %d", want, cross, got)
+	}
+
+	if got, want := id, txnUID; got != want {
+		t.Fatal("\t\tshould be receive the UID assigned to the transaction", cross, got)
+	}
+}
+
+func TestWithdraw_InsufficientFunds(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
+	mockResp := `["INSUFFICIENT_FUNDS"]`
+
+	mockAmount := Amount{Currency: "GBP", MinorUnits: 10000000}
+	mockReq := withdrawalRequest{Amount: mockAmount}
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, "PUT")
+
+		var wr = withdrawalRequest{}
+		err := json.NewDecoder(r.Body).Decode(&wr)
+		if err != nil {
+			t.Fatal("should send a request that the API can parse", cross, err)
+		}
+
+		if !reflect.DeepEqual(mockReq, wr) {
+			t.Error("should send a top-up request that matches the mock", cross)
+		}
+
+		resource := path.Base(path.Dir(r.URL.Path))
+		if resource != "withdraw-money" {
+			t.Error("should make a request to withdraw-money", cross, resource)
+		}
+
+		reqUID, err := uuid.Parse(path.Base(r.URL.Path))
+		if err != nil {
+			t.Error("should send a top-up request with a valid UID", cross, reqUID)
+		}
+
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, mockResp)
+	})
+
+	_, resp, err := client.Withdraw(context.Background(), goalUID, mockAmount)
+	if err == nil {
+		t.Fatal("should return an error when making the request", cross)
+	}
+
+	if got, want := resp.StatusCode, http.StatusBadRequest; got != want {
+		t.Errorf("should receive a %d status code %s %d", want, cross, got)
 	}
 }

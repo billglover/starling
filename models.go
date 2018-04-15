@@ -29,14 +29,9 @@ type ScheduledSavingsPaymentRequest struct {
 	Amount         `json:"currencyAndAmount"`
 }
 
-// SavingsGoalPhoto is a photo associated to a savings goal
-type SavingsGoalPhoto struct {
+// Photo is a photo associated to a savings goal
+type Photo struct {
 	Base64EncodedPhoto string `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
-}
-
-// WithdrawalRequest is a request to withdraw money from a savings goal
-type WithdrawalRequest struct {
-	Amount `json:"amount"`
 }
 
 // MastercardTransactionPayload is the webhook payload for mastercard transactions
