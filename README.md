@@ -84,10 +84,10 @@ func main() {
 | DELETE | /api/v1/savings-goals/{savingsGoalUid}                              | Done        |
 | GET    | /api/v1/savings-goals                                               | Done        |
 | GET    | /api/v1/savings-goals/{savingsGoalUid}/photo                        | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/withdraw-money/{transferUid} |             |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           |             |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           |             |
-| DELETE | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           |             |
+| PUT    | /api/v1/savings-goals/{savingsGoalUid}/withdraw-money/{transferUid} | Done        |
+| GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
+| PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
+| DELETE | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
 
 ### Webhooks
 

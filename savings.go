@@ -56,6 +56,13 @@ type topUpRequest struct {
 	Amount `json:"amount"`
 }
 
+// RecurringTransferRequest represents a request to create scheduled payment into a savings goal
+type RecurringTransferRequest struct {
+	UID            string         `json:"transferUid,omitempty"`
+	RecurrenceRule RecurrenceRule `json:"recurrenceRule"`
+	Amount         `json:"currencyAndAmount"`
+}
+
 // SavingsGoals returns the savings goals for the current user. It also returns the http response
 // in case this is required for further processing. It is possible that the user has no savings goals
 // in which case a nil value will be returned. An error will be returned if unable to retrieve goals
@@ -190,4 +197,51 @@ func (c *Client) SavingsGoalPhoto(ctx context.Context, uid string) (*Photo, *htt
 	}
 
 	return photo, resp, nil
+}
+
+// RecurringTransfer returns the recurring savings for savings goal based on a UID. It also returns
+// the http response in case this is required for further processing. An error will be returned if
+// unable to retrieve the recurring savings set-up from the API.
+func (c *Client) RecurringTransfer(ctx context.Context, uid string) (*RecurringTransferRequest, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid+"/recurring-transfer", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var rtr *RecurringTransferRequest
+	resp, err := c.Do(ctx, req, &rtr)
+	if err != nil {
+		return rtr, resp, err
+	}
+
+	return rtr, resp, nil
+}
+
+// CreateRecurringTransfer sets up the recurring transfer for a savings goal. It takes the UID of the savings goal, along with a RecurringTransferRequest
+// and returns the UID of the recurring transfer. It also returns the http response in case this is required for further processing. An error is returned
+// on failure.
+func (c *Client) CreateRecurringTransfer(ctx context.Context, uid string, rtr RecurringTransferRequest) (string, *http.Response, error) {
+	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid+"/recurring-transfer", rtr)
+	if err != nil {
+		return "", nil, err
+	}
+
+	var tuResp *savingsGoalTransferResponse
+	resp, err := c.Do(ctx, req, &tuResp)
+	if err != nil {
+		return "", resp, err
+	}
+	return "", resp, nil
+}
+
+// DeleteRecurringTransfer deletes the recurring transfer for a savings goal. It takes the UID of the savings goal and returns no content. It returns the
+// http response in case this is required for further processing. An error is returned on failure.
+func (c *Client) DeleteRecurringTransfer(ctx context.Context, uid string) (*http.Response, error) {
+	req, err := c.NewRequest("DELETE", "/api/v1/savings-goals/"+uid+"/recurring-transfer", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	return resp, err
 }

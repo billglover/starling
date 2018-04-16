@@ -576,3 +576,190 @@ func TestWithdraw_InsufficientFunds(t *testing.T) {
 		t.Errorf("should receive a %d status code %s %d", want, cross, got)
 	}
 }
+
+var recurringSavingsGoalCases = []struct {
+	name string
+	uid  string
+	mock string
+}{
+	{
+		name: "sample recurring savings goal",
+		uid:  "840e4030-b94c-4e71-a1d3-1319a233dd3c",
+		mock: `{
+			"transferUid": "28dff346-dd48-426f-96df-d7f33d29c379",
+			"recurrenceRule": {
+				"startDate": "2017-09-23",
+				"frequency": "WEEKLY"
+			},
+			"currencyAndAmount": {
+				"currency": "GBP",
+				"minorUnits": 1000
+			}
+		}`,
+	},
+	{
+		name: "confusing recurring savings goal",
+		uid:  "840e4030-b94c-4e71-a1d3-1319a233dd3c",
+		mock: `{
+			"transferUid": "28dff346-dd48-426f-96df-d7f33d29c379",
+			"recurrenceRule": {
+				"startDate": "2017-09-23",
+				"frequency": "WEEKLY",
+				"interval": 2,
+				"count": 2,
+				"untilDate": "2019-09-23",
+				"weekStart": "WEDNESDAY",
+				"days": ["MONDAY", "TUESDAY", "WEDNESDAY"],
+				"monthDay": 10,
+				"monthWeek": 3
+			},
+			"currencyAndAmount": {
+				"currency": "GBP",
+				"minorUnits": 1000
+			}
+		}`,
+	},
+}
+
+func RecurringTransfer(t *testing.T) {
+	for _, tc := range recurringSavingsGoalCases {
+		t.Run(tc.name, func(st *testing.T) {
+			recurringTransfer(st, tc.name, tc.uid, tc.mock)
+		})
+	}
+}
+
+func recurringTransfer(t *testing.T, name, uid string, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		resource := path.Base(r.URL.Path)
+		reqUID := path.Base(path.Dir(r.URL.Path))
+
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		if resource != "recurring-transfer" {
+			t.Error("should request the recurring transfer", cross, resource)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, mock)
+	})
+
+	recSav, resp, err := client.RecurringTransfer(context.Background(), uid)
+	checkNoError(t, err)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Error("should return an HTTP 200 status", cross, resp.Status)
+	}
+
+	want := &RecurringTransferRequest{}
+	json.Unmarshal([]byte(mock), want)
+
+	if !reflect.DeepEqual(recSav, want) {
+		t.Error("should return a recurring savings goal that matches the mock", cross)
+	}
+
+	if recSav.UID == "" {
+		t.Error("should return a UID", cross)
+	}
+}
+
+func TestCreateRecurringTransfer(t *testing.T) {
+	for _, tc := range recurringSavingsGoalCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testCreateRecurringTransfer(st, tc.name, tc.uid, tc.mock)
+		})
+	}
+}
+
+func testCreateRecurringTransfer(t *testing.T, name, uid string, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+
+		resource := path.Base(r.URL.Path)
+		reqUID := path.Base(path.Dir(r.URL.Path))
+
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		if resource != "recurring-transfer" {
+			t.Error("should request the recurring transfer", cross, resource)
+		}
+
+		mockResp := `{
+			"transferUid": "28dff346-dd48-426f-96df-d7f33d29c379",
+			"success": true,
+			"errors": []
+	  }`
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, mockResp)
+	})
+
+	rtrReq := RecurringTransferRequest{UID: "123"}
+
+	id, resp, err := client.CreateRecurringTransfer(context.Background(), uid, rtrReq)
+	checkNoError(t, err)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Error("should return an HTTP 200 status", cross, resp.Status)
+	}
+
+	if id == "28dff346-dd48-426f-96df-d7f33d29c379" {
+		t.Error("should return a UID", cross)
+	}
+}
+
+func TestDeleteRecurringTransfer(t *testing.T) {
+	for _, tc := range recurringSavingsGoalCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testDeleteRecurringTransfer(st, tc.name, tc.uid)
+		})
+	}
+}
+
+func testDeleteRecurringTransfer(t *testing.T, name, uid string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodDelete)
+
+		resource := path.Base(r.URL.Path)
+		reqUID := path.Base(path.Dir(r.URL.Path))
+
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		if resource != "recurring-transfer" {
+			t.Error("should request the recurring transfer", cross, resource)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	resp, err := client.DeleteRecurringTransfer(context.Background(), uid)
+	checkNoError(t, err)
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Error("\t\tshould return an HTTP 204 status", cross, resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	checkNoError(t, err)
+
+	if len(body) != 0 {
+		t.Error("\t\tshould return an empty body", cross, len(body))
+	}
+}
