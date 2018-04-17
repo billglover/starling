@@ -55,23 +55,6 @@ type MerchantPosData struct {
 	MerchantIdentifier string `json:"merchantIdentifier"` // The merchant identifier as reported by Mastercard AKA mid
 }
 
-// DirectDebitMandate represents a single mandate
-type DirectDebitMandate struct {
-	UID            string `json:"uid"`
-	Reference      string `json:"reference"`
-	Status         string `json:"status"`
-	Source         string `json:"source"`
-	Created        string `json:"created"`
-	Cancelled      string `json:"cancelled"`
-	OriginatorName string `json:"originatorName"`
-	OriginatorUID  string `json:"originatorUid"`
-}
-
-// DirectDebitMandates represents a list of mandates
-type DirectDebitMandates struct {
-	Mandates []DirectDebitMandate `json:"mandates"`
-}
-
 // HALLink is a link to another resource
 type HALLink struct {
 	HREF        string `json:"href"`

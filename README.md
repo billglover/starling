@@ -129,7 +129,7 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/direct-debit/mandates                                       |             |
+| GET    | /api/v1/direct-debit/mandates                                       | Done        |
 | GET    | /api/v1/direct-debit/mandates/{mandateUid}                          |             |
 | DELETE | /api/v1/direct-debit/mandates/{mandateUid}                          |             |
 
