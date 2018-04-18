@@ -57,3 +57,15 @@ func (c *Client) Transactions(ctx context.Context, dr *DateRange) (*[]Transactio
 
 	return &txns.Transactions, resp, nil
 }
+
+// Transaction returns an individual transaction for the current customer.
+func (c *Client) Transaction(ctx context.Context, uid string) (*Transaction, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/transactions/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	txn := new(Transaction)
+	resp, err := c.Do(ctx, req, txn)
+	return txn, resp, err
+}

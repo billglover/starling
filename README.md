@@ -192,4 +192,4 @@ func main() {
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
 | GET    | /api/v1/transactions                                                | Done        |
-| GET    | /api/v1/transactions/{transactionUid}                               |             |
+| GET    | /api/v1/transactions/{transactionUid}                               | Done        |

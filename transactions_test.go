@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -217,4 +218,81 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Log("\t\tshould have at least one transaction", tick)
 	}
 
+}
+
+var transactionCases = []struct {
+	name string
+	uid  string
+	mock string
+}{
+	{
+		name: "direct debit transaction",
+		uid:  "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		mock: `{
+			"_links": {
+				 "detail": {
+					  "href": "api/v1/transactions/direct-debit/474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+					  "templated": false
+				 }
+			},
+			"id": "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+			"currency": "GBP",
+			"amount": -42.13,
+			"direction": "OUTBOUND",
+			"created": "2018-04-16T23:30:00.000Z",
+			"narrative": "Society of Antiquaries",
+			"source": "DIRECT_DEBIT"
+	  }`,
+	},
+	{
+		name: "direct debit transaction (without hal)",
+		uid:  "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		mock: `{
+			"id": "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+			"currency": "GBP",
+			"amount": -42.13,
+			"direction": "OUTBOUND",
+			"created": "2018-04-16T23:30:00.000Z",
+			"narrative": "Society of Antiquaries",
+			"source": "DIRECT_DEBIT"
+	  }`,
+	},
+}
+
+func TestTransaction(t *testing.T) {
+	for _, tc := range transactionCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testTransaction(st, tc.name, tc.uid, tc.mock)
+		})
+	}
+}
+
+func testTransaction(t *testing.T, name, uid, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("should send a requestwith the correct UID", cross, reqUID)
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.Transaction(context.Background(), uid)
+	checkNoError(t, err)
+
+	want := &Transaction{}
+	json.Unmarshal([]byte(mock), want)
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("should return a single transaction matching the mock response", cross)
+	}
+
+	if got.UID != want.UID {
+		t.Error("should have the correct UID", cross, got.UID)
+	}
 }
