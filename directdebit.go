@@ -48,3 +48,15 @@ func (c *Client) DirectDebitMandates(ctx context.Context) (*[]DirectDebitMandate
 
 	return &mandates.Mandates, resp, nil
 }
+
+// DirectDebitMandate returns a single DirectDebitMandate for the current customer.
+func (c *Client) DirectDebitMandate(ctx context.Context, uid string) (*DirectDebitMandate, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/direct-debit/mandates/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var mandate *DirectDebitMandate
+	resp, err := c.Do(ctx, req, &mandate)
+	return mandate, resp, err
+}
