@@ -74,124 +74,58 @@ func main() {
 
 ## Features
 
-### Savings Goals
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/add-money/{transferUid}      | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}                              | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}                              | Done        |
-| DELETE | /api/v1/savings-goals/{savingsGoalUid}                              | Done        |
-| GET    | /api/v1/savings-goals                                               | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}/photo                        | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/withdraw-money/{transferUid} | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
-| DELETE | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
-| |
-| GET    | /api/v1/accounts                                                    | Done        |
-| GET    | /api/v1/accounts/balance                                            | Done        |
-
-### Webhooks
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| POST   | /your-registered-web-hook-address/card-transaction                  |             |
-
-### Accounts
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-
-
-### Addresses
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/addresses                                                   | Done        |
-
-### Contacts
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/contacts                                                    | Done        |
-| POST   | /api/v1/contacts                                                    | Done        |
-| GET    | /api/v1/contacts/{id}                                               | Done        |
-| DELETE | /api/v1/contacts/{id}                                               | Done        |
-| GET    | /api/v1/contacts/{id}/accounts                                      | Done        |
-| GET    | /api/v1/contacts/{contactId}/accounts/{accountId}                   | Done        |
-
-### Customers
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/customers                                                   | Done        |
-
-### Direct Debit Mandates
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/direct-debit/mandates                                       | Done        |
-| GET    | /api/v1/direct-debit/mandates/{mandateUid}                          | Done        |
-| DELETE | /api/v1/direct-debit/mandates/{mandateUid}                          | Done        |
-
-### Who am I
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/me                                                          | Done        |
-
-### Cards
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/cards                                                       | Done        |
-
-### Merchants
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/merchants/{merchantUid}                                     |             |
-| GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}     |             |
-
-### Payments
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| POST   | /api/v1/payments/local                                              |             |
-| GET    | /api/v1/payments/scheduled                                          |             |
-| POST   | /api/v1/payments/scheduled                                          |             |
-
-### Transactions - Direct Debits
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/transactions/direct-debit                                   |             |
-| GET    | /api/v1/transactions/direct-debit/{transactionUid}                  |             |
-| PUT    | /api/v1/transactions/direct-debit/{transactionUid}                  |             |
-
-### Transactions - Faster Payments Service
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/transactions/fps/in                                         |             |
-| GET    | /api/v1/transactions/fps/in/{transactionUid}                        |             |
-| GET    | /api/v1/transactions/fps/out                                        |             |
-| GET    | /api/v1/transactions/fps/out/{transactionUid}                       |             |
-
-### Transactions - Card
+### API Coverage
 
 | Method | Resource                                                              | Status      |
 |--------|-----------------------------------------------------------------------|------------:|
+| PUT    | /api/v1/savings-goals/{savingsGoalUid}/add-money/{transferUid}        | Done        |
+| GET    | /api/v1/savings-goals/{savingsGoalUid}                                | Done        |
+| PUT    | /api/v1/savings-goals/{savingsGoalUid}                                | Done        |
+| DELETE | /api/v1/savings-goals/{savingsGoalUid}                                | Done        |
+| GET    | /api/v1/savings-goals                                                 | Done        |
+| GET    | /api/v1/savings-goals/{savingsGoalUid}/photo                          | Done        |
+| PUT    | /api/v1/savings-goals/{savingsGoalUid}/withdraw-money/{transferUid}   | Done        |
+| GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer             | Done        |
+| PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer             | Done        |
+| DELETE | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer             | Done        |
+| GET    | /api/v1/accounts                                                      | Done        |
+| GET    | /api/v1/accounts/balance                                              | Done        |
+| GET    | /api/v1/addresses                                                     | Done        |
+| GET    | /api/v1/contacts                                                      | Done        |
+| POST   | /api/v1/contacts                                                      | Done        |
+| GET    | /api/v1/contacts/{id}                                                 | Done        |
+| DELETE | /api/v1/contacts/{id}                                                 | Done        |
+| GET    | /api/v1/contacts/{id}/accounts                                        | Done        |
+| GET    | /api/v1/contacts/{contactId}/accounts/{accountId}                     | Done        |
+| GET    | /api/v1/customers                                                     | Done        |
+| GET    | /api/v1/direct-debit/mandates                                         | Done        |
+| GET    | /api/v1/direct-debit/mandates/{mandateUid}                            | Done        |
+| DELETE | /api/v1/direct-debit/mandates/{mandateUid}                            | Done        |
+| GET    | /api/v1/me                                                            | Done        |
+| GET    | /api/v1/cards                                                         | Done        |
+| GET    | /api/v1/merchants/{merchantUid}                                       |             |
+| GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}       |             |
+| POST   | /api/v1/payments/local                                                |             |
+| GET    | /api/v1/payments/scheduled                                            |             |
+| POST   | /api/v1/payments/scheduled                                            |             |
+| GET    | /api/v1/transactions/direct-debit                                     |             |
+| GET    | /api/v1/transactions/direct-debit/{transactionUid}                    |             |
+| PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    |             |
+| GET    | /api/v1/transactions/fps/in                                           |             |
+| GET    | /api/v1/transactions/fps/in/{transactionUid}                          |             |
+| GET    | /api/v1/transactions/fps/out                                          |             |
+| GET    | /api/v1/transactions/fps/out/{transactionUid}                         |             |
 | GET    | /api/v1/transactions/mastercard                                       |             |
 | GET    | /api/v1/transactions/mastercard/{transactionUid}                      |             |
 | PUT    | /api/v1/transactions/mastercard/{transactionUid}                      |             |
 | POST   | /api/v1/transactions/mastercard/{transactionUid}/receipt              |             |
 | PUT    | /api/v1/transactions/mastercard/{transactionUid}/receipt/{receiptUid} |             |
+| GET    | /api/v1/transactions                                                  | Done        |
+| GET    | /api/v1/transactions/{transactionUid}                                 | Done        |
 
-### Transactions - Any
+### Webhook Coverage
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/transactions                                                | Done        |
-| GET    | /api/v1/transactions/{transactionUid}                               | Done        |
+| POST   | /your-registered-web-hook-address/card-transaction                  |             |
+
