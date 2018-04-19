@@ -88,6 +88,9 @@ func main() {
 | GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
 | PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
 | DELETE | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer           | Done        |
+| |
+| GET    | /api/v1/accounts                                                    | Done        |
+| GET    | /api/v1/accounts/balance                                            | Done        |
 
 ### Webhooks
 
@@ -99,8 +102,7 @@ func main() {
 
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
-| GET    | /api/v1/accounts                                                    | Done        |
-| GET    | /api/v1/accounts/balance                                            | Done        |
+
 
 ### Addresses
 
@@ -131,7 +133,7 @@ func main() {
 |--------|---------------------------------------------------------------------|------------:|
 | GET    | /api/v1/direct-debit/mandates                                       | Done        |
 | GET    | /api/v1/direct-debit/mandates/{mandateUid}                          | Done        |
-| DELETE | /api/v1/direct-debit/mandates/{mandateUid}                          |             |
+| DELETE | /api/v1/direct-debit/mandates/{mandateUid}                          | Done        |
 
 ### Who am I
 

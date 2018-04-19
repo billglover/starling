@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"reflect"
@@ -138,5 +139,53 @@ func testDDMandate(t *testing.T, name, uid, mock string) {
 
 	if got.UID != want.UID {
 		t.Error("should have the correct UID", cross, got.UID)
+	}
+}
+
+var deleteDDMandateCases = []struct {
+	name string
+	uid  string
+}{
+	{
+		name: "sample direct debit mandate",
+		uid:  "840e4030-b94c-4e71-a1d3-1319a233dd3c",
+	},
+}
+
+func TestDeleteDDMandate(t *testing.T) {
+	for _, tc := range deleteDDMandateCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testDeleteDDMandate(st, tc.name, tc.uid)
+		})
+	}
+}
+
+func testDeleteDDMandate(t *testing.T, name, uid string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/direct-debit/mandates/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodDelete)
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("should send a requestwith the correct UID", cross, reqUID)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	resp, err := client.DeleteDirectDebitMandate(context.Background(), uid)
+	checkNoError(t, err)
+
+	if resp.StatusCode != http.StatusNoContent {
+		t.Error("should return an HTTP 204 status", cross, resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	checkNoError(t, err)
+
+	if len(body) != 0 {
+		t.Error("should return an empty body", cross, len(body))
 	}
 }
