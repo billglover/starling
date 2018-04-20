@@ -103,8 +103,8 @@ func main() {
 | DELETE | /api/v1/direct-debit/mandates/{mandateUid}                            | Done        |
 | GET    | /api/v1/me                                                            | Done        |
 | GET    | /api/v1/cards                                                         | Done        |
-| GET    | /api/v1/merchants/{merchantUid}                                       |             |
-| GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}       |             |
+| GET    | /api/v1/merchants/{merchantUid}                                       | Done        |
+| GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}       | Done        |
 | POST   | /api/v1/payments/local                                                |             |
 | GET    | /api/v1/payments/scheduled                                            |             |
 | POST   | /api/v1/payments/scheduled                                            |             |
