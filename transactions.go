@@ -27,6 +27,32 @@ type halTransactions struct {
 	Embedded *transactions `json:"_embedded"`
 }
 
+// DDTransaction represents the details of a direct debit transaction.
+type DDTransaction struct {
+	UID                 string  `json:"id"`
+	Currency            string  `json:"currency"`
+	Amount              float64 `json:"amount"`
+	Direction           string  `json:"direction"`
+	Created             string  `json:"created"`
+	Narrative           string  `json:"narrative"`
+	Source              string  `json:"source"`
+	MandateUID          string  `json:"mandateId"`
+	Type                string  `json:"type"`
+	MerchantUID         string  `json:"merchantId"`
+	MerchantLocationUID string  `json:"merchantLocationId"`
+	SpendingCategory    string  `json:"spendingCategory"`
+}
+
+// ddTransactions is a list of transaction summaries.
+type ddTransactions struct {
+	Transactions []DDTransaction `json:"transactions"`
+}
+
+// HALDDTransactions is a HAL wrapper around the Transactions type.
+type halDDTransactions struct {
+	Embedded *ddTransactions `json:"_embedded"`
+}
+
 // Transactions returns a list of transaction summaries for the current user. It accepts optional
 // time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
@@ -68,4 +94,35 @@ func (c *Client) Transaction(ctx context.Context, uid string) (*Transaction, *ht
 	txn := new(Transaction)
 	resp, err := c.Do(ctx, req, txn)
 	return txn, resp, err
+}
+
+// DDTransactions returns a list of direct debit transactions for the current user. It accepts optional
+// time.Time values to request transactions within a given date range. If these values are not provided
+// the API returns the last 100 transactions.
+func (c *Client) DDTransactions(ctx context.Context, dr *DateRange) (*[]DDTransaction, *http.Response, error) {
+
+	req, err := c.NewRequest("GET", "/api/v1/transactions/direct-debit", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if dr != nil {
+		q := req.URL.Query()
+		q.Add("from", dr.From.Format("2006-01-02"))
+		q.Add("to", dr.To.Format("2006-01-02"))
+		req.URL.RawQuery = q.Encode()
+	}
+
+	var halResp *halDDTransactions
+	var txns *ddTransactions
+	resp, err := c.Do(ctx, req, &halResp)
+	if err != nil {
+		return &txns.Transactions, resp, err
+	}
+
+	if halResp.Embedded != nil {
+		txns = halResp.Embedded
+	}
+
+	return &txns.Transactions, resp, nil
 }

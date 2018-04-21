@@ -296,3 +296,178 @@ func testTransaction(t *testing.T, name, uid, mock string) {
 		t.Error("should have the correct UID", cross, got.UID)
 	}
 }
+
+var txnTestCasesDD = []struct {
+	name      string
+	mock      string
+	dateRange *DateRange
+}{
+	{
+		name: "with date range",
+		dateRange: &DateRange{
+			From: time.Date(2017, time.January, 01, 0, 0, 0, 0, time.Local),
+			To:   time.Date(2017, time.January, 03, 0, 0, 0, 0, time.Local),
+		},
+		mock: `{
+			"_links": {
+				 "nextPage": {
+					  "href": "NOT_YET_IMPLEMENTED"
+				 }
+			},
+			"_embedded": {
+				 "transactions": [
+					  {
+							"id": "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+							"currency": "GBP",
+							"amount": -42.13,
+							"direction": "OUTBOUND",
+							"created": "2018-04-16T23:30:00.000Z",
+							"narrative": "Society of Antiquaries",
+							"source": "DIRECT_DEBIT",
+							"mandate": {
+								 "href": "/api/v1/direct-debit/mandates/fa7998f6-07ce-42a9-ba5b-ce45ea8aff89",
+								 "templated": false
+							},
+							"merchant": {
+								 "href": "/api/v1/merchants/b6c146f7-666e-4868-beed-21344b7e6e47",
+								 "templated": false
+							},
+							"merchantLocation": {
+								 "href": "/api/v1/merchants/b6c146f7-666e-4868-beed-21344b7e6e47/locations/7dda8396-7c7a-46d3-b5af-61a187bf00f9",
+								 "templated": false
+							},
+							"mandateId": "fa7998f6-07ce-42a9-ba5b-ce45ea8aff89",
+							"type": "FIRST_PAYMENT_OF_DIRECT_DEBIT",
+							"merchantId": "b6c146f7-666e-4868-beed-21344b7e6e47",
+							"merchantLocationId": "7dda8396-7c7a-46d3-b5af-61a187bf00f9",
+							"spendingCategory": "GENERAL"
+					  }
+				 ]
+			}
+	  }`,
+	},
+	{
+		name:      "without date range",
+		dateRange: nil,
+		mock: `{
+			"_links": {
+				 "nextPage": {
+					  "href": "NOT_YET_IMPLEMENTED"
+				 }
+			},
+			"_embedded": {
+				 "transactions": [
+					  {
+							"id": "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+							"currency": "GBP",
+							"amount": -42.13,
+							"direction": "OUTBOUND",
+							"created": "2018-04-16T23:30:00.000Z",
+							"narrative": "Society of Antiquaries",
+							"source": "DIRECT_DEBIT",
+							"mandate": {
+								 "href": "/api/v1/direct-debit/mandates/fa7998f6-07ce-42a9-ba5b-ce45ea8aff89",
+								 "templated": false
+							},
+							"merchant": {
+								 "href": "/api/v1/merchants/b6c146f7-666e-4868-beed-21344b7e6e47",
+								 "templated": false
+							},
+							"merchantLocation": {
+								 "href": "/api/v1/merchants/b6c146f7-666e-4868-beed-21344b7e6e47/locations/7dda8396-7c7a-46d3-b5af-61a187bf00f9",
+								 "templated": false
+							},
+							"mandateId": "fa7998f6-07ce-42a9-ba5b-ce45ea8aff89",
+							"type": "FIRST_PAYMENT_OF_DIRECT_DEBIT",
+							"merchantId": "b6c146f7-666e-4868-beed-21344b7e6e47",
+							"merchantLocationId": "7dda8396-7c7a-46d3-b5af-61a187bf00f9",
+							"spendingCategory": "GENERAL"
+					  }
+				 ]
+			}
+	  }`,
+	},
+}
+
+func TestDDTransactions(t *testing.T) {
+	for _, tc := range txnTestCasesDD {
+		t.Run(tc.name, func(t *testing.T) {
+			testDDTransactions(t, tc.name, tc.mock, tc.dateRange)
+		})
+	}
+}
+
+func testDDTransactions(t *testing.T, name, mock string, dr *DateRange) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/direct-debit", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		params := r.URL.Query()
+
+		if dr != nil {
+			if got, want := params.Get("from"), dr.From.Format("2006-01-02"); got != want {
+				t.Errorf("should include 'from=%s' query string parameter %s 'from=%s'", want, cross, got)
+			}
+
+			if got, want := params.Get("to"), dr.To.Format("2006-01-02"); got != want {
+				t.Errorf("should include 'to=%s' query string parameter %s 'to=%s'", want, cross, got)
+			}
+		} else {
+			if got, want := params.Get("from"), ""; got != want {
+				t.Errorf("\t\tshould not include 'from' query string parameter %s 'from=%s'", cross, got)
+			}
+
+			if got, want := params.Get("to"), ""; got != want {
+				t.Errorf("\t\tshould not include 'to' query string parameter %s 'to=%s'", cross, got)
+			}
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.DDTransactions(context.Background(), dr)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	hal := &halDDTransactions{}
+	json.Unmarshal([]byte(mock), hal)
+	want := hal.Embedded
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(*got, want.Transactions) {
+		t.Error("should return a list matching the mock response", cross)
+	}
+
+	if len(*got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	}
+
+	first := (*got)[0]
+
+	if first.MandateUID == "" {
+		t.Error("should have a MandateID specified", cross)
+	}
+
+	if first.Type == "" {
+		t.Error("should have a Type specified", cross)
+	}
+
+	if first.MerchantUID == "" {
+		t.Error("should have a MerchantUID specified", cross)
+	}
+
+	if first.MerchantLocationUID == "" {
+		t.Error("should have a MerchantLocationUID specified", cross)
+	}
+
+	if first.SpendingCategory == "" {
+		t.Error("should have a SpendingCategory specified", cross)
+	}
+
+}
