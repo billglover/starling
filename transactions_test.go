@@ -276,7 +276,7 @@ func testTransaction(t *testing.T, name, uid, mock string) {
 
 		reqUID := path.Base(r.URL.Path)
 		if reqUID != uid {
-			t.Error("should send a requestwith the correct UID", cross, reqUID)
+			t.Error("should send a request with the correct UID", cross, reqUID)
 		}
 
 		fmt.Fprint(w, mock)
@@ -297,7 +297,7 @@ func testTransaction(t *testing.T, name, uid, mock string) {
 	}
 }
 
-var txnTestCasesDD = []struct {
+var txnsTestCasesDD = []struct {
 	name      string
 	mock      string
 	dateRange *DateRange
@@ -390,7 +390,7 @@ var txnTestCasesDD = []struct {
 }
 
 func TestDDTransactions(t *testing.T) {
-	for _, tc := range txnTestCasesDD {
+	for _, tc := range txnsTestCasesDD {
 		t.Run(tc.name, func(t *testing.T) {
 			testDDTransactions(t, tc.name, tc.mock, tc.dateRange)
 		})
@@ -416,11 +416,11 @@ func testDDTransactions(t *testing.T, name, mock string, dr *DateRange) {
 			}
 		} else {
 			if got, want := params.Get("from"), ""; got != want {
-				t.Errorf("\t\tshould not include 'from' query string parameter %s 'from=%s'", cross, got)
+				t.Errorf("should not include 'from' query string parameter %s 'from=%s'", cross, got)
 			}
 
 			if got, want := params.Get("to"), ""; got != want {
-				t.Errorf("\t\tshould not include 'to' query string parameter %s 'to=%s'", cross, got)
+				t.Errorf("should not include 'to' query string parameter %s 'to=%s'", cross, got)
 			}
 		}
 
@@ -467,6 +467,104 @@ func testDDTransactions(t *testing.T, name, mock string, dr *DateRange) {
 	}
 
 	if first.SpendingCategory == "" {
+		t.Error("should have a SpendingCategory specified", cross)
+	}
+
+}
+
+var txnTestCasesDD = []struct {
+	name string
+	uid  string
+	mock string
+}{
+	{
+		name: "single direct-debit transaction",
+		uid:  "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		mock: `{
+			"id": "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+			"currency": "GBP",
+			"amount": -42.13,
+			"direction": "OUTBOUND",
+			"created": "2018-04-16T23:30:00.000Z",
+			"narrative": "Society of Antiquaries",
+			"source": "DIRECT_DEBIT",
+			"mandate": {
+				 "href": "/api/v1/direct-debit/mandates/fa7998f6-07ce-42a9-ba5b-ce45ea8aff89",
+				 "templated": false
+			},
+			"merchant": {
+				 "href": "/api/v1/merchants/b6c146f7-666e-4868-beed-21344b7e6e47",
+				 "templated": false
+			},
+			"merchantLocation": {
+				 "href": "/api/v1/merchants/b6c146f7-666e-4868-beed-21344b7e6e47/locations/7dda8396-7c7a-46d3-b5af-61a187bf00f9",
+				 "templated": false
+			},
+			"mandateId": "fa7998f6-07ce-42a9-ba5b-ce45ea8aff89",
+			"type": "FIRST_PAYMENT_OF_DIRECT_DEBIT",
+			"merchantId": "b6c146f7-666e-4868-beed-21344b7e6e47",
+			"merchantLocationId": "7dda8396-7c7a-46d3-b5af-61a187bf00f9",
+			"spendingCategory": "GENERAL"
+	  }`,
+	},
+}
+
+func TestDDTransaction(t *testing.T) {
+	for _, tc := range txnTestCasesDD {
+		t.Run(tc.name, func(t *testing.T) {
+			testDDTransaction(t, tc.name, tc.uid, tc.mock)
+		})
+	}
+}
+
+func testDDTransaction(t *testing.T, name, uid, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/direct-debit/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	want := &DDTransaction{}
+	json.Unmarshal([]byte(mock), want)
+
+	got, _, err := client.DDTransaction(context.Background(), uid)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("should return a transaction matching the mock response", cross)
+	}
+
+	if got.MandateUID == "" {
+		t.Error("should have a MandateID specified", cross)
+	}
+
+	if got.Type == "" {
+		t.Error("should have a Type specified", cross)
+	}
+
+	if got.MerchantUID == "" {
+		t.Error("should have a MerchantUID specified", cross)
+	}
+
+	if got.MerchantLocationUID == "" {
+		t.Error("should have a MerchantLocationUID specified", cross)
+	}
+
+	if got.SpendingCategory == "" {
 		t.Error("should have a SpendingCategory specified", cross)
 	}
 

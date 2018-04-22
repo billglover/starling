@@ -126,3 +126,15 @@ func (c *Client) DDTransactions(ctx context.Context, dr *DateRange) (*[]DDTransa
 
 	return &txns.Transactions, resp, nil
 }
+
+// DDTransaction returns an individual transaction for the current customer.
+func (c *Client) DDTransaction(ctx context.Context, uid string) (*DDTransaction, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/transactions/direct-debit/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ddTxn := new(DDTransaction)
+	resp, err := c.Do(ctx, req, ddTxn)
+	return ddTxn, resp, err
+}

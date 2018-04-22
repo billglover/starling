@@ -109,7 +109,7 @@ func main() {
 | GET    | /api/v1/payments/scheduled                                            |             |
 | POST   | /api/v1/payments/scheduled                                            |             |
 | GET    | /api/v1/transactions/direct-debit                                     | Done        |
-| GET    | /api/v1/transactions/direct-debit/{transactionUid}                    |             |
+| GET    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
 | PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    |             |
 | GET    | /api/v1/transactions/fps/in                                           |             |
 | GET    | /api/v1/transactions/fps/in/{transactionUid}                          |             |
