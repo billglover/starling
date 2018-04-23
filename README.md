@@ -110,7 +110,7 @@ func main() {
 | POST   | /api/v1/payments/scheduled                                            |             |
 | GET    | /api/v1/transactions/direct-debit                                     | Done        |
 | GET    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
-| PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    |             |
+| PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
 | GET    | /api/v1/transactions/fps/in                                           |             |
 | GET    | /api/v1/transactions/fps/in/{transactionUid}                          |             |
 | GET    | /api/v1/transactions/fps/out                                          |             |
@@ -128,4 +128,3 @@ func main() {
 | Method | Resource                                                            | Status      |
 |--------|---------------------------------------------------------------------|------------:|
 | POST   | /your-registered-web-hook-address/card-transaction                  |             |
-

@@ -61,7 +61,7 @@ func (c *Client) DirectDebitMandate(ctx context.Context, uid string) (*DirectDeb
 	return mandate, resp, err
 }
 
-// DeleteDDMandate deletes an individual DirectDebitMandate for the current customer.
+// DeleteDirectDebitMandate deletes an individual DirectDebitMandate for the current customer.
 func (c *Client) DeleteDirectDebitMandate(ctx context.Context, uid string) (*http.Response, error) {
 	req, err := c.NewRequest("DELETE", "/api/v1/direct-debit/mandates/"+uid, nil)
 	if err != nil {

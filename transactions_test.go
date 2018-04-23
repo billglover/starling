@@ -569,3 +569,80 @@ func testDDTransaction(t *testing.T, name, uid, mock string) {
 	}
 
 }
+
+var setDDSpendingCategoryCases = []struct {
+	name     string
+	uid      string
+	category string
+	status   int
+	mock     string
+}{
+	{
+		name:     "set transaction category to charity",
+		uid:      "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		category: "CHARITY",
+		status:   http.StatusAccepted,
+		mock:     ``,
+	},
+	{
+		name:     "set invalid transaction category",
+		uid:      "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		category: "INVALID",
+		status:   http.StatusBadRequest,
+		mock: `[
+			"Can not deserialize value of type com.starlingbank.connectors.customer.SpendingCategory from String \"DEMOX\": value not one of declared Enum instance names: [GIFTS, FAMILY, ENTERTAINMENT, TRANSPORT, GROCERIES, PAYMENTS, PETS, LIFESTYLE, CHARITY, BILLS_AND_SERVICES, SAVING, HOLIDAYS, HOME, GENERAL, NONE, EXPENSES, INCOME, SHOPPING, EATING_OUT]"
+	  ]`,
+	},
+}
+
+func TestSetDDSpendingCategory(t *testing.T) {
+	for _, tc := range setDDSpendingCategoryCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testSetDDSpendingCategory(st, tc.name, tc.uid, tc.category, tc.status, tc.mock)
+		})
+	}
+}
+
+func testSetDDSpendingCategory(t *testing.T, name, uid, cat string, status int, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/direct-debit/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+
+		reqUID := path.Base(r.URL.Path)
+		resource := path.Base(path.Dir(r.URL.Path))
+
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		if resource != "direct-debit" {
+			t.Error("should request direct-debit", cross, resource)
+		}
+
+		var reqCat = SpendingCategory{}
+		err := json.NewDecoder(r.Body).Decode(&reqCat)
+		if err != nil {
+			t.Fatal("should send a request that the API can parse", cross, err)
+		}
+
+		if reqCat.SpendingCategory != cat {
+			t.Error("should request the correct spending category", cross, reqCat)
+		}
+
+		w.WriteHeader(status)
+		fmt.Fprintln(w, mock)
+	})
+
+	resp, err := client.SetDDSpendingCategory(context.Background(), uid, cat)
+	if status >= 400 {
+		checkHasError(t, err)
+	} else {
+		checkNoError(t, err)
+	}
+
+	if resp.StatusCode != status {
+		t.Error("should return the correct status", cross, resp.Status)
+	}
+}

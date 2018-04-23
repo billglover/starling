@@ -138,3 +138,15 @@ func (c *Client) DDTransaction(ctx context.Context, uid string) (*DDTransaction,
 	resp, err := c.Do(ctx, req, ddTxn)
 	return ddTxn, resp, err
 }
+
+// SetDDSpendingCategory updates the spending category for a given direct debit.
+func (c *Client) SetDDSpendingCategory(ctx context.Context, uid, cat string) (*http.Response, error) {
+	reqCat := SpendingCategory{SpendingCategory: cat}
+	req, err := c.NewRequest("PUT", "/api/v1/transactions/direct-debit/"+uid, reqCat)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	return resp, err
+}
