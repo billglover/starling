@@ -151,12 +151,43 @@ func (c *Client) SetDDSpendingCategory(ctx context.Context, uid, cat string) (*h
 	return resp, err
 }
 
-// FPSTransactionsIn returns a list of transaction summaries for the current user. It accepts optional
-// time.Time values to request transactions within a given date range. If these values are not provided
+// FPSTransactionsIn returns a list of inbound Faster Payments transaction summaries for the current user. It accepts
+// optional time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
 func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) (*[]Transaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/in", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if dr != nil {
+		q := req.URL.Query()
+		q.Add("from", dr.From.Format("2006-01-02"))
+		q.Add("to", dr.To.Format("2006-01-02"))
+		req.URL.RawQuery = q.Encode()
+	}
+
+	var halResp *halTransactions
+	var txns *transactions
+	resp, err := c.Do(ctx, req, &halResp)
+	if err != nil {
+		return &txns.Transactions, resp, err
+	}
+
+	if halResp.Embedded != nil {
+		txns = halResp.Embedded
+	}
+
+	return &txns.Transactions, resp, nil
+}
+
+// FPSTransactionsOut returns a list of inbound Faster Payments transaction summaries for the current user. It accepts
+// optional time.Time values to request transactions within a given date range. If these values are not provided
+// the API returns the last 100 transactions.
+func (c *Client) FPSTransactionsOut(ctx context.Context, dr *DateRange) (*[]Transaction, *http.Response, error) {
+
+	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/out", nil)
 	if err != nil {
 		return nil, nil, err
 	}

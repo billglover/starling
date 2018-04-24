@@ -113,7 +113,7 @@ func main() {
 | PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
 | GET    | /api/v1/transactions/fps/in                                           | Done        |
 | GET    | /api/v1/transactions/fps/in/{transactionUid}                          |             |
-| GET    | /api/v1/transactions/fps/out                                          |             |
+| GET    | /api/v1/transactions/fps/out                                          | Done        |
 | GET    | /api/v1/transactions/fps/out/{transactionUid}                         |             |
 | GET    | /api/v1/transactions/mastercard                                       |             |
 | GET    | /api/v1/transactions/mastercard/{transactionUid}                      |             |
