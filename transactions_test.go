@@ -646,3 +646,186 @@ func testSetDDSpendingCategory(t *testing.T, name, uid, cat string, status int, 
 		t.Error("should return the correct status", cross, resp.Status)
 	}
 }
+
+// ---
+
+var txnsTestCasesFPSIn = []struct {
+	name      string
+	mock      string
+	dateRange *DateRange
+}{
+	{
+		name: "with date range",
+		dateRange: &DateRange{
+			From: time.Date(2017, time.January, 01, 0, 0, 0, 0, time.Local),
+			To:   time.Date(2017, time.January, 03, 0, 0, 0, 0, time.Local),
+		},
+		mock: `{
+			"_links": {
+				 "nextPage": {
+					  "href": "NOT_YET_IMPLEMENTED"
+				 }
+			},
+			"_embedded": {
+				 "transactions": [
+					  {
+							"id": "4f39ce4a-b760-42d8-811d-792e366486ef",
+							"currency": "GBP",
+							"amount": 33.14,
+							"direction": "INBOUND",
+							"created": "2018-03-28T13:48:56.000Z",
+							"narrative": "someRef",
+							"source": "FASTER_PAYMENTS_IN"
+					  },
+					  {
+							"id": "e517d335-2fb8-486b-91b3-2762ae7d929a",
+							"currency": "GBP",
+							"amount": 19.44,
+							"direction": "INBOUND",
+							"created": "2018-03-28T13:48:51.000Z",
+							"narrative": "someRef",
+							"source": "FASTER_PAYMENTS_IN"
+					  },
+					  {
+							"id": "94d24e13-61c1-47fe-adb2-a903a9bf6982",
+							"currency": "GBP",
+							"amount": 200,
+							"direction": "INBOUND",
+							"created": "2018-03-28T13:48:17.000Z",
+							"narrative": "someRef",
+							"source": "FASTER_PAYMENTS_IN"
+					  }
+				 ]
+			}
+	  }`,
+	},
+	{
+		name:      "without date range",
+		dateRange: nil,
+		mock: `{
+			"_links": {
+				 "nextPage": {
+					  "href": "NOT_YET_IMPLEMENTED"
+				 }
+			},
+			"_embedded": {
+				 "transactions": [
+					  {
+							"id": "4f39ce4a-b760-42d8-811d-792e366486ef",
+							"currency": "GBP",
+							"amount": 33.14,
+							"direction": "INBOUND",
+							"created": "2018-03-28T13:48:56.000Z",
+							"narrative": "someRef",
+							"source": "FASTER_PAYMENTS_IN"
+					  },
+					  {
+							"id": "e517d335-2fb8-486b-91b3-2762ae7d929a",
+							"currency": "GBP",
+							"amount": 19.44,
+							"direction": "INBOUND",
+							"created": "2018-03-28T13:48:51.000Z",
+							"narrative": "someRef",
+							"source": "FASTER_PAYMENTS_IN"
+					  },
+					  {
+							"id": "94d24e13-61c1-47fe-adb2-a903a9bf6982",
+							"currency": "GBP",
+							"amount": 200,
+							"direction": "INBOUND",
+							"created": "2018-03-28T13:48:17.000Z",
+							"narrative": "someRef",
+							"source": "FASTER_PAYMENTS_IN"
+					  }
+				 ]
+			}
+	  }`,
+	},
+}
+
+func TestFPSInTransactions(t *testing.T) {
+	for _, tc := range txnsTestCasesFPSIn {
+		t.Run(tc.name, func(t *testing.T) {
+			testFPSInTransactions(t, tc.name, tc.mock, tc.dateRange)
+		})
+	}
+}
+
+func testFPSInTransactions(t *testing.T, name, mock string, dr *DateRange) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/fps/in", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		params := r.URL.Query()
+
+		if dr != nil {
+			if got, want := params.Get("from"), dr.From.Format("2006-01-02"); got != want {
+				t.Errorf("should include 'from=%s' query string parameter %s 'from=%s'", want, cross, got)
+			}
+
+			if got, want := params.Get("to"), dr.To.Format("2006-01-02"); got != want {
+				t.Errorf("should include 'to=%s' query string parameter %s 'to=%s'", want, cross, got)
+			}
+		} else {
+			if got, want := params.Get("from"), ""; got != want {
+				t.Errorf("should not include 'from' query string parameter %s 'from=%s'", cross, got)
+			}
+
+			if got, want := params.Get("to"), ""; got != want {
+				t.Errorf("should not include 'to' query string parameter %s 'to=%s'", cross, got)
+			}
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.FPSTransactionsIn(context.Background(), dr)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	hal := &halTransactions{}
+	json.Unmarshal([]byte(mock), hal)
+	want := hal.Embedded
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(*got, want.Transactions) {
+		t.Error("should return a list matching the mock response", cross)
+	}
+
+	if len(*got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	}
+
+	first := (*got)[0]
+
+	if first.UID == "" {
+		t.Error("should have a UID specified", cross)
+	}
+
+	if first.Currency == "" {
+		t.Error("should have a Currency specified", cross)
+	}
+
+	if first.Direction == "" {
+		t.Error("should have a Direction specified", cross)
+	}
+
+	if first.Created == "" {
+		t.Error("should have a Created date specified", cross)
+	}
+
+	if first.Narrative == "" {
+		t.Error("should have a Narrative specified", cross)
+	}
+
+	if first.Source == "" {
+		t.Error("should have a Source specified", cross)
+	}
+
+}
