@@ -182,6 +182,18 @@ func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) (*[]Trans
 	return &txns.Transactions, resp, nil
 }
 
+// FPSTransactionIn returns an individual transaction for the current customer.
+func (c *Client) FPSTransactionIn(ctx context.Context, uid string) (*Transaction, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/in/debit/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	txn := new(Transaction)
+	resp, err := c.Do(ctx, req, txn)
+	return txn, resp, err
+}
+
 // FPSTransactionsOut returns a list of inbound Faster Payments transaction summaries for the current user. It accepts
 // optional time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
