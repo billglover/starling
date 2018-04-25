@@ -114,7 +114,7 @@ func main() {
 | GET    | /api/v1/transactions/fps/in                                           | Done        |
 | GET    | /api/v1/transactions/fps/in/{transactionUid}                          | Done        |
 | GET    | /api/v1/transactions/fps/out                                          | Done        |
-| GET    | /api/v1/transactions/fps/out/{transactionUid}                         |             |
+| GET    | /api/v1/transactions/fps/out/{transactionUid}                         | Done        |
 | GET    | /api/v1/transactions/mastercard                                       |             |
 | GET    | /api/v1/transactions/mastercard/{transactionUid}                      |             |
 | PUT    | /api/v1/transactions/mastercard/{transactionUid}                      |             |

@@ -868,6 +868,11 @@ func testFPSInTransaction(t *testing.T, name, uid, mock string) {
 			t.Error("should send a request with the correct UID", cross, reqUID)
 		}
 
+		dir := path.Dir(r.URL.Path)
+		if dir != "/api/v1/transactions/fps/in" {
+			t.Error("should send a request to the correct endpoint", cross, dir)
+		}
+
 		fmt.Fprint(w, mock)
 	})
 
@@ -1089,6 +1094,96 @@ func testFPSOutTransactions(t *testing.T, name, mock string, dr *DateRange) {
 	}
 
 	if first.Source == "" {
+		t.Error("should have a Source specified", cross)
+	}
+
+}
+
+var txnTestCasesFPSOut = []struct {
+	name string
+	uid  string
+	mock string
+}{
+	{
+		name: "single direct-debit transaction",
+		uid:  "4f39ce4a-b760-42d8-811d-792e366486ef",
+		mock: `{
+			"id": "7d3e646a-a485-41af-bd3a-d46bbb3aca8f",
+			"currency": "GBP",
+			"amount": -12.46,
+			"direction": "OUTBOUND",
+			"created": "2018-03-28T13:48:49.702Z",
+			"narrative": "External Payment",
+			"source": "FASTER_PAYMENTS_OUT"
+	  }`,
+	},
+}
+
+func TestFPSOutTransaction(t *testing.T) {
+	for _, tc := range txnTestCasesDD {
+		t.Run(tc.name, func(t *testing.T) {
+			testFPSOutTransaction(t, tc.name, tc.uid, tc.mock)
+		})
+	}
+}
+
+func testFPSOutTransaction(t *testing.T, name, uid, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/fps/out/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		dir := path.Dir(r.URL.Path)
+		if dir != "/api/v1/transactions/fps/out" {
+			t.Error("should send a request to the correct endpoint", cross, dir)
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	want := &Transaction{}
+	json.Unmarshal([]byte(mock), want)
+
+	got, _, err := client.FPSTransactionOut(context.Background(), uid)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("should return a transaction matching the mock response", cross)
+	}
+
+	if got.UID == "" {
+		t.Error("should have a UID specified", cross)
+	}
+
+	if got.Currency == "" {
+		t.Error("should have a Currency specified", cross)
+	}
+
+	if got.Direction == "" {
+		t.Error("should have a Direction specified", cross)
+	}
+
+	if got.Created == "" {
+		t.Error("should have a Created date specified", cross)
+	}
+
+	if got.Narrative == "" {
+		t.Error("should have a Narrative specified", cross)
+	}
+
+	if got.Source == "" {
 		t.Error("should have a Source specified", cross)
 	}
 

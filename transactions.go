@@ -184,7 +184,7 @@ func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) (*[]Trans
 
 // FPSTransactionIn returns an individual transaction for the current customer.
 func (c *Client) FPSTransactionIn(ctx context.Context, uid string) (*Transaction, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/in/debit/"+uid, nil)
+	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/in/"+uid, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -223,4 +223,16 @@ func (c *Client) FPSTransactionsOut(ctx context.Context, dr *DateRange) (*[]Tran
 	}
 
 	return &txns.Transactions, resp, nil
+}
+
+// FPSTransactionOut returns an individual transaction for the current customer.
+func (c *Client) FPSTransactionOut(ctx context.Context, uid string) (*Transaction, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/out/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	txn := new(Transaction)
+	resp, err := c.Do(ctx, req, txn)
+	return txn, resp, err
 }
