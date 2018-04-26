@@ -136,29 +136,6 @@ type SpendingCategory struct {
 	SpendingCategory string `json:"spendingCategory"`
 }
 
-// MastercardTransaction represents the details of a card transaction
-type MastercardTransaction struct {
-	Transaction
-	Method            string  `json:"mastercardTransactionMethod"`
-	Status            string  `json:"status"`
-	SourceAmount      float64 `json:"sourceAmount"`
-	SourceCurrency    string  `json:"sourceCurrency"`
-	MerchantUID       string  `json:"merchantId"`
-	SpendingCategory  string  `json:"spendingCategory"`
-	Country           string  `json:"country"`
-	POSTimestamp      int64   `json:"posTimestamp"`
-	AuthorisationCode string  `json:"authorisationCode"`
-	EventUID          string  `json:"eventUid"`
-	Receipt           Receipt `json:"receipt"`
-	CardLast4         string  `json:"cardLast4"`
-}
-
-// MastercardTransactions is a list of Mastercard transactions
-type MastercardTransactions struct {
-	NextPage     HALLink                 `json:"nextPage"`
-	Transactions []MastercardTransaction `json:"transactions"`
-}
-
 // Receipt is a receipt for a transaction
 type Receipt struct {
 	UID                string        `json:"receiptUid"`

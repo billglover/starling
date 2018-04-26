@@ -53,6 +53,33 @@ type halDDTransactions struct {
 	Embedded *ddTransactions `json:"_embedded"`
 }
 
+// MastercardTransaction represents the details of a card transaction
+type MastercardTransaction struct {
+	Transaction
+	Method            string  `json:"mastercardTransactionMethod"`
+	Status            string  `json:"status"`
+	SourceAmount      float64 `json:"sourceAmount"`
+	SourceCurrency    string  `json:"sourceCurrency"`
+	MerchantUID       string  `json:"merchantId"`
+	SpendingCategory  string  `json:"spendingCategory"`
+	Country           string  `json:"country"`
+	POSTimestamp      string  `json:"posTimestamp"`
+	AuthorisationCode string  `json:"authorisationCode"`
+	EventUID          string  `json:"eventUid"`
+	Receipt           Receipt `json:"receipt"`
+	CardLast4         string  `json:"cardLast4"`
+}
+
+// MastercardTransactions is a list of Mastercard transactions
+type mastercardTransactions struct {
+	Transactions []MastercardTransaction `json:"transactions"`
+}
+
+// HALMastercardTransactions is a HAL wrapper around the Transactions type.
+type halMastercardTransactions struct {
+	Embedded *mastercardTransactions `json:"_embedded"`
+}
+
 // Transactions returns a list of transaction summaries for the current user. It accepts optional
 // time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
@@ -233,6 +260,50 @@ func (c *Client) FPSTransactionOut(ctx context.Context, uid string) (*Transactio
 	}
 
 	txn := new(Transaction)
+	resp, err := c.Do(ctx, req, txn)
+	return txn, resp, err
+}
+
+// MastercardTransactions returns a list of transaction summaries for the current user. It accepts optional
+// time.Time values to request transactions within a given date range. If these values are not provided
+// the API returns the last 100 transactions.
+func (c *Client) MastercardTransactions(ctx context.Context, dr *DateRange) (*[]MastercardTransaction, *http.Response, error) {
+
+	req, err := c.NewRequest("GET", "/api/v1/transactions/mastercard", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if dr != nil {
+		q := req.URL.Query()
+		q.Add("from", dr.From.Format("2006-01-02"))
+		q.Add("to", dr.To.Format("2006-01-02"))
+		req.URL.RawQuery = q.Encode()
+	}
+
+	var halResp *halMastercardTransactions
+	resp, err := c.Do(ctx, req, &halResp)
+
+	var txns *mastercardTransactions
+	if halResp.Embedded != nil {
+		txns = halResp.Embedded
+	}
+
+	if err != nil {
+		return &txns.Transactions, resp, err
+	}
+
+	return &txns.Transactions, resp, nil
+}
+
+// MastercardTransaction returns an individual mastercard transaction for the current customer.
+func (c *Client) MastercardTransaction(ctx context.Context, uid string) (*MastercardTransaction, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v1/transactions/mastercard/"+uid, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	txn := new(MastercardTransaction)
 	resp, err := c.Do(ctx, req, txn)
 	return txn, resp, err
 }

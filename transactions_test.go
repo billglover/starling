@@ -1186,5 +1186,420 @@ func testFPSOutTransaction(t *testing.T, name, uid, mock string) {
 	if got.Source == "" {
 		t.Error("should have a Source specified", cross)
 	}
+}
 
+var txnsTestCasesMastercard = []struct {
+	name      string
+	mock      string
+	dateRange *DateRange
+}{
+	{
+		name: "with date range",
+		dateRange: &DateRange{
+			From: time.Date(2017, time.January, 01, 0, 0, 0, 0, time.Local),
+			To:   time.Date(2017, time.January, 03, 0, 0, 0, 0, time.Local),
+		},
+		mock: `{
+			"_links": {
+				 "nextPage": {
+					  "href": "NOT_YET_IMPLEMENTED"
+				 }
+			},
+			"_embedded": {
+				 "transactions": [
+					  {
+							"_links": {
+								 "merchant": {
+									  "href": "/api/v1/merchants/e5b21fd4-fb62-4c40-8f56-4890a16bab51",
+									  "templated": false
+								 },
+								 "merchantLocation": {
+									  "href": "/api/v1/merchants/e5b21fd4-fb62-4c40-8f56-4890a16bab51/locations/96fc27d9-164d-4fb5-a60f-799e9b2b2294",
+									  "templated": false
+								 }
+							},
+							"id": "1b19cf9e-0499-4a99-83b5-b442db58d176",
+							"currency": "GBP",
+							"amount": -15.51,
+							"direction": "OUTBOUND",
+							"created": "2018-03-28T13:48:59.434Z",
+							"narrative": "Sofitel",
+							"source": "MASTER_CARD",
+							"mastercardTransactionMethod": "CHIP_AND_PIN",
+							"status": "SETTLED",
+							"sourceAmount": -15.51,
+							"sourceCurrency": "GBP",
+							"merchantId": "e5b21fd4-fb62-4c40-8f56-4890a16bab51",
+							"merchantLocationId": "96fc27d9-164d-4fb5-a60f-799e9b2b2294",
+							"spendingCategory": "HOLIDAYS",
+							"country": "GBR",
+							"posTimestamp": "13:48:58",
+							"authorisationCode": "597448",
+							"eventUid": "5a9ca682-8b8e-40bc-887d-43e00617e2b9",
+							"cardLast4": "0142"
+					  },
+					  {
+							"_links": {
+								 "merchant": {
+									  "href": "/api/v1/merchants/c052f76f-e919-427d-85fc-f46a75a3ff26",
+									  "templated": false
+								 },
+								 "merchantLocation": {
+									  "href": "/api/v1/merchants/c052f76f-e919-427d-85fc-f46a75a3ff26/locations/371c62bc-dcfc-4799-8b23-b070626772f7",
+									  "templated": false
+								 }
+							},
+							"id": "ab4b76ef-8e98-4181-8be9-164d73e16d99",
+							"currency": "GBP",
+							"amount": -35.24,
+							"direction": "OUTBOUND",
+							"created": "2018-03-28T13:48:58.677Z",
+							"narrative": "Yorkshire Bank III",
+							"source": "MASTER_CARD",
+							"mastercardTransactionMethod": "CHIP_AND_PIN",
+							"status": "SETTLED",
+							"sourceAmount": -35.24,
+							"sourceCurrency": "GBP",
+							"merchantId": "c052f76f-e919-427d-85fc-f46a75a3ff26",
+							"merchantLocationId": "371c62bc-dcfc-4799-8b23-b070626772f7",
+							"spendingCategory": "HOLIDAYS",
+							"country": "GBR",
+							"posTimestamp": "13:48:58",
+							"authorisationCode": "639682",
+							"eventUid": "feada116-963e-4246-8fac-ed5e499b03d5",
+							"cardLast4": "0142"
+					  },
+					  {
+							"_links": {
+								 "merchant": {
+									  "href": "/api/v1/merchants/acc81c26-071b-4e22-904d-5635e4bd6089",
+									  "templated": false
+								 },
+								 "merchantLocation": {
+									  "href": "/api/v1/merchants/acc81c26-071b-4e22-904d-5635e4bd6089/locations/5c1abdb1-8a8f-4a9f-a415-d8a5af8df0f6",
+									  "templated": false
+								 }
+							},
+							"id": "a7593bd6-b003-4076-9c12-198fdc53fa25",
+							"currency": "GBP",
+							"amount": -12.3,
+							"direction": "OUTBOUND",
+							"created": "2018-03-28T13:48:58.675Z",
+							"narrative": "Sofitel",
+							"source": "MASTER_CARD",
+							"mastercardTransactionMethod": "CHIP_AND_PIN",
+							"status": "SETTLED",
+							"sourceAmount": -12.3,
+							"sourceCurrency": "GBP",
+							"merchantId": "acc81c26-071b-4e22-904d-5635e4bd6089",
+							"merchantLocationId": "5c1abdb1-8a8f-4a9f-a415-d8a5af8df0f6",
+							"spendingCategory": "HOLIDAYS",
+							"country": "GBR",
+							"posTimestamp": "13:48:58",
+							"authorisationCode": "675742",
+							"eventUid": "1b448a68-1bc5-46b3-9b52-aab689511516",
+							"cardLast4": "0142"
+					  }
+				 ]
+			}
+	  }`,
+	},
+	{
+		name:      "without date range",
+		dateRange: nil,
+		mock: `{
+			"_links": {
+				 "nextPage": {
+					  "href": "NOT_YET_IMPLEMENTED"
+				 }
+			},
+			"_embedded": {
+				 "transactions": [
+					  {
+							"_links": {
+								 "merchant": {
+									  "href": "/api/v1/merchants/e5b21fd4-fb62-4c40-8f56-4890a16bab51",
+									  "templated": false
+								 },
+								 "merchantLocation": {
+									  "href": "/api/v1/merchants/e5b21fd4-fb62-4c40-8f56-4890a16bab51/locations/96fc27d9-164d-4fb5-a60f-799e9b2b2294",
+									  "templated": false
+								 }
+							},
+							"id": "1b19cf9e-0499-4a99-83b5-b442db58d176",
+							"currency": "GBP",
+							"amount": -15.51,
+							"direction": "OUTBOUND",
+							"created": "2018-03-28T13:48:59.434Z",
+							"narrative": "Sofitel",
+							"source": "MASTER_CARD",
+							"mastercardTransactionMethod": "CHIP_AND_PIN",
+							"status": "SETTLED",
+							"sourceAmount": -15.51,
+							"sourceCurrency": "GBP",
+							"merchantId": "e5b21fd4-fb62-4c40-8f56-4890a16bab51",
+							"merchantLocationId": "96fc27d9-164d-4fb5-a60f-799e9b2b2294",
+							"spendingCategory": "HOLIDAYS",
+							"country": "GBR",
+							"posTimestamp": "13:48:58",
+							"authorisationCode": "597448",
+							"eventUid": "5a9ca682-8b8e-40bc-887d-43e00617e2b9",
+							"cardLast4": "0142"
+					  },
+					  {
+							"_links": {
+								 "merchant": {
+									  "href": "/api/v1/merchants/c052f76f-e919-427d-85fc-f46a75a3ff26",
+									  "templated": false
+								 },
+								 "merchantLocation": {
+									  "href": "/api/v1/merchants/c052f76f-e919-427d-85fc-f46a75a3ff26/locations/371c62bc-dcfc-4799-8b23-b070626772f7",
+									  "templated": false
+								 }
+							},
+							"id": "ab4b76ef-8e98-4181-8be9-164d73e16d99",
+							"currency": "GBP",
+							"amount": -35.24,
+							"direction": "OUTBOUND",
+							"created": "2018-03-28T13:48:58.677Z",
+							"narrative": "Yorkshire Bank III",
+							"source": "MASTER_CARD",
+							"mastercardTransactionMethod": "CHIP_AND_PIN",
+							"status": "SETTLED",
+							"sourceAmount": -35.24,
+							"sourceCurrency": "GBP",
+							"merchantId": "c052f76f-e919-427d-85fc-f46a75a3ff26",
+							"merchantLocationId": "371c62bc-dcfc-4799-8b23-b070626772f7",
+							"spendingCategory": "HOLIDAYS",
+							"country": "GBR",
+							"posTimestamp": "13:48:58",
+							"authorisationCode": "639682",
+							"eventUid": "feada116-963e-4246-8fac-ed5e499b03d5",
+							"cardLast4": "0142"
+					  },
+					  {
+							"_links": {
+								 "merchant": {
+									  "href": "/api/v1/merchants/acc81c26-071b-4e22-904d-5635e4bd6089",
+									  "templated": false
+								 },
+								 "merchantLocation": {
+									  "href": "/api/v1/merchants/acc81c26-071b-4e22-904d-5635e4bd6089/locations/5c1abdb1-8a8f-4a9f-a415-d8a5af8df0f6",
+									  "templated": false
+								 }
+							},
+							"id": "a7593bd6-b003-4076-9c12-198fdc53fa25",
+							"currency": "GBP",
+							"amount": -12.3,
+							"direction": "OUTBOUND",
+							"created": "2018-03-28T13:48:58.675Z",
+							"narrative": "Sofitel",
+							"source": "MASTER_CARD",
+							"mastercardTransactionMethod": "CHIP_AND_PIN",
+							"status": "SETTLED",
+							"sourceAmount": -12.3,
+							"sourceCurrency": "GBP",
+							"merchantId": "acc81c26-071b-4e22-904d-5635e4bd6089",
+							"merchantLocationId": "5c1abdb1-8a8f-4a9f-a415-d8a5af8df0f6",
+							"spendingCategory": "HOLIDAYS",
+							"country": "GBR",
+							"posTimestamp": "13:48:58",
+							"authorisationCode": "675742",
+							"eventUid": "1b448a68-1bc5-46b3-9b52-aab689511516",
+							"cardLast4": "0142"
+					  }
+				 ]
+			}
+	  }`,
+	},
+}
+
+func TestMastercardTransactions(t *testing.T) {
+	for _, tc := range txnsTestCasesMastercard {
+		t.Run(tc.name, func(t *testing.T) {
+			testMastercardTransactions(t, tc.name, tc.mock, tc.dateRange)
+		})
+	}
+}
+
+func testMastercardTransactions(t *testing.T, name, mock string, dr *DateRange) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/mastercard", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		params := r.URL.Query()
+
+		if dr != nil {
+			if got, want := params.Get("from"), dr.From.Format("2006-01-02"); got != want {
+				t.Errorf("should include 'from=%s' query string parameter %s 'from=%s'", want, cross, got)
+			}
+
+			if got, want := params.Get("to"), dr.To.Format("2006-01-02"); got != want {
+				t.Errorf("should include 'to=%s' query string parameter %s 'to=%s'", want, cross, got)
+			}
+		} else {
+			if got, want := params.Get("from"), ""; got != want {
+				t.Errorf("should not include 'from' query string parameter %s 'from=%s'", cross, got)
+			}
+
+			if got, want := params.Get("to"), ""; got != want {
+				t.Errorf("should not include 'to' query string parameter %s 'to=%s'", cross, got)
+			}
+		}
+
+		resource := path.Base(r.URL.Path)
+
+		if resource != "mastercard" {
+			t.Error("should request mastercard", cross, resource)
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.MastercardTransactions(context.Background(), dr)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	hal := &halMastercardTransactions{}
+	json.Unmarshal([]byte(mock), hal)
+	want := hal.Embedded
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(*got, want.Transactions) {
+		t.Error("should return a list matching the mock response", cross)
+	}
+
+	if len(*got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	}
+
+	first := (*got)[0]
+
+	if first.UID == "" {
+		t.Error("should have a UID specified", cross)
+	}
+
+	if first.Currency == "" {
+		t.Error("should have a Currency specified", cross)
+	}
+
+	if first.Direction == "" {
+		t.Error("should have a Direction specified", cross)
+	}
+
+	if first.Created == "" {
+		t.Error("should have a Created date specified", cross)
+	}
+
+	if first.Narrative == "" {
+		t.Error("should have a Narrative specified", cross)
+	}
+
+	if first.Source == "" {
+		t.Error("should have a Source specified", cross)
+	}
+
+}
+
+var txnTestCasesMastercard = []struct {
+	name string
+	uid  string
+	mock string
+}{
+	{
+		name: "single direct-debit transaction",
+		uid:  "4f39ce4a-b760-42d8-811d-792e366486ef",
+		mock: `{
+			"id": "7d3e646a-a485-41af-bd3a-d46bbb3aca8f",
+			"currency": "GBP",
+			"amount": -12.46,
+			"direction": "OUTBOUND",
+			"created": "2018-03-28T13:48:49.702Z",
+			"narrative": "External Payment",
+			"source": "FASTER_PAYMENTS_OUT"
+	  }`,
+	},
+}
+
+func TestMastercardTransaction(t *testing.T) {
+	for _, tc := range txnTestCasesMastercard {
+		t.Run(tc.name, func(t *testing.T) {
+			testMastercardTransaction(t, tc.name, tc.uid, tc.mock)
+		})
+	}
+}
+
+func testMastercardTransaction(t *testing.T, name, uid, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/mastercard/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		reqUID := path.Base(r.URL.Path)
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		dir := path.Dir(r.URL.Path)
+		if dir != "/api/v1/transactions/mastercard" {
+			t.Error("should send a request to the correct endpoint", cross, dir)
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	want := &MastercardTransaction{}
+	json.Unmarshal([]byte(mock), want)
+
+	got, _, err := client.MastercardTransaction(context.Background(), uid)
+	if err != nil {
+		t.Fatal("should be able to make the request", cross, err)
+	}
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("should return a transaction matching the mock response", cross)
+	}
+
+	if got.UID == "" {
+		t.Error("should have a UID specified", cross)
+	}
+
+	if got.Currency == "" {
+		t.Error("should have a Currency specified", cross)
+	}
+
+	if got.Direction == "" {
+		t.Error("should have a Direction specified", cross)
+	}
+
+	if got.Created == "" {
+		t.Error("should have a Created date specified", cross)
+	}
+
+	if got.Narrative == "" {
+		t.Error("should have a Narrative specified", cross)
+	}
+
+	if got.Source == "" {
+		t.Error("should have a Source specified", cross)
+	}
+
+	if got.CardLast4 == "" {
+		t.Error("should have the last four digits of the card number specified", cross)
+	}
+
+	if got.POSTimestamp == "" {
+		t.Error("should have the POS timestamp specified", cross)
+	}
 }
