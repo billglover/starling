@@ -307,3 +307,15 @@ func (c *Client) MastercardTransaction(ctx context.Context, uid string) (*Master
 	resp, err := c.Do(ctx, req, txn)
 	return txn, resp, err
 }
+
+// SetMastercardSpendingCategory updates the spending category for a given mastercard transaction.
+func (c *Client) SetMastercardSpendingCategory(ctx context.Context, uid, cat string) (*http.Response, error) {
+	reqCat := SpendingCategory{SpendingCategory: cat}
+	req, err := c.NewRequest("PUT", "/api/v1/transactions/mastercard/"+uid, reqCat)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	return resp, err
+}

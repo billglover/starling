@@ -1105,7 +1105,7 @@ var txnTestCasesFPSOut = []struct {
 	mock string
 }{
 	{
-		name: "single direct-debit transaction",
+		name: "single outbound faster payments transaction",
 		uid:  "4f39ce4a-b760-42d8-811d-792e366486ef",
 		mock: `{
 			"id": "7d3e646a-a485-41af-bd3a-d46bbb3aca8f",
@@ -1513,16 +1513,38 @@ var txnTestCasesMastercard = []struct {
 	mock string
 }{
 	{
-		name: "single direct-debit transaction",
-		uid:  "4f39ce4a-b760-42d8-811d-792e366486ef",
+		name: "single mastercard transaction",
+		uid:  "1b19cf9e-0499-4a99-83b5-b442db58d176",
 		mock: `{
-			"id": "7d3e646a-a485-41af-bd3a-d46bbb3aca8f",
+			"_links": {
+				 "merchant": {
+					  "href": "/api/v1/merchants/e5b21fd4-fb62-4c40-8f56-4890a16bab51",
+					  "templated": false
+				 },
+				 "merchantLocation": {
+					  "href": "/api/v1/merchants/e5b21fd4-fb62-4c40-8f56-4890a16bab51/locations/96fc27d9-164d-4fb5-a60f-799e9b2b2294",
+					  "templated": false
+				 }
+			},
+			"id": "1b19cf9e-0499-4a99-83b5-b442db58d176",
 			"currency": "GBP",
-			"amount": -12.46,
+			"amount": -15.51,
 			"direction": "OUTBOUND",
-			"created": "2018-03-28T13:48:49.702Z",
-			"narrative": "External Payment",
-			"source": "FASTER_PAYMENTS_OUT"
+			"created": "2018-03-28T13:48:59.434Z",
+			"narrative": "Sofitel",
+			"source": "MASTER_CARD",
+			"mastercardTransactionMethod": "CHIP_AND_PIN",
+			"status": "SETTLED",
+			"sourceAmount": -15.51,
+			"sourceCurrency": "GBP",
+			"merchantId": "e5b21fd4-fb62-4c40-8f56-4890a16bab51",
+			"merchantLocationId": "96fc27d9-164d-4fb5-a60f-799e9b2b2294",
+			"spendingCategory": "HOLIDAYS",
+			"country": "GBR",
+			"posTimestamp": "13:48:58",
+			"authorisationCode": "597448",
+			"eventUid": "5a9ca682-8b8e-40bc-887d-43e00617e2b9",
+			"cardLast4": "0142"
 	  }`,
 	},
 }
@@ -1601,5 +1623,82 @@ func testMastercardTransaction(t *testing.T, name, uid, mock string) {
 
 	if got.POSTimestamp == "" {
 		t.Error("should have the POS timestamp specified", cross)
+	}
+}
+
+var setMastercardSpendingCategoryCases = []struct {
+	name     string
+	uid      string
+	category string
+	status   int
+	mock     string
+}{
+	{
+		name:     "set transaction category to charity",
+		uid:      "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		category: "CHARITY",
+		status:   http.StatusAccepted,
+		mock:     ``,
+	},
+	{
+		name:     "set invalid transaction category",
+		uid:      "474642e6-c4f5-43af-9b93-fe5ddbfcb857",
+		category: "INVALID",
+		status:   http.StatusBadRequest,
+		mock: `[
+			"Can not deserialize value of type com.starlingbank.connectors.customer.SpendingCategory from String \"DEMOX\": value not one of declared Enum instance names: [GIFTS, FAMILY, ENTERTAINMENT, TRANSPORT, GROCERIES, PAYMENTS, PETS, LIFESTYLE, CHARITY, BILLS_AND_SERVICES, SAVING, HOLIDAYS, HOME, GENERAL, NONE, EXPENSES, INCOME, SHOPPING, EATING_OUT]"
+	  ]`,
+	},
+}
+
+func TestSetMastercardSpendingCategory(t *testing.T) {
+	for _, tc := range setDDSpendingCategoryCases {
+		t.Run(tc.name, func(st *testing.T) {
+			testSetMastercardSpendingCategory(st, tc.name, tc.uid, tc.category, tc.status, tc.mock)
+		})
+	}
+}
+
+func testSetMastercardSpendingCategory(t *testing.T, name, uid, cat string, status int, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/mastercard/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+
+		reqUID := path.Base(r.URL.Path)
+		resource := path.Base(path.Dir(r.URL.Path))
+
+		if reqUID != uid {
+			t.Error("should send a request with the correct UID", cross, reqUID)
+		}
+
+		if resource != "mastercard" {
+			t.Error("should request mastercard", cross, resource)
+		}
+
+		var reqCat = SpendingCategory{}
+		err := json.NewDecoder(r.Body).Decode(&reqCat)
+		if err != nil {
+			t.Fatal("should send a request that the API can parse", cross, err)
+		}
+
+		if reqCat.SpendingCategory != cat {
+			t.Error("should request the correct spending category", cross, reqCat)
+		}
+
+		w.WriteHeader(status)
+		fmt.Fprintln(w, mock)
+	})
+
+	resp, err := client.SetMastercardSpendingCategory(context.Background(), uid, cat)
+	if status >= 400 {
+		checkHasError(t, err)
+	} else {
+		checkNoError(t, err)
+	}
+
+	if resp.StatusCode != status {
+		t.Error("should return the correct status", cross, resp.Status)
 	}
 }
