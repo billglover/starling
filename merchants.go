@@ -5,8 +5,27 @@ import (
 	"net/http"
 )
 
-// /api/v1/merchants/c052f76f-e919-427d-85fc-f46a75a3ff26
-// /api/v1/merchants/c052f76f-e919-427d-85fc-f46a75a3ff26/locations/371c62bc-dcfc-4799-8b23-b070626772f7
+// Merchant represents details of a merchant
+type Merchant struct {
+	UID             string `json:"merchantUid"`
+	Name            string `json:"name"`
+	Website         string `json:"website"`
+	PhoneNumber     string `json:"phoneNumber"`
+	TwitterUsername string `json:"twitterUsername"`
+}
+
+// MerchantLocation represents details of a merchant location
+type MerchantLocation struct {
+	UID                            string  `json:"merchantLocationUid"`
+	MerchantUID                    string  `json:"merchantUid"`
+	Merchant                       HALLink `json:"merchant"`
+	MerchantName                   string  `json:"merchantName"`
+	LocationName                   string  `json:"locationName"`
+	Address                        string  `json:"address"`
+	PhoneNumber                    string  `json:"phoneNUmber"`
+	GooglePlaceID                  string  `json:"googlePlaceId"`
+	MastercardMerchantCategoryCode int32   `json:"mastercardMerchantCategoryCode"`
+}
 
 // Merchant returns an individual merchant based on the UID.
 func (c *Client) Merchant(ctx context.Context, uid string) (*Merchant, *http.Response, error) {

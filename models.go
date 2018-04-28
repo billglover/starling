@@ -67,28 +67,6 @@ type HALLink struct {
 	HREFLang    string `json:"hreflang"`
 }
 
-// Merchant represents details of a merchant
-type Merchant struct {
-	UID             string `json:"merchantUid"`
-	Name            string `json:"name"`
-	Website         string `json:"website"`
-	PhoneNumber     string `json:"phoneNumber"`
-	TwitterUsername string `json:"twitterUsername"`
-}
-
-// MerchantLocation represents details of a merchant location
-type MerchantLocation struct {
-	UID                            string  `json:"merchantLocationUid"`
-	MerchantUID                    string  `json:"merchantUid"`
-	Merchant                       HALLink `json:"merchant"`
-	MerchantName                   string  `json:"merchantName"`
-	LocationName                   string  `json:"locationName"`
-	Address                        string  `json:"address"`
-	PhoneNumber                    string  `json:"phoneNUmber"`
-	GooglePlaceID                  string  `json:"googlePlaceId"`
-	MastercardMerchantCategoryCode int32   `json:"mastercardMerchantCategoryCode"`
-}
-
 // PaymentAmount represents the currency and amount of a payment
 type PaymentAmount struct {
 	Currency string  `json:"currency"`
