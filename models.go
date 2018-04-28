@@ -114,29 +114,6 @@ type SpendingCategory struct {
 	SpendingCategory string `json:"spendingCategory"`
 }
 
-// Receipt is a receipt for a transaction
-type Receipt struct {
-	UID                string        `json:"receiptUid"`
-	EventUID           string        `json:"eventUid"`
-	MetadataSource     string        `json:"metadataSource"`
-	ReceiptIdentifier  string        `json:"receiptIdentifier"`
-	MerchantIdentifier string        `json:"merchantIdentifier"`
-	TotalAmount        float64       `json:"totalAmount"`
-	TotalTax           float64       `json:"totalTax"`
-	AuthCode           string        `json:"authCode"`
-	CardLast4          string        `json:"cardLast4"`
-	Items              []ReceiptItem `json:"items"`
-}
-
-// ReceiptItem is a single item on a Receipt
-type ReceiptItem struct {
-	UID         string  `json:"receiptItemUid"`
-	Description string  `json:"description"`
-	Quantity    int32   `json:"quantity"`
-	Amount      float64 `json:"amount"`
-	Tax         float64 `json:"tax"`
-}
-
 // ReceiptUID is an un-used type
 type ReceiptUID struct{}
 
