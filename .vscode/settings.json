@@ -1,16 +1,23 @@
 {
    "cSpell.words": [
       "barista",
+      "cust",
+      "demox",
+      "deserialize",
       "dylib",
       "fatih",
       "hreflang",
       "iban",
       "lite",
+      "mastercard",
       "oauth",
       "plugins",
+      "println",
       "resp",
+      "sofitel",
       "templated",
       "txns",
-      "uuid"
+      "uuid",
+      "webhook"
    ]
 }

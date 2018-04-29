@@ -48,7 +48,7 @@ type ddTransactions struct {
 	Transactions []DDTransaction `json:"transactions"`
 }
 
-// HALDDTransactions is a HAL wrapper around the Transactions type.
+// halDDTransactions is a HAL wrapper around the Transactions type.
 type halDDTransactions struct {
 	Embedded *ddTransactions `json:"_embedded"`
 }
