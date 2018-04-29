@@ -76,9 +76,7 @@ func testCreateReceipt(t *testing.T, name string, rcpt Receipt, mock string, sta
 		}
 
 		if !reflect.DeepEqual(rcpt, reqRcpt) {
-			t.Error("should send a contact account that matches the mock", cross)
-			t.Error(rcpt)
-			t.Error(reqRcpt)
+			t.Error("should send a receipt that matches the mock", cross)
 		}
 
 		w.WriteHeader(http.StatusAccepted)
