@@ -16,15 +16,14 @@ type Merchant struct {
 
 // MerchantLocation represents details of a merchant location
 type MerchantLocation struct {
-	UID                            string  `json:"merchantLocationUid"`
-	MerchantUID                    string  `json:"merchantUid"`
-	Merchant                       HALLink `json:"merchant"`
-	MerchantName                   string  `json:"merchantName"`
-	LocationName                   string  `json:"locationName"`
-	Address                        string  `json:"address"`
-	PhoneNumber                    string  `json:"phoneNUmber"`
-	GooglePlaceID                  string  `json:"googlePlaceId"`
-	MastercardMerchantCategoryCode int32   `json:"mastercardMerchantCategoryCode"`
+	UID                            string `json:"merchantLocationUid"`
+	MerchantUID                    string `json:"merchantUid"`
+	MerchantName                   string `json:"merchantName"`
+	LocationName                   string `json:"locationName"`
+	Address                        string `json:"address"`
+	PhoneNumber                    string `json:"phoneNUmber"`
+	GooglePlaceID                  string `json:"googlePlaceId"`
+	MastercardMerchantCategoryCode int32  `json:"mastercardMerchantCategoryCode"`
 }
 
 // Merchant returns an individual merchant based on the UID.

@@ -7,16 +7,15 @@ import (
 
 // Card represents card details
 type Card struct {
-	UID                 string  `json:"id"`
-	NameOnCard          string  `json:"nameOnCard"`
-	Type                string  `json:"type"`
-	Enabled             bool    `json:"enabled"`
-	Cancelled           bool    `json:"cancelled"`
-	ActivationRequested bool    `json:"activationRequested"`
-	Activated           bool    `json:"activated"`
-	DispatchDate        string  `json:"dispatchDate"`
-	LastFourDigits      string  `json:"lastFourDigits"`
-	Transactions        HALLink `json:"transactions"`
+	UID                 string `json:"id"`
+	NameOnCard          string `json:"nameOnCard"`
+	Type                string `json:"type"`
+	Enabled             bool   `json:"enabled"`
+	Cancelled           bool   `json:"cancelled"`
+	ActivationRequested bool   `json:"activationRequested"`
+	Activated           bool   `json:"activated"`
+	DispatchDate        string `json:"dispatchDate"`
+	LastFourDigits      string `json:"lastFourDigits"`
 }
 
 // Card returns the the customer details for the current customer.

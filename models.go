@@ -28,58 +28,9 @@ type Photo struct {
 	Base64EncodedPhoto string `json:"base64EncodedPhoto"` // A text (base 64) encoded picture to associate with the savings goal
 }
 
-// MastercardTransactionPayload is the webhook payload for mastercard transactions
-type MastercardTransactionPayload struct {
-	WebhookNotificationUID string          `json:"webhookNotificationUid"` // Unique identifier of the webhook dispatch event
-	CustomerUID            string          `json:"customerUid"`            // Unique identifier of the customer
-	WebhookType            string          `json:"webhookType"`            // The type of the event
-	EventUID               string          `json:"eventUid"`               // Unique identifier of the customer transaction event
-	TransactionAmount      Amount          `json:"transactionAmount"`
-	SourceAmount           Amount          `json:"sourceAmount"`
-	Direction              string          `json:"direction"`            // The cashflow direction of the card transaction
-	Description            string          `json:"description"`          // The transaction description, usually the name of the merchant
-	MerchantUID            string          `json:"merchantUid"`          // The unique identifier of the merchant
-	MerchantLocationUID    string          `json:"merchantLocationUid"`  // The unique identifier of the merchant location
-	Status                 string          `json:"status"`               // The status of the transaction
-	TransactionMethod      string          `json:"transactionMethod"`    // The method of card usage
-	TransactionTimestamp   string          `json:"transactionTimestamp"` // Timestamp of the card transaction
-	MerchantPosData        MerchantPosData `json:"merchantPosData"`
-}
-
-// MerchantPosData is data relating to the merchant at the point-of-sale
-type MerchantPosData struct {
-	PosTimestamp       string `json:"posTimestamp"`       // The transaction time as reported at the point of sale
-	CardLast4          string `json:"cardLast4"`          // The last 4 digits of the mastercard PAN
-	AuthorisationCode  string `json:"authorisationCode"`  // The authorisation code of the transaction, as reported at the point of sale
-	Country            string `json:"country"`            // The country of the transaction, in ISO-3 format
-	MerchantIdentifier string `json:"merchantIdentifier"` // The merchant identifier as reported by Mastercard AKA mid
-}
-
-// HALLink is a link to another resource
-type HALLink struct {
-	HREF        string `json:"href"`
-	Templated   bool   `json:"templated"`
-	Type        string `json:"type"`
-	Deprecation string `json:"deprecation"`
-	Name        string `json:"name"`
-	Profile     string `json:"profile"`
-	Title       string `json:"title"`
-	HREFLang    string `json:"hreflang"`
-}
-
 // SpendingCategory is the category associated with a transaction
 type SpendingCategory struct {
 	SpendingCategory string `json:"spendingCategory"`
-}
-
-// ReceiptUID is an un-used type
-type ReceiptUID struct{}
-
-// OptionalTransactionSummary indicates the presence of a TransactionSummary
-type OptionalTransactionSummary optional
-
-type optional struct {
-	Present bool `json:"present"`
 }
 
 // DateRange holds two dates that represent a range. It is typically
