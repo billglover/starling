@@ -67,35 +67,6 @@ type HALLink struct {
 	HREFLang    string `json:"hreflang"`
 }
 
-// ScheduledPayment represents a scheduled payment
-type ScheduledPayment struct {
-	LocalPayment
-	RecurrenceRule RecurrenceRule `json:"recurrenceRule"`
-}
-
-// PaymentOrder is a single PaymentOrder
-type PaymentOrder struct {
-	UID                        string         `json:"paymentOrderId"`
-	Currency                   string         `json:"currency"`
-	Amount                     float64        `json:"amount"`
-	Reference                  string         `json:"reference"`
-	ReceivingContactAccountUID string         `json:"receivingContactAccountId"`
-	RecipientName              string         `json:"recipientName"`
-	Immediate                  bool           `json:"immediate"`
-	RecurrenceRule             RecurrenceRule `json:"recurrenceRule"`
-	StartDate                  string         `json:"startDate"`
-	NextDate                   string         `json:"nextDate"`
-	CancelledAt                string         `json:"cancelledAt"`
-	PaymentType                string         `json:"paymentType"`
-	MandateUID                 string         `json:"mandateId"`
-}
-
-// PaymentOrders is a list of PaymentOrders
-type PaymentOrders struct {
-	NextPage      HALLink        `json:"nextPage"`
-	PaymentOrders []PaymentOrder `json:"paymentOrders"`
-}
-
 // SpendingCategory is the category associated with a transaction
 type SpendingCategory struct {
 	SpendingCategory string `json:"spendingCategory"`
