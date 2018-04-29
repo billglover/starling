@@ -155,7 +155,7 @@ func testScheduledPayment(t *testing.T, name string, mock string) {
 
 	hPO := new(halPaymentOrders)
 	json.Unmarshal([]byte(mock), hPO)
-	var want []ScheduledPayment
+	var want []PaymentOrder
 	if hPO.Embedded != nil {
 		want = hPO.Embedded.PaymentOrders
 	}
@@ -168,5 +168,95 @@ func testScheduledPayment(t *testing.T, name string, mock string) {
 		if got[0].UID == "" {
 			t.Error("first scheduled payment should have a non zero UID")
 		}
+	}
+}
+
+var paymentsCasesCreateScheduled = []struct {
+	name    string
+	payment ScheduledPayment
+	mock    string
+	uid     string
+}{
+	{
+		name: "valid payment",
+		payment: ScheduledPayment{
+			LocalPayment: LocalPayment{
+				Reference:             "sample payment",
+				DestinationAccountUID: "99970be2-2bc7-49d3-8d23-ebef9f746ecf",
+				Payment: PaymentAmount{
+					Currency: "GBP",
+					Amount:   10.24,
+				},
+			},
+			Schedule: RecurrenceRule{
+				StartDate: "",
+				UntilDate: "",
+				Frequency: "",
+				Count:     2,
+				Interval:  2,
+				WeekStart: "MONDAY",
+			},
+		},
+		mock: `{
+			"payment": {
+			  "currency": "GBP",
+			  "amount": 10.24
+			},
+			"reference": "Dinner",
+			"destinationAccountUid": "99970be2-2bc7-49d3-8d23-ebef9f746ecf",
+			"recurrenceRule": {
+				"startDate": "2017-09-23",
+				"frequency": "MONTHLY",
+				"count": 2,
+				"interval": 2,
+				"untilDate": "2017-09-23",
+				"weekStart": "MONDAY"
+			}
+		 }`,
+		uid: "a1d4f9c2-9689-4946-83cc-267ee0064c49",
+	},
+}
+
+func TestCreateScheduledPayment(t *testing.T) {
+	for _, tc := range paymentsCasesCreateScheduled {
+		t.Run(tc.name, func(st *testing.T) {
+			testCreateScheduledPayment(st, tc.name, tc.payment, tc.mock, tc.uid)
+		})
+	}
+}
+
+func testCreateScheduledPayment(t *testing.T, name string, payment ScheduledPayment, mock, uid string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/payments/scheduled", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPost)
+
+		var reqPayment = ScheduledPayment{}
+		err := json.NewDecoder(r.Body).Decode(&reqPayment)
+		if err != nil {
+			t.Fatal("should send a request that the API can parse", err)
+		}
+
+		if reqPayment.DestinationAccountUID == "" {
+			t.Error("should send a destinationAccountUid", cross)
+		}
+
+		if !reflect.DeepEqual(payment, reqPayment) {
+			t.Error("should send a scheduled payment that matches the mock", cross)
+		}
+
+		h := w.Header()
+		h.Set("Location", "/api/v1/payments/scheduled/"+uid)
+
+		w.WriteHeader(http.StatusAccepted)
+	})
+
+	id, resp, err := client.CreateScheduledPayment(context.Background(), payment)
+	checkNoError(t, err)
+	checkStatus(t, resp, http.StatusAccepted)
+
+	if id != uid {
+		t.Error("should return the correct UID", cross, id)
 	}
 }

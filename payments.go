@@ -2,8 +2,8 @@ package starling
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+	"path"
 )
 
 // LocalPayment represents a local payment
@@ -13,8 +13,14 @@ type LocalPayment struct {
 	Reference             string        `json:"reference"`
 }
 
-// ScheduledPayment is a single PaymentOrder
+// ScheduledPayment represents a scheduled payment
 type ScheduledPayment struct {
+	LocalPayment
+	Schedule RecurrenceRule `json:"recurrenceRule"`
+}
+
+// PaymentOrder is a single PaymentOrder
+type PaymentOrder struct {
 	UID                        string         `json:"paymentOrderId"`
 	Currency                   string         `json:"currency"`
 	Amount                     float64        `json:"amount"`
@@ -32,7 +38,7 @@ type ScheduledPayment struct {
 
 // PaymentOrders is a list of PaymentOrders
 type paymentOrders struct {
-	PaymentOrders []ScheduledPayment `json:"paymentOrders"`
+	PaymentOrders []PaymentOrder `json:"paymentOrders"`
 }
 
 // HALPaymentOrders is a HAL wrapper around the Transactions type.
@@ -57,9 +63,22 @@ func (c *Client) MakeLocalPayment(ctx context.Context, p LocalPayment) (*http.Re
 	return resp, err
 }
 
+// CreateScheduledPayment creates a scheduled payment. It returns the UID for the scheduled payment.
+func (c *Client) CreateScheduledPayment(ctx context.Context, p ScheduledPayment) (string, *http.Response, error) {
+	req, err := c.NewRequest("POST", "/api/v1/payments/scheduled", p)
+	if err != nil {
+		return "", nil, err
+	}
+
+	resp, err := c.Do(ctx, req, nil)
+	loc := resp.Header.Get("Location")
+	uid := path.Base(loc)
+	return uid, resp, err
+}
+
 // ScheduledPayments retrieves a list of all the payment orders on the customer account. These may be
 // orders for previous immediate payments or scheduled payment orders for future or on-going payments.
-func (c *Client) ScheduledPayments(ctx context.Context) ([]ScheduledPayment, *http.Response, error) {
+func (c *Client) ScheduledPayments(ctx context.Context) ([]PaymentOrder, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/payments/scheduled", nil)
 
 	if err != nil {
@@ -77,6 +96,5 @@ func (c *Client) ScheduledPayments(ctx context.Context) ([]ScheduledPayment, *ht
 		return nil, resp, err
 	}
 
-	fmt.Println(hPO.Embedded)
 	return hPO.Embedded.PaymentOrders, resp, err
 }

@@ -107,7 +107,7 @@ func main() {
 | GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}       | Done        |
 | POST   | /api/v1/payments/local                                                | Done        |
 | GET    | /api/v1/payments/scheduled                                            | Done        |
-| POST   | /api/v1/payments/scheduled                                            |             |
+| POST   | /api/v1/payments/scheduled                                            | Done        |
 | GET    | /api/v1/transactions/direct-debit                                     | Done        |
 | GET    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
 | PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
