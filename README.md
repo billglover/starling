@@ -105,7 +105,7 @@ func main() {
 | GET    | /api/v1/cards                                                         | Done        |
 | GET    | /api/v1/merchants/{merchantUid}                                       | Done        |
 | GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}       | Done        |
-| POST   | /api/v1/payments/local                                                |             |
+| POST   | /api/v1/payments/local                                                | Done        |
 | GET    | /api/v1/payments/scheduled                                            |             |
 | POST   | /api/v1/payments/scheduled                                            |             |
 | GET    | /api/v1/transactions/direct-debit                                     | Done        |
@@ -119,7 +119,7 @@ func main() {
 | GET    | /api/v1/transactions/mastercard/{transactionUid}                      | Done        |
 | PUT    | /api/v1/transactions/mastercard/{transactionUid}                      | Done        |
 | POST   | /api/v1/transactions/mastercard/{transactionUid}/receipt              | Done        |
-| PUT    | /api/v1/transactions/mastercard/{transactionUid}/receipt/{receiptUid} |             |
+| PUT    | /api/v1/transactions/mastercard/{transactionUid}/receipt/{receiptUid} | Invalid     |
 | GET    | /api/v1/transactions                                                  | Done        |
 | GET    | /api/v1/transactions/{transactionUid}                                 | Done        |
 
