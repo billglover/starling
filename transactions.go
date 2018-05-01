@@ -97,18 +97,18 @@ func (c *Client) Transactions(ctx context.Context, dr *DateRange) (*[]Transactio
 		req.URL.RawQuery = q.Encode()
 	}
 
-	var halResp *halTransactions
-	var txns *transactions
-	resp, err := c.Do(ctx, req, &halResp)
-	if err != nil {
-		return &txns.Transactions, resp, err
+	hTxns := new(halTransactions)
+	resp, err := c.Do(ctx, req, &hTxns)
+
+	if hTxns == nil {
+		return nil, resp, err
 	}
 
-	if halResp.Embedded != nil {
-		txns = halResp.Embedded
+	if hTxns.Embedded == nil {
+		return nil, resp, err
 	}
 
-	return &txns.Transactions, resp, nil
+	return &hTxns.Embedded.Transactions, resp, err
 }
 
 // Transaction returns an individual transaction for the current customer.
