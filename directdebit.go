@@ -29,24 +29,24 @@ type halDirectDebitMandates struct {
 }
 
 // DirectDebitMandates returns the DirectDebitMandates for the current customer.
-func (c *Client) DirectDebitMandates(ctx context.Context) (*[]DirectDebitMandate, *http.Response, error) {
+func (c *Client) DirectDebitMandates(ctx context.Context) ([]DirectDebitMandate, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/direct-debit/mandates", nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var halResp *halDirectDebitMandates
-	var mandates *directDebitMandates
-	resp, err := c.Do(ctx, req, &halResp)
-	if err != nil {
-		return &mandates.Mandates, resp, err
+	hMandates := new(halDirectDebitMandates)
+	resp, err := c.Do(ctx, req, &hMandates)
+
+	if hMandates == nil {
+		return nil, resp, err
 	}
 
-	if halResp.Embedded != nil {
-		mandates = halResp.Embedded
+	if hMandates.Embedded == nil {
+		return nil, resp, err
 	}
 
-	return &mandates.Mandates, resp, nil
+	return hMandates.Embedded.Mandates, resp, err
 }
 
 // DirectDebitMandate returns a single DirectDebitMandate for the current customer.

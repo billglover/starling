@@ -79,7 +79,7 @@ func testDirectDebits(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), hal)
 	want := hal.Embedded
 
-	if !reflect.DeepEqual(got, &want.Mandates) {
+	if !reflect.DeepEqual(got, want.Mandates) {
 		t.Error("should return a list of mandates matching the mock response", cross)
 	}
 }
