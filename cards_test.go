@@ -50,9 +50,6 @@ var cardTestCases = []struct {
 }
 
 func TestCard(t *testing.T) {
-
-	t.Log("Given the need to test fetching card details:")
-
 	for _, tc := range cardTestCases {
 		t.Run(tc.name, func(st *testing.T) {
 			testCard(st, tc.name, tc.mock)
@@ -61,8 +58,6 @@ func TestCard(t *testing.T) {
 }
 
 func testCard(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to GetCards() with a %s:", name)
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -78,8 +73,6 @@ func testCard(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return a card matching the mock response", cross)
-	} else {
-		t.Log("\t\tshould return a card matching the mock response", tick)
+		t.Error("should return a card matching the mock response", cross)
 	}
 }

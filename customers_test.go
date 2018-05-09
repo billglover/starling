@@ -62,9 +62,6 @@ var customersTestCases = []struct {
 }
 
 func TestCustomer(t *testing.T) {
-
-	t.Log("Given the need to test fetching customer details:")
-
 	for _, tc := range customersTestCases {
 		t.Run(tc.name, func(st *testing.T) {
 			testCustomer(st, tc.name, tc.mock)
@@ -73,8 +70,6 @@ func TestCustomer(t *testing.T) {
 }
 
 func testCustomer(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to GetCustomer() with %s:", name)
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -90,8 +85,6 @@ func testCustomer(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return an identity matching the mock response", cross)
-	} else {
-		t.Log("\t\tshould return an identity matching the mock response", tick)
+		t.Error("should return an identity matching the mock response", cross)
 	}
 }

@@ -131,10 +131,6 @@ var txnTestCases = []struct {
 }
 
 func TestGetTransactions(t *testing.T) {
-
-	t.Log("Given the need to test fetching transactions:")
-
-	// Run each of the test cases a subtest.
 	for _, tc := range txnTestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			testGetTransactions(t, tc.name, tc.mock, tc.dateRange)
@@ -143,8 +139,6 @@ func TestGetTransactions(t *testing.T) {
 }
 
 func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
-	t.Logf("\tWhen making a call to GetTransactions() %s:", name)
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -158,30 +152,22 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 			// If we are expecting a date range to be passed to the API, validate that it was
 			// passed correctly as part of the query string.
 			if got, want := params.Get("from"), dr.From.Format("2006-01-02"); got != want {
-				t.Errorf("\t\tshould include 'from=%s' query string parameter %s 'from=%s'", want, cross, got)
-			} else {
-				t.Logf("\t\tshould include 'from=%s' query string parameter %s", want, tick)
+				t.Errorf("should include 'from=%s' query string parameter %s 'from=%s'", want, cross, got)
 			}
 
 			if got, want := params.Get("to"), dr.To.Format("2006-01-02"); got != want {
-				t.Errorf("\t\tshould include 'to=%s' query string parameter %s 'to=%s'", want, cross, got)
-			} else {
-				t.Logf("\t\tshould include 'to=%s' query string parameter %s", want, tick)
+				t.Errorf("should include 'to=%s' query string parameter %s 'to=%s'", want, cross, got)
 			}
 		} else {
 
 			// If we weren't expecting a date range to be passed to the API, validate that the
 			// API was called without the 'from' and 'to' query parameters.
 			if got, want := params.Get("from"), ""; got != want {
-				t.Errorf("\t\tshould not include 'from' query string parameter %s 'from=%s'", cross, got)
-			} else {
-				t.Logf("\t\tshould not include 'from' query string parameter %s", tick)
+				t.Errorf("should not include 'from' query string parameter %s 'from=%s'", cross, got)
 			}
 
 			if got, want := params.Get("to"), ""; got != want {
-				t.Errorf("\t\tshould not include 'to' query string parameter %s 'to=%s'", cross, got)
-			} else {
-				t.Logf("\t\tshould not include 'to' query string parameter %s", tick)
+				t.Errorf("should not include 'to' query string parameter %s 'to=%s'", cross, got)
 			}
 		}
 
@@ -191,9 +177,7 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 
 	got, _, err := client.Transactions(context.Background(), dr)
 	if err != nil {
-		t.Fatal("\t\tshould be able to make the request", cross, err)
-	} else {
-		t.Log("\t\tshould be able to make the request", tick)
+		t.Fatal("should be able to make the request", cross, err)
 	}
 
 	hal := &halTransactions{}
@@ -201,21 +185,15 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 	want := hal.Embedded
 
 	if got == nil {
-		t.Fatal("\t\tshould not return 'nil'", cross)
-	} else {
-		t.Log("\t\tshould not return 'nil'", tick)
+		t.Fatal("should not return 'nil'", cross)
 	}
 
 	if !reflect.DeepEqual(*got, want.Transactions) {
-		t.Error("\t\tshould return a list matching the mock response", cross)
-	} else {
-		t.Log("\t\tshould return a transaction list matching the mock response", tick)
+		t.Error("should return a list matching the mock response", cross)
 	}
 
 	if len(*got) == 0 {
-		t.Errorf("\t\tshould have at least one transaction %s %d", cross, len(*got))
-	} else {
-		t.Log("\t\tshould have at least one transaction", tick)
+		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
 	}
 
 }

@@ -61,10 +61,6 @@ var userTestCases = []struct {
 }
 
 func TestCurrentUser(t *testing.T) {
-
-	t.Log("Given the need to test fetching details on the current user:")
-
-	// Run each of the test cases a subtest.
 	for _, tc := range userTestCases {
 		t.Run(tc.name, func(st *testing.T) {
 			testCurrentUser(st, tc.name, tc.mock)
@@ -73,8 +69,6 @@ func TestCurrentUser(t *testing.T) {
 }
 
 func testCurrentUser(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to CurrentUser() with %s:", name)
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -90,8 +84,6 @@ func testCurrentUser(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return an identity matching the mock response", cross)
-	} else {
-		t.Log("\t\tshould return an identity matching the mock response", tick)
+		t.Error("should return an identity matching the mock response", cross)
 	}
 }

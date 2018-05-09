@@ -66,9 +66,6 @@ var accountTestCases = []struct {
 }
 
 func TestAccount(t *testing.T) {
-
-	t.Log("Given the need to test fetching account details:")
-
 	for _, tc := range accountTestCases {
 		t.Run(tc.name, func(st *testing.T) {
 			testAccount(st, tc.name, tc.mock)
@@ -77,8 +74,6 @@ func TestAccount(t *testing.T) {
 }
 
 func testAccount(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to Account() with %s:", name)
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -94,9 +89,7 @@ func testAccount(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return an account matching the mock response", cross)
-	} else {
-		t.Log("\t\tshould return an account matching the mock response", tick)
+		t.Error("should return an account matching the mock response", cross)
 	}
 }
 
@@ -140,9 +133,6 @@ var balanceTestCases = []struct {
 }
 
 func TestAccountBalance(t *testing.T) {
-
-	t.Log("Given the need to test fetching account balance:")
-
 	for _, tc := range balanceTestCases {
 		t.Run(tc.name, func(st *testing.T) {
 			testAccountBalance(st, tc.name, tc.mock)
@@ -151,8 +141,6 @@ func TestAccountBalance(t *testing.T) {
 }
 
 func testAccountBalance(t *testing.T, name, mock string) {
-	t.Logf("\tWhen making a call to AccountBalance() with a %s:", name)
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -168,8 +156,6 @@ func testAccountBalance(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), want)
 
 	if !reflect.DeepEqual(got, want) {
-		t.Error("\t\tshould return an account balance matching the mock response", cross)
-	} else {
-		t.Log("\t\tshould return an account balance matching the mock response", tick)
+		t.Error("should return an account balance matching the mock response", cross)
 	}
 }
