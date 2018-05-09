@@ -1,8 +1,10 @@
 # Starling
 
+[![Build Status](https://travis-ci.com/billglover/starling.svg?branch=master)](https://travis-ci.com/billglover/starling)
+
 This is a Go client for the Starling Bank API.
 
-Both the API itself and this client are under active development and cannot guarantee a stable interface.
+Both the API itself and this client are under active development and cannot guarantee a stable interface. A versioning approach has not yet been determined and so breaking changes are possible. That said, the client is in active use by a number of small projects.
 
 ## Installation
 
