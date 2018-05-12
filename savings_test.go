@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
 // TestSavingsGoals confirms that the client is able to query a list of savings goals.
@@ -223,9 +224,6 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 // TestAddMoney confirms that the client is able to make a request to add money to a savings goal and parse
 // the successful response from the API.
 func TestAddMoney(t *testing.T) {
-
-	t.Log("Given the need to test adding money to a savings goal:")
-
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -272,6 +270,40 @@ func TestAddMoney(t *testing.T) {
 
 	if got, want := id, txnUID; got != want {
 		t.Fatal("should be receive the UID assigned to the transaction", cross, got)
+	}
+}
+
+func TestAddMoney_BadRequest(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
+	mockAmount := Amount{Currency: "GBP", MinorUnits: 1050}
+	mockResp := `[
+		"UNKNOWN_CATEGORY"
+	]`
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, "PUT")
+
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, mockResp)
+	})
+
+	_, resp, err := client.AddMoney(context.Background(), goalUID, mockAmount)
+	if err == nil {
+		t.Fatal("should return an error")
+	}
+
+	errWant := errors.New("UNKNOWN_CATEGORY")
+	errWant = errors.Wrap(errWant, http.StatusText(http.StatusBadRequest))
+
+	if err.Error() != errWant.Error() {
+		t.Error("should indicate the error detail")
+	}
+
+	if got, want := resp.StatusCode, http.StatusBadRequest; got != want {
+		t.Errorf("should receive a %d status code", http.StatusBadRequest)
 	}
 }
 

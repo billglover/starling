@@ -6,16 +6,10 @@ import (
 )
 
 // Errors contains a list of errors
-type Errors []struct {
-	ErrorDetail
-}
+type Errors []string
 
 func (e Errors) Error() string {
-	full := make([]string, len(e))
-	for i, err := range e {
-		full[i] = err.Message
-	}
-	return strings.Join(full, ",")
+	return strings.Join(e, ",")
 }
 
 // ErrorDetail holds the details of an error message

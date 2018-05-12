@@ -140,10 +140,10 @@ func (c *Client) AddMoney(ctx context.Context, goalUID string, a Amount) (string
 		return "", nil, err
 	}
 
-	var tuResp *savingsGoalTransferResponse
+	tuResp := new(savingsGoalTransferResponse)
 	resp, err := c.Do(ctx, req, &tuResp)
 	if err != nil {
-		return tuResp.UID, resp, err
+		return "", resp, err
 	}
 	return tuResp.UID, resp, nil
 }

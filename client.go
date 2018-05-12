@@ -136,11 +136,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 		var e = Errors{}
 		err := json.Unmarshal(data, &e)
 		if err != nil {
+			err = errors.Wrap(err, http.StatusText(resp.StatusCode))
 			return resp, errors.Wrap(err, "unable to parse API error response")
 		}
 
 		if len(e) != 0 {
-			return resp, e
+			return resp, errors.Wrap(e, http.StatusText(resp.StatusCode))
 		}
 
 		// In some cases, the error response is returned as part of the
@@ -148,10 +149,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 		// resource and return the error.
 		err = json.Unmarshal(data, v)
 		if err != nil {
+			err = errors.Wrap(err, http.StatusText(resp.StatusCode))
 			return resp, errors.Wrap(err, "unable to parse API response")
 		}
 
-		return resp, errors.New("no additional error information available")
+		err = errors.New("no additional error information available")
+		return resp, errors.Wrap(err, http.StatusText(resp.StatusCode))
 	}
 
 	if v != nil && len(data) != 0 {
