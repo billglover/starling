@@ -173,6 +173,40 @@ func TestDo(t *testing.T) {
 		checkNoError(tc, err)
 	})
 
+	t.Run("GET request that receives an HTML response", func(tc *testing.T) {
+		client, mux, _, teardown := setup()
+		defer teardown()
+
+		type foo struct{ A string }
+
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			checkMethod(tc, r, http.MethodGet)
+			w.WriteHeader(http.StatusOK)
+			html := `<!doctype html>
+			<html lang="en-GB">
+			<head>
+			  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+			  <title>Default Page Title</title>
+			  <link rel="shortcut icon" href="favicon.ico">
+			  <link rel="icon" href="favicon.ico">
+			  <link rel="stylesheet" type="text/css" href="styles.css">
+			</head>
+			
+			<body>
+			
+			</body>
+			</html>	`
+			fmt.Fprintln(w, html)
+		})
+
+		req, _ := client.NewRequest("GET", ".", nil)
+		got := new(foo)
+		resp, err := client.Do(context.Background(), req, got)
+
+		checkStatus(tc, resp, http.StatusOK)
+		checkHasError(tc, err)
+	})
+
 	t.Run("request on a cancelled context", func(tc *testing.T) {
 		client, mux, _, teardown := setup()
 		defer teardown()

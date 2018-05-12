@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 const (
@@ -112,7 +114,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 	if err != nil {
 		select {
 		case <-ctx.Done():
-			return nil, ctx.Err()
+			return nil, errors.Wrap(err, ctx.Err().Error())
 		default:
 			return nil, err
 		}
@@ -120,7 +122,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "unable to read body")
 	}
 	resp.Body.Close()
 
@@ -129,31 +131,38 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 	// of the standard response. Others respond with a standardised error structure.
 	if c := resp.StatusCode; c >= 300 {
 
-		// Try parsing the response using the standard error schema and returning the error.
-		var e = ErrorDetail{}
+		// Try parsing the response using the standard error schema. If this fails we wrap the parsing
+		// error and return. Otherwise return the errors included in the API response payload.
+		var e = Errors{}
 		err := json.Unmarshal(data, &e)
 		if err != nil {
-			return resp, fmt.Errorf("API returned an error but client was unable to parse the detail: %v", err)
+			return resp, errors.Wrap(err, "unable to parse API error response")
 		}
 
-		if e.Message != "" {
-			return resp, fmt.Errorf(e.Message)
+		if len(e) != 0 {
+			return resp, e
 		}
 
-		// If we haven't been able to parse the standard error schema try parsing the response.
+		// In some cases, the error response is returned as part of the
+		// requested resource. In these cases we attempt to decode the
+		// resource and return the error.
 		err = json.Unmarshal(data, v)
 		if err != nil {
-			return resp, fmt.Errorf("API returned an error but client was unable to parse the detail: %v", err)
+			return resp, errors.Wrap(err, "unable to parse API response")
 		}
 
-		// There isn't much more we can do to determine the cause of the error so return the HTTP status code.
-		return resp, fmt.Errorf(resp.Status)
+		return resp, errors.New("no additional error information available")
 	}
 
 	if v != nil && len(data) != 0 {
 		err = json.Unmarshal(data, v)
-		if err == io.EOF {
+
+		switch err {
+		case nil:
+		case io.EOF:
 			err = nil
+		default:
+			err = errors.Wrap(err, "unable to parse API response")
 		}
 	}
 

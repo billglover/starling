@@ -1,10 +1,26 @@
 package starling
 
-import "time"
+import (
+	"strings"
+	"time"
+)
+
+// Errors contains a list of errors
+type Errors []struct {
+	ErrorDetail
+}
+
+func (e Errors) Error() string {
+	full := make([]string, len(e))
+	for i, err := range e {
+		full[i] = err.Message
+	}
+	return strings.Join(full, ",")
+}
 
 // ErrorDetail holds the details of an error message
 type ErrorDetail struct {
-	Message string
+	Message string `json:"message"`
 }
 
 // Amount represents the value and currency of a monetary amount
