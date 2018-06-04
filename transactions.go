@@ -83,7 +83,7 @@ type halMastercardTransactions struct {
 // Transactions returns a list of transaction summaries for the current user. It accepts optional
 // time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
-func (c *Client) Transactions(ctx context.Context, dr *DateRange) (*[]Transaction, *http.Response, error) {
+func (c *Client) Transactions(ctx context.Context, dr *DateRange) ([]Transaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions", nil)
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *Client) Transactions(ctx context.Context, dr *DateRange) (*[]Transactio
 		return nil, resp, err
 	}
 
-	return &hTxns.Embedded.Transactions, resp, err
+	return hTxns.Embedded.Transactions, resp, err
 }
 
 // Transaction returns an individual transaction for the current customer.
@@ -126,7 +126,7 @@ func (c *Client) Transaction(ctx context.Context, uid string) (*Transaction, *ht
 // DDTransactions returns a list of direct debit transactions for the current user. It accepts optional
 // time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
-func (c *Client) DDTransactions(ctx context.Context, dr *DateRange) (*[]DDTransaction, *http.Response, error) {
+func (c *Client) DDTransactions(ctx context.Context, dr *DateRange) ([]DDTransaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions/direct-debit", nil)
 	if err != nil {
@@ -144,14 +144,14 @@ func (c *Client) DDTransactions(ctx context.Context, dr *DateRange) (*[]DDTransa
 	var txns *ddTransactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return &txns.Transactions, resp, err
+		return txns.Transactions, resp, err
 	}
 
 	if halResp.Embedded != nil {
 		txns = halResp.Embedded
 	}
 
-	return &txns.Transactions, resp, nil
+	return txns.Transactions, resp, nil
 }
 
 // DDTransaction returns an individual transaction for the current customer.
@@ -181,7 +181,7 @@ func (c *Client) SetDDSpendingCategory(ctx context.Context, uid, cat string) (*h
 // FPSTransactionsIn returns a list of inbound Faster Payments transaction summaries for the current user. It accepts
 // optional time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
-func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) (*[]Transaction, *http.Response, error) {
+func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) ([]Transaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/in", nil)
 	if err != nil {
@@ -199,14 +199,14 @@ func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) (*[]Trans
 	var txns *transactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return &txns.Transactions, resp, err
+		return txns.Transactions, resp, err
 	}
 
 	if halResp.Embedded != nil {
 		txns = halResp.Embedded
 	}
 
-	return &txns.Transactions, resp, nil
+	return txns.Transactions, resp, nil
 }
 
 // FPSTransactionIn returns an individual transaction for the current customer.
@@ -224,7 +224,7 @@ func (c *Client) FPSTransactionIn(ctx context.Context, uid string) (*Transaction
 // FPSTransactionsOut returns a list of inbound Faster Payments transaction summaries for the current user. It accepts
 // optional time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
-func (c *Client) FPSTransactionsOut(ctx context.Context, dr *DateRange) (*[]Transaction, *http.Response, error) {
+func (c *Client) FPSTransactionsOut(ctx context.Context, dr *DateRange) ([]Transaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions/fps/out", nil)
 	if err != nil {
@@ -242,14 +242,14 @@ func (c *Client) FPSTransactionsOut(ctx context.Context, dr *DateRange) (*[]Tran
 	var txns *transactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return &txns.Transactions, resp, err
+		return txns.Transactions, resp, err
 	}
 
 	if halResp.Embedded != nil {
 		txns = halResp.Embedded
 	}
 
-	return &txns.Transactions, resp, nil
+	return txns.Transactions, resp, nil
 }
 
 // FPSTransactionOut returns an individual transaction for the current customer.
@@ -267,7 +267,7 @@ func (c *Client) FPSTransactionOut(ctx context.Context, uid string) (*Transactio
 // MastercardTransactions returns a list of transaction summaries for the current user. It accepts optional
 // time.Time values to request transactions within a given date range. If these values are not provided
 // the API returns the last 100 transactions.
-func (c *Client) MastercardTransactions(ctx context.Context, dr *DateRange) (*[]MastercardTransaction, *http.Response, error) {
+func (c *Client) MastercardTransactions(ctx context.Context, dr *DateRange) ([]MastercardTransaction, *http.Response, error) {
 
 	req, err := c.NewRequest("GET", "/api/v1/transactions/mastercard", nil)
 	if err != nil {
@@ -290,10 +290,10 @@ func (c *Client) MastercardTransactions(ctx context.Context, dr *DateRange) (*[]
 	}
 
 	if err != nil {
-		return &txns.Transactions, resp, err
+		return txns.Transactions, resp, err
 	}
 
-	return &txns.Transactions, resp, nil
+	return txns.Transactions, resp, nil
 }
 
 // MastercardTransaction returns an individual mastercard transaction for the current customer.

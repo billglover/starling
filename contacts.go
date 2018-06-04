@@ -37,7 +37,7 @@ type contactAccounts struct {
 }
 
 // Contacts returns the contacts for the current customer.
-func (c *Client) Contacts(ctx context.Context) (*[]Contact, *http.Response, error) {
+func (c *Client) Contacts(ctx context.Context) ([]Contact, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/contacts", nil)
 	if err != nil {
 		return nil, nil, err
@@ -47,14 +47,14 @@ func (c *Client) Contacts(ctx context.Context) (*[]Contact, *http.Response, erro
 	var contacts *contacts
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return &contacts.Contacts, resp, err
+		return contacts.Contacts, resp, err
 	}
 
 	if halResp.Embedded != nil {
 		contacts = halResp.Embedded
 	}
 
-	return &contacts.Contacts, resp, nil
+	return contacts.Contacts, resp, nil
 }
 
 // Contact returns an individual contact for the current customer.
@@ -82,7 +82,7 @@ func (c *Client) DeleteContact(ctx context.Context, uid string) (*http.Response,
 }
 
 // ContactAccounts returns the accounts for a given contact.
-func (c *Client) ContactAccounts(ctx context.Context, uid string) (*[]ContactAccount, *http.Response, error) {
+func (c *Client) ContactAccounts(ctx context.Context, uid string) ([]ContactAccount, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/contacts/"+uid+"/accounts", nil)
 	if err != nil {
 		return nil, nil, err
@@ -90,7 +90,7 @@ func (c *Client) ContactAccounts(ctx context.Context, uid string) (*[]ContactAcc
 
 	var cas *contactAccounts
 	resp, err := c.Do(ctx, req, &cas)
-	return &cas.ContactAccounts, resp, err
+	return cas.ContactAccounts, resp, err
 }
 
 // ContactAccount returns the specified account for a given contact.
