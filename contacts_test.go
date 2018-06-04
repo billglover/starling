@@ -128,12 +128,12 @@ func testContacts(t *testing.T, name, mock string) {
 	json.Unmarshal([]byte(mock), hal)
 	want := hal.Embedded
 
-	if !reflect.DeepEqual(got, &want.Contacts) {
+	if !reflect.DeepEqual(got, want.Contacts) {
 		t.Error("should return a list of contacts matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one contact %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one contact %s %d", cross, len(got))
 	}
 }
 
@@ -337,12 +337,12 @@ func testContactAccounts(t *testing.T, name, mock, uid string) {
 	want := &contactAccounts{}
 	json.Unmarshal([]byte(mock), want)
 
-	if !reflect.DeepEqual(got, &want.ContactAccounts) {
+	if !reflect.DeepEqual(got, want.ContactAccounts) {
 		t.Error("should return a list of contact accounts matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one contact account %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one contact account %s %d", cross, len(got))
 	}
 }
 
