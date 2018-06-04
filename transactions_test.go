@@ -188,12 +188,12 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Fatal("should not return 'nil'", cross)
 	}
 
-	if !reflect.DeepEqual(*got, want.Transactions) {
+	if !reflect.DeepEqual(got, want.Transactions) {
 		t.Error("should return a list matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(got))
 	}
 
 }
@@ -418,15 +418,15 @@ func testDDTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Fatal("should not return 'nil'", cross)
 	}
 
-	if !reflect.DeepEqual(*got, want.Transactions) {
+	if !reflect.DeepEqual(got, want.Transactions) {
 		t.Error("should return a list matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(got))
 	}
 
-	first := (*got)[0]
+	first := (got)[0]
 
 	if first.MandateUID == "" {
 		t.Error("should have a MandateID specified", cross)
@@ -770,15 +770,15 @@ func testFPSInTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Fatal("should not return 'nil'", cross)
 	}
 
-	if !reflect.DeepEqual(*got, want.Transactions) {
+	if !reflect.DeepEqual(got, want.Transactions) {
 		t.Error("should return a list matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(got))
 	}
 
-	first := (*got)[0]
+	first := (got)[0]
 
 	if first.UID == "" {
 		t.Error("should have a UID specified", cross)
@@ -1041,15 +1041,15 @@ func testFPSOutTransactions(t *testing.T, name, mock string, dr *DateRange) {
 		t.Fatal("should not return 'nil'", cross)
 	}
 
-	if !reflect.DeepEqual(*got, want.Transactions) {
+	if !reflect.DeepEqual(got, want.Transactions) {
 		t.Error("should return a list matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(got))
 	}
 
-	first := (*got)[0]
+	first := (got)[0]
 
 	if first.UID == "" {
 		t.Error("should have a UID specified", cross)
@@ -1449,15 +1449,15 @@ func testMastercardTransactions(t *testing.T, name, mock string, dr *DateRange) 
 		t.Fatal("should not return 'nil'", cross)
 	}
 
-	if !reflect.DeepEqual(*got, want.Transactions) {
+	if !reflect.DeepEqual(got, want.Transactions) {
 		t.Error("should return a list matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should have at least one transaction %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should have at least one transaction %s %d", cross, len(got))
 	}
 
-	first := (*got)[0]
+	first := (got)[0]
 
 	if first.UID == "" {
 		t.Error("should have a UID specified", cross)
