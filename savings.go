@@ -67,7 +67,7 @@ type RecurringTransferRequest struct {
 // in case this is required for further processing. It is possible that the user has no savings goals
 // in which case a nil value will be returned. An error will be returned if unable to retrieve goals
 // from the API.
-func (c *Client) SavingsGoals(ctx context.Context) (*[]SavingsGoal, *http.Response, error) {
+func (c *Client) SavingsGoals(ctx context.Context) ([]SavingsGoal, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/savings-goals", nil)
 	if err != nil {
 		return nil, nil, err
@@ -76,10 +76,10 @@ func (c *Client) SavingsGoals(ctx context.Context) (*[]SavingsGoal, *http.Respon
 	var goals savingsGoals
 	resp, err := c.Do(ctx, req, &goals)
 	if err != nil {
-		return &goals.SavingsGoals, resp, err
+		return goals.SavingsGoals, resp, err
 	}
 
-	return &goals.SavingsGoals, resp, nil
+	return goals.SavingsGoals, resp, nil
 }
 
 // SavingsGoal returns an individual savings goal based on a UID. It also returns the http response

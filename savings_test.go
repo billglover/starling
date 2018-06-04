@@ -54,12 +54,12 @@ func TestSavingsGoals(t *testing.T) {
 		t.Fatal("should not return 'nil'", cross)
 	}
 
-	if !reflect.DeepEqual(got, &want.SavingsGoals) {
+	if !reflect.DeepEqual(got, want.SavingsGoals) {
 		t.Error("should return a list of savings goals matching the mock response", cross)
 	}
 
-	if len(*got) == 0 {
-		t.Errorf("should return a list with at least one savings goal %s %d", cross, len(*got))
+	if len(got) == 0 {
+		t.Errorf("should return a list with at least one savings goal %s %d", cross, len(got))
 	}
 
 }
