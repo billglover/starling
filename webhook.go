@@ -1,6 +1,11 @@
 package starling
 
 import (
+	"bytes"
+	"crypto/sha512"
+	"encoding/base64"
+	"io/ioutil"
+	"net/http"
 	"time"
 )
 
@@ -26,4 +31,23 @@ type WebHookContent struct {
 	Reference      string  `json:"reference"`
 	Type           string  `json:"type"`
 	ForCustomer    string  `json:"forCustomer"`
+}
+
+func Validate(r *http.Request, secret string) (bool, error) {
+	buf, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return false, err
+	}
+
+	body := ioutil.NopCloser(bytes.NewBuffer(buf))
+	r.Body = body
+
+	sha512 := sha512.New()
+	sha512.Write([]byte(secret + string(buf)))
+	recSig := base64.StdEncoding.EncodeToString(sha512.Sum(nil))
+	reqSig := r.Header.Get("X-Hook-Signature")
+	if reqSig != recSig {
+		return false, nil
+	}
+	return true, nil
 }
