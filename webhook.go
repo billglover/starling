@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha512"
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -33,7 +34,14 @@ type WebHookContent struct {
 	ForCustomer    string  `json:"forCustomer"`
 }
 
+// Validate takes an http request and a web-hook secret and validates the
+// request signature matches the signature provided in the X-Hook-Signature
+// header. An error is returned if unable to parse the body of the request.
 func Validate(r *http.Request, secret string) (bool, error) {
+	if r.Body == nil {
+		return false, fmt.Errorf("no body to validate")
+	}
+
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return false, err
@@ -46,6 +54,8 @@ func Validate(r *http.Request, secret string) (bool, error) {
 	sha512.Write([]byte(secret + string(buf)))
 	recSig := base64.StdEncoding.EncodeToString(sha512.Sum(nil))
 	reqSig := r.Header.Get("X-Hook-Signature")
+	fmt.Println("reqSig:", reqSig)
+	fmt.Println("recSig:", recSig)
 	if reqSig != recSig {
 		return false, nil
 	}
