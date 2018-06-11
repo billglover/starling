@@ -484,16 +484,20 @@ func testPostContactAccount(t *testing.T, name string, ca ContactAccount, respBo
 		if !reflect.DeepEqual(ca, reqCA) {
 			t.Error("should send a contact account that matches the mock", cross)
 		}
-
+		w.Header().Set("Location", reqCA.UID)
 		w.WriteHeader(respStatus)
 		fmt.Fprintln(w, respBody)
 	})
 
-	resp, err := client.CreateContactAccount(context.Background(), ca)
+	uid, resp, err := client.CreateContactAccount(context.Background(), ca)
 	if respStatus <= 299 {
 		checkNoError(t, err)
 	} else {
 		checkHasError(t, err)
+	}
+
+	if uid != ca.UID {
+		t.Error("should return the UID in the Location header")
 	}
 
 	checkStatus(t, resp, respStatus)

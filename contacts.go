@@ -3,6 +3,7 @@ package starling
 import (
 	"context"
 	"net/http"
+	"path"
 )
 
 // Contact represents the details of a payee
@@ -106,12 +107,15 @@ func (c *Client) ContactAccount(ctx context.Context, cUID, aUID string) (*Contac
 }
 
 // CreateContactAccount creates the specified account for a given contact.
-func (c *Client) CreateContactAccount(ctx context.Context, ca ContactAccount) (*http.Response, error) {
+func (c *Client) CreateContactAccount(ctx context.Context, ca ContactAccount) (string, *http.Response, error) {
 	req, err := c.NewRequest("POST", "/api/v1/contacts", ca)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	resp, err := c.Do(ctx, req, nil)
-	return resp, err
+	loc := resp.Header.Get("Location")
+	uid := path.Base(loc)
+
+	return uid, resp, err
 }
