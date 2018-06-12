@@ -18,3 +18,6 @@ vendor/
 
 # Ignore OS specific files
 .DS_Store
+
+# Ignore distribution directory
+.dist/
