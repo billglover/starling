@@ -1,0 +1,10 @@
+release:
+  prerelease: true 
+
+changelog:
+  filters:
+    exclude:
+      - '^docs:'
+      - typo
+      - (?i)foo
+  sort: asc
