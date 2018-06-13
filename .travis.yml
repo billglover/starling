@@ -6,6 +6,7 @@ go:
 
 deploy:
 - provider: releases
+  prerelease: true
   api_key: $GITHUB_TOKEN
   on:
     tags: true
