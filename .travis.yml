@@ -2,13 +2,10 @@ language: go
 
 go:
   - "1.x"
-  - "1.10.x"
   - master
 
 deploy:
-- provider: script
-  skip_cleanup: true
-  script: curl -sL https://git.io/goreleaser | bash
+- provider: releases
+  api_key: $GITHUB_TOKEN
   on:
     tags: true
-    condition: $TRAVIS_OS_NAME = linux
