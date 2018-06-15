@@ -44,18 +44,18 @@ func (c *Client) Contacts(ctx context.Context) ([]Contact, *http.Response, error
 		return nil, nil, err
 	}
 
-	var halResp *halContacts
-	var contacts *contacts
-	resp, err := c.Do(ctx, req, &halResp)
+	var halWrapper *halContacts
+	resp, err := c.Do(ctx, req, &halWrapper)
 	if err != nil {
-		return contacts.Contacts, resp, err
+		return nil, resp, err
 	}
 
-	if halResp.Embedded != nil {
-		contacts = halResp.Embedded
+	contactWrapper := new(contacts)
+	if halWrapper.Embedded != nil {
+		contactWrapper = halWrapper.Embedded
 	}
 
-	return contacts.Contacts, resp, nil
+	return contactWrapper.Contacts, resp, nil
 }
 
 // Contact returns an individual contact for the current customer.

@@ -147,7 +147,7 @@ func TestContactAccountsError(t *testing.T) {
 	})
 
 	got, resp, err := client.Contacts(context.Background())
-	checkNoError(t, err)
+	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
 		t.Error("should return HTTP 403 status")
