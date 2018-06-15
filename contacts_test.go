@@ -137,6 +137,27 @@ func testContacts(t *testing.T, name, mock string) {
 	}
 }
 
+func TestContactAccountsError(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/contacts", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Contacts(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if len(got) != 0 {
+		t.Error("should not return any contacts")
+	}
+}
+
 var contactTestCases = []struct {
 	name string
 	uid  string

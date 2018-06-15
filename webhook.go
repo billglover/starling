@@ -54,8 +54,7 @@ func Validate(r *http.Request, secret string) (bool, error) {
 	sha512.Write([]byte(secret + string(buf)))
 	recSig := base64.StdEncoding.EncodeToString(sha512.Sum(nil))
 	reqSig := r.Header.Get("X-Hook-Signature")
-	fmt.Println("reqSig:", reqSig)
-	fmt.Println("recSig:", recSig)
+
 	if reqSig != recSig {
 		return false, nil
 	}
