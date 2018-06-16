@@ -18,6 +18,8 @@ go get -u 'github.com/billglover/starling'
 
 ## Usage
 
+It is assumed that you are able to provide an OAuth access-token when establishing the Starling client. Depending on your use case, it pay be as simple as passing in the personal access-token provided by Starling when you create an applicaiton. See the section on Personal Access Tokens in the [Starling Developer Docs](https://developer.starlingbank.com/docs) for more information on how to do this.
+
 ```go
 package main
 
