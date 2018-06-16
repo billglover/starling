@@ -30,17 +30,17 @@ import (
 )
 
 func main() {
-    ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
-    ctx := context.Background()
-    tc := oauth2.NewClient(ctx, ts)
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
+	ctx := context.Background()
+	tc := oauth2.NewClient(ctx, ts)
 
-    client := starling.NewClient(tc)
+	client := NewClient(tc)
 
-    txns, _, _ := client.GetTransactions(ctx, dr)
+	txns, _, _ := client.Transactions(ctx, nil)
 
-    for i, txn := range txns.Transactions {
-        fmt.Println(txn.Created, tx.Amount, txn.Currency, txn.Narrative)
-    }
+	for _, txn := range txns {
+		fmt.Println(txn.Created, txn.Amount, txn.Currency, txn.Narrative)
+	}
 }
 ```
 
@@ -52,25 +52,26 @@ package main
 import (
     "context"
     "fmt"
+    "net/url"
 
     "github.com/billglover/starling"
     "golang.org/x/oauth2"
 )
 
 func main() {
-    ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
-    ctx := context.Background()
-    tc := oauth2.NewClient(ctx, ts)
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
+	ctx := context.Background()
+	tc := oauth2.NewClient(ctx, ts)
 
-    baseURL, _ := url.Parse("https://dummyurl:4000")
-    opts := ClientOptions{BaseURL: baseURL}
-    client := NewClientWithOptions(nil, opts)
+	baseURL, _ := url.Parse(ProdURL)
+	opts := ClientOptions{BaseURL: baseURL}
+	client := NewClientWithOptions(tc, opts)
 
-    txns, _, _ := client.GetTransactions(ctx, dr)
+	txns, _, _ := client.Transactions(ctx, nil)
 
-    for i, txn := range txns.Transactions {
-        fmt.Println(txn.Created, tx.Amount, txn.Currency, txn.Narrative)
-    }
+	for _, txn := range txns {
+		fmt.Println(txn.Created, txn.Amount, txn.Currency, txn.Narrative)
+	}
 }
 ```
 
