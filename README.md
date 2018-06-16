@@ -2,17 +2,23 @@
 
 [![Build Status](https://travis-ci.com/billglover/starling.svg?branch=master)](https://travis-ci.com/billglover/starling)
 
-This is a Go client for the Starling Bank API.
+This is an unofficial Go client for the Starling Bank API.
 
-Both the API itself and this client are under active development and cannot guarantee a stable interface. A versioning approach has not yet been determined and so breaking changes are possible. That said, the client is in active use by a number of small projects.
+Both the Starling Bank API itself and this package are under active development and, whilst we try to keep breaking changes to a minimum, we cannot guarantee a stable interface. We use [Semantic Versioning](https://semver.org) to quantify changes from one release to the next.
+
+> "Major version zero (0.y.z) is for initial development. Anything may change at any time. The public API should not be considered stable."
 
 ## Installation
 
+Use Go to fetch the latest version of the package.
+
 ```shell
-go get 'github.com/billglover/starling'
+go get -u 'github.com/billglover/starling'
 ```
 
 ## Usage
+
+It is assumed that you are able to provide an OAuth access-token when establishing the Starling client. Depending on your use case, it pay be as simple as passing in the personal access-token provided by Starling when you create an applicaiton. See the section on Personal Access Tokens in the [Starling Developer Docs](https://developer.starlingbank.com/docs) for more information on how to do this.
 
 ```go
 package main
@@ -26,17 +32,17 @@ import (
 )
 
 func main() {
-    ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
-    ctx := context.Background()
-    tc := oauth2.NewClient(ctx, ts)
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
+	ctx := context.Background()
+	tc := oauth2.NewClient(ctx, ts)
 
-    client := starling.NewClient(tc)
+	client := NewClient(tc)
 
-    txns, _, _ := client.GetTransactions(ctx, dr)
+	txns, _, _ := client.Transactions(ctx, nil)
 
-    for i, txn := range txns.Transactions {
-        fmt.Println(txn.Created, tx.Amount, txn.Currency, txn.Narrative)
-    }
+	for _, txn := range txns {
+		fmt.Println(txn.Created, txn.Amount, txn.Currency, txn.Narrative)
+	}
 }
 ```
 
@@ -48,85 +54,29 @@ package main
 import (
     "context"
     "fmt"
+    "net/url"
 
     "github.com/billglover/starling"
     "golang.org/x/oauth2"
 )
 
 func main() {
-    ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
-    ctx := context.Background()
-    tc := oauth2.NewClient(ctx, ts)
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
+	ctx := context.Background()
+	tc := oauth2.NewClient(ctx, ts)
 
-    baseURL, _ := url.Parse("https://dummyurl:4000")
-    opts := ClientOptions{BaseURL: baseURL}
-    client := NewClientWithOptions(nil, opts)
+	baseURL, _ := url.Parse(ProdURL)
+	opts := ClientOptions{BaseURL: baseURL}
+	client := NewClientWithOptions(tc, opts)
 
-    txns, _, _ := client.GetTransactions(ctx, dr)
+	txns, _, _ := client.Transactions(ctx, nil)
 
-    for i, txn := range txns.Transactions {
-        fmt.Println(txn.Created, tx.Amount, txn.Currency, txn.Narrative)
-    }
+	for _, txn := range txns {
+		fmt.Println(txn.Created, txn.Amount, txn.Currency, txn.Narrative)
+	}
 }
 ```
 
-## Starling Developer Documentation
+## Starling Bank Developer Documentation
 
 * [Developer Documentation](https://developer.starlingbank.com/)
-
-## Features
-
-### API Coverage
-
-| Method | Resource                                                              | Status      |
-|--------|-----------------------------------------------------------------------|------------:|
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/add-money/{transferUid}        | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}                                | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}                                | Done        |
-| DELETE | /api/v1/savings-goals/{savingsGoalUid}                                | Done        |
-| GET    | /api/v1/savings-goals                                                 | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}/photo                          | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/withdraw-money/{transferUid}   | Done        |
-| GET    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer             | Done        |
-| PUT    | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer             | Done        |
-| DELETE | /api/v1/savings-goals/{savingsGoalUid}/recurring-transfer             | Done        |
-| GET    | /api/v1/accounts                                                      | Done        |
-| GET    | /api/v1/accounts/balance                                              | Done        |
-| GET    | /api/v1/addresses                                                     | Done        |
-| GET    | /api/v1/contacts                                                      | Done        |
-| POST   | /api/v1/contacts                                                      | Done        |
-| GET    | /api/v1/contacts/{id}                                                 | Done        |
-| DELETE | /api/v1/contacts/{id}                                                 | Done        |
-| GET    | /api/v1/contacts/{id}/accounts                                        | Done        |
-| GET    | /api/v1/contacts/{contactId}/accounts/{accountId}                     | Done        |
-| GET    | /api/v1/customers                                                     | Done        |
-| GET    | /api/v1/direct-debit/mandates                                         | Done        |
-| GET    | /api/v1/direct-debit/mandates/{mandateUid}                            | Done        |
-| DELETE | /api/v1/direct-debit/mandates/{mandateUid}                            | Done        |
-| GET    | /api/v1/me                                                            | Done        |
-| GET    | /api/v1/cards                                                         | Done        |
-| GET    | /api/v1/merchants/{merchantUid}                                       | Done        |
-| GET    | /api/v1/merchants/{merchantUid}/locations/{merchantLocationUid}       | Done        |
-| POST   | /api/v1/payments/local                                                | Done        |
-| GET    | /api/v1/payments/scheduled                                            | Done        |
-| POST   | /api/v1/payments/scheduled                                            | Done        |
-| GET    | /api/v1/transactions/direct-debit                                     | Done        |
-| GET    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
-| PUT    | /api/v1/transactions/direct-debit/{transactionUid}                    | Done        |
-| GET    | /api/v1/transactions/fps/in                                           | Done        |
-| GET    | /api/v1/transactions/fps/in/{transactionUid}                          | Done        |
-| GET    | /api/v1/transactions/fps/out                                          | Done        |
-| GET    | /api/v1/transactions/fps/out/{transactionUid}                         | Done        |
-| GET    | /api/v1/transactions/mastercard                                       | Done        |
-| GET    | /api/v1/transactions/mastercard/{transactionUid}                      | Done        |
-| PUT    | /api/v1/transactions/mastercard/{transactionUid}                      | Done        |
-| POST   | /api/v1/transactions/mastercard/{transactionUid}/receipt              | Done        |
-| PUT    | /api/v1/transactions/mastercard/{transactionUid}/receipt/{receiptUid} | Invalid     |
-| GET    | /api/v1/transactions                                                  | Done        |
-| GET    | /api/v1/transactions/{transactionUid}                                 | Done        |
-
-### Webhook Coverage
-
-| Method | Resource                                                            | Status      |
-|--------|---------------------------------------------------------------------|------------:|
-| POST   | /your-registered-web-hook-address/card-transaction                  |             |
