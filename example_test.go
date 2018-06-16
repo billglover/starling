@@ -1,10 +1,11 @@
-package starling
+package starling_test
 
 import (
 	"context"
 	"fmt"
 	"net/url"
 
+	"github.com/billglover/starling"
 	"golang.org/x/oauth2"
 )
 
@@ -17,7 +18,7 @@ func Example_sandbox() {
 	ctx := context.Background()
 	tc := oauth2.NewClient(ctx, ts)
 
-	client := NewClient(tc)
+	client := starling.NewClient(tc)
 
 	txns, _, _ := client.Transactions(ctx, nil)
 
@@ -31,9 +32,9 @@ func Example_live() {
 	ctx := context.Background()
 	tc := oauth2.NewClient(ctx, ts)
 
-	baseURL, _ := url.Parse(ProdURL)
-	opts := ClientOptions{BaseURL: baseURL}
-	client := NewClientWithOptions(tc, opts)
+	baseURL, _ := url.Parse(starling.ProdURL)
+	opts := starling.ClientOptions{BaseURL: baseURL}
+	client := starling.NewClientWithOptions(tc, opts)
 
 	txns, _, _ := client.Transactions(ctx, nil)
 
