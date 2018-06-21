@@ -198,6 +198,27 @@ func testGetTransactions(t *testing.T, name, mock string, dr *DateRange) {
 
 }
 
+func TestTxnsForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Transactions(context.Background(), nil)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a slice of transactions")
+	}
+}
+
 var transactionCases = []struct {
 	name string
 	uid  string
@@ -272,6 +293,27 @@ func testTransaction(t *testing.T, name, uid, mock string) {
 
 	if got.UID != want.UID {
 		t.Error("should have the correct UID", cross, got.UID)
+	}
+}
+
+func TestTxnForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Transaction(context.Background(), "nil")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a transaction")
 	}
 }
 
@@ -450,6 +492,27 @@ func testDDTransactions(t *testing.T, name, mock string, dr *DateRange) {
 
 }
 
+func TestTxnsDDForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/direct-debit", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.DDTransactions(context.Background(), nil)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a slice of transactions")
+	}
+}
+
 var txnTestCasesDD = []struct {
 	name string
 	uid  string
@@ -548,6 +611,27 @@ func testDDTransaction(t *testing.T, name, uid, mock string) {
 
 }
 
+func TestDDTxnForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/direct-debit/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.DDTransaction(context.Background(), "nil")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a transaction")
+	}
+}
+
 var setDDSpendingCategoryCases = []struct {
 	name     string
 	uid      string
@@ -622,6 +706,23 @@ func testSetDDSpendingCategory(t *testing.T, name, uid, cat string, status int, 
 
 	if resp.StatusCode != status {
 		t.Error("should return the correct status", cross, resp.Status)
+	}
+}
+
+func TestDDSpendingCategoryForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/direct-debit/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	resp, err := client.SetDDSpendingCategory(context.Background(), "474642e6-c4f5-43af-9b93-fe5ddbfcb857", "CHARITY")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
 	}
 }
 
@@ -806,6 +907,27 @@ func testFPSInTransactions(t *testing.T, name, mock string, dr *DateRange) {
 
 }
 
+func TestFPSTxnsInForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/fps/in", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.FPSTransactionsIn(context.Background(), nil)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a slice of transactions")
+	}
+}
+
 var txnTestCasesFPSIn = []struct {
 	name string
 	uid  string
@@ -893,7 +1015,27 @@ func testFPSInTransaction(t *testing.T, name, uid, mock string) {
 	if got.Source == "" {
 		t.Error("should have a Source specified", cross)
 	}
+}
 
+func TestFPSTxnInForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.FPSTransactionIn(context.Background(), "nil")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a transaction")
+	}
 }
 
 var txnsTestCasesFPSOut = []struct {
@@ -1074,7 +1216,27 @@ func testFPSOutTransactions(t *testing.T, name, mock string, dr *DateRange) {
 	if first.Source == "" {
 		t.Error("should have a Source specified", cross)
 	}
+}
 
+func TestFPSTxnsOutForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/fps/out", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.FPSTransactionsOut(context.Background(), nil)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a slice of transactions")
+	}
 }
 
 var txnTestCasesFPSOut = []struct {
@@ -1163,6 +1325,27 @@ func testFPSOutTransaction(t *testing.T, name, uid, mock string) {
 
 	if got.Source == "" {
 		t.Error("should have a Source specified", cross)
+	}
+}
+
+func TestFPSTxnOutForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/fps/out/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.FPSTransactionOut(context.Background(), "nil")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a transaction")
 	}
 }
 
@@ -1482,7 +1665,27 @@ func testMastercardTransactions(t *testing.T, name, mock string, dr *DateRange) 
 	if first.Source == "" {
 		t.Error("should have a Source specified", cross)
 	}
+}
 
+func TestTxnsCardForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/mastercard", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.MastercardTransactions(context.Background(), nil)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a slice of transactions")
+	}
 }
 
 var txnTestCasesMastercard = []struct {
@@ -1604,6 +1807,27 @@ func testMastercardTransaction(t *testing.T, name, uid, mock string) {
 	}
 }
 
+func TestCardTxnForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/mastercard/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.MastercardTransaction(context.Background(), "nil")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a transaction")
+	}
+}
+
 var setMastercardSpendingCategoryCases = []struct {
 	name     string
 	uid      string
@@ -1678,5 +1902,22 @@ func testSetMastercardSpendingCategory(t *testing.T, name, uid, cat string, stat
 
 	if resp.StatusCode != status {
 		t.Error("should return the correct status", cross, resp.Status)
+	}
+}
+
+func TestCardSpendingCategoryForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/transactions/mastercard/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	resp, err := client.SetMastercardSpendingCategory(context.Background(), "474642e6-c4f5-43af-9b93-fe5ddbfcb857", "CHARITY")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
 	}
 }
