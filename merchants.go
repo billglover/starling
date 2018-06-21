@@ -35,6 +35,10 @@ func (c *Client) Merchant(ctx context.Context, uid string) (*Merchant, *http.Res
 
 	mer := new(Merchant)
 	resp, err := c.Do(ctx, req, mer)
+	if err != nil {
+		return nil, resp, err
+	}
+
 	return mer, resp, err
 }
 
@@ -47,5 +51,9 @@ func (c *Client) MerchantLocation(ctx context.Context, mUID, lUID string) (*Merc
 
 	merLoc := new(MerchantLocation)
 	resp, err := c.Do(ctx, req, merLoc)
+	if err != nil {
+		return nil, resp, err
+	}
+
 	return merLoc, resp, err
 }
