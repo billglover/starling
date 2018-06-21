@@ -71,6 +71,10 @@ func (c *Client) CreateScheduledPayment(ctx context.Context, p ScheduledPayment)
 	}
 
 	resp, err := c.Do(ctx, req, nil)
+	if err != nil {
+		return "", resp, err
+	}
+
 	loc := resp.Header.Get("Location")
 	uid := path.Base(loc)
 	return uid, resp, err
