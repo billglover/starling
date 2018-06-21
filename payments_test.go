@@ -66,15 +66,14 @@ func testLocalPayment(t *testing.T, name string, payment LocalPayment, mock stri
 	resp, err := client.MakeLocalPayment(context.Background(), payment)
 	checkNoError(t, err)
 	checkStatus(t, resp, http.StatusAccepted)
-
 }
 
 func TestLocalPaymentForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/payments/local/", func(w http.ResponseWriter, r *http.Request) {
-		checkMethod(t, r, http.MethodGet)
+	mux.HandleFunc("/api/v1/payments/local", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPost)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
