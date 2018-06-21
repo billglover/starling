@@ -69,6 +69,32 @@ func testLocalPayment(t *testing.T, name string, payment LocalPayment, mock stri
 
 }
 
+func TestLocalPaymentForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/payments/local/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	payment := LocalPayment{
+		Reference:             "sample payment",
+		DestinationAccountUID: "99970be2-2bc7-49d3-8d23-ebef9f746ecf",
+		Payment: PaymentAmount{
+			Currency: "GBP",
+			Amount:   10.24,
+		},
+	}
+
+	resp, err := client.MakeLocalPayment(context.Background(), payment)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+}
+
 var paymentsCasesScheduled = []struct {
 	name string
 	mock string
@@ -171,6 +197,27 @@ func testScheduledPayment(t *testing.T, name string, mock string) {
 	}
 }
 
+func TestScheduledPaymentForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/payments/scheduled/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	payments, resp, err := client.ScheduledPayments(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if payments != nil {
+		t.Error("should not return scheduled payments")
+	}
+}
+
 var paymentsCasesCreateScheduled = []struct {
 	name    string
 	payment ScheduledPayment
@@ -258,5 +305,45 @@ func testCreateScheduledPayment(t *testing.T, name string, payment ScheduledPaym
 
 	if id != uid {
 		t.Error("should return the correct UID", cross, id)
+	}
+}
+
+func TestCreateScheduledPaymentForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/payments/scheduled/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	payment := ScheduledPayment{
+		LocalPayment: LocalPayment{
+			Reference:             "sample payment",
+			DestinationAccountUID: "99970be2-2bc7-49d3-8d23-ebef9f746ecf",
+			Payment: PaymentAmount{
+				Currency: "GBP",
+				Amount:   10.24,
+			},
+		},
+		Schedule: RecurrenceRule{
+			StartDate: "",
+			UntilDate: "",
+			Frequency: "",
+			Count:     2,
+			Interval:  2,
+			WeekStart: "MONDAY",
+		},
+	}
+
+	id, resp, err := client.CreateScheduledPayment(context.Background(), payment)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if id != "" {
+		t.Error("should not return a payment ID")
 	}
 }
