@@ -120,7 +120,10 @@ func (c *Client) Transaction(ctx context.Context, uid string) (*Transaction, *ht
 
 	txn := new(Transaction)
 	resp, err := c.Do(ctx, req, txn)
-	return txn, resp, err
+	if err != nil {
+		return nil, resp, err
+	}
+	return txn, resp, nil
 }
 
 // DDTransactions returns a list of direct debit transactions for the current user. It accepts optional
@@ -144,7 +147,7 @@ func (c *Client) DDTransactions(ctx context.Context, dr *DateRange) ([]DDTransac
 	var txns *ddTransactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return txns.Transactions, resp, err
+		return nil, resp, err
 	}
 
 	if halResp.Embedded != nil {
@@ -163,7 +166,11 @@ func (c *Client) DDTransaction(ctx context.Context, uid string) (*DDTransaction,
 
 	ddTxn := new(DDTransaction)
 	resp, err := c.Do(ctx, req, ddTxn)
-	return ddTxn, resp, err
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return ddTxn, resp, nil
 }
 
 // SetDDSpendingCategory updates the spending category for a given direct debit.
@@ -199,7 +206,7 @@ func (c *Client) FPSTransactionsIn(ctx context.Context, dr *DateRange) ([]Transa
 	var txns *transactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return txns.Transactions, resp, err
+		return nil, resp, err
 	}
 
 	if halResp.Embedded != nil {
@@ -218,6 +225,10 @@ func (c *Client) FPSTransactionIn(ctx context.Context, uid string) (*Transaction
 
 	txn := new(Transaction)
 	resp, err := c.Do(ctx, req, txn)
+	if err != nil {
+		return nil, resp, err
+	}
+
 	return txn, resp, err
 }
 
@@ -242,7 +253,7 @@ func (c *Client) FPSTransactionsOut(ctx context.Context, dr *DateRange) ([]Trans
 	var txns *transactions
 	resp, err := c.Do(ctx, req, &halResp)
 	if err != nil {
-		return txns.Transactions, resp, err
+		return nil, resp, err
 	}
 
 	if halResp.Embedded != nil {
@@ -261,6 +272,10 @@ func (c *Client) FPSTransactionOut(ctx context.Context, uid string) (*Transactio
 
 	txn := new(Transaction)
 	resp, err := c.Do(ctx, req, txn)
+	if err != nil {
+		return nil, resp, err
+	}
+
 	return txn, resp, err
 }
 
@@ -281,19 +296,18 @@ func (c *Client) MastercardTransactions(ctx context.Context, dr *DateRange) ([]M
 		req.URL.RawQuery = q.Encode()
 	}
 
-	var halResp *halMastercardTransactions
-	resp, err := c.Do(ctx, req, &halResp)
+	hTxns := new(halMastercardTransactions)
+	resp, err := c.Do(ctx, req, &hTxns)
 
-	var txns *mastercardTransactions
-	if halResp.Embedded != nil {
-		txns = halResp.Embedded
+	if hTxns == nil {
+		return nil, resp, err
 	}
 
-	if err != nil {
-		return txns.Transactions, resp, err
+	if hTxns.Embedded == nil {
+		return nil, resp, err
 	}
 
-	return txns.Transactions, resp, nil
+	return hTxns.Embedded.Transactions, resp, err
 }
 
 // MastercardTransaction returns an individual mastercard transaction for the current customer.
@@ -305,7 +319,11 @@ func (c *Client) MastercardTransaction(ctx context.Context, uid string) (*Master
 
 	txn := new(MastercardTransaction)
 	resp, err := c.Do(ctx, req, txn)
-	return txn, resp, err
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return txn, resp, nil
 }
 
 // SetMastercardSpendingCategory updates the spending category for a given mastercard transaction.

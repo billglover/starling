@@ -29,7 +29,7 @@ func (c *Client) AddressHistory(ctx context.Context) (*AddressHistory, *http.Res
 	var addr *AddressHistory
 	resp, err := c.Do(ctx, req, &addr)
 	if err != nil {
-		return addr, resp, err
+		return nil, resp, err
 	}
 
 	return addr, resp, nil

@@ -110,6 +110,27 @@ func TestGetSavingsGoal(t *testing.T) {
 	}
 }
 
+func TestSavingsGoalForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	goal, resp, err := client.SavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if goal != nil {
+		t.Error("should not return a savings goal")
+	}
+}
+
 // TestPutSavingsGoal confirms that the client is able to create a savings goal.
 func TestPutSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
@@ -221,6 +242,33 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 	}
 }
 
+func TestPutSavingsGoalForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	goal := SavingsGoalRequest{
+		Name:     "test",
+		Currency: "GBP",
+		Target: Amount{
+			Currency:   "GBP",
+			MinorUnits: 10000,
+		},
+		Base64EncodedPhoto: "",
+	}
+
+	resp, err := client.CreateSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", goal)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+}
+
 // TestAddMoney confirms that the client is able to make a request to add money to a savings goal and parse
 // the successful response from the API.
 func TestAddMoney(t *testing.T) {
@@ -307,6 +355,29 @@ func TestAddMoney_BadRequest(t *testing.T) {
 	}
 }
 
+func TestAddMoneyForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	amt := Amount{Currency: "GBP", MinorUnits: 1050}
+
+	id, resp, err := client.AddMoney(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if id != "" {
+		t.Error("should not return a transaction id")
+	}
+}
+
 var deleteSavingsGoalCases = []struct {
 	name string
 	uid  string
@@ -353,6 +424,23 @@ func testDeleteSavingsGoal(t *testing.T, name, uid string) {
 
 	if len(body) != 0 {
 		t.Error("should return an empty body", cross, len(body))
+	}
+}
+
+func TestDeleteGoalForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodDelete)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	resp, err := client.DeleteSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
 	}
 }
 
@@ -422,6 +510,27 @@ func testSavingsGoalPhoto(t *testing.T, name, uid string, mock string) {
 
 	if len(photo.Base64EncodedPhoto) == 0 {
 		t.Error("should return a base64 encoded photo", cross)
+	}
+}
+
+func TestSavingsGoalPhotoForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.SavingsGoalPhoto(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a savings goal photo")
 	}
 }
 
@@ -528,6 +637,29 @@ func TestWithdraw_InsufficientFunds(t *testing.T) {
 	}
 }
 
+func TestWithdrawForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	amt := Amount{Currency: "GBP", MinorUnits: 1050}
+
+	got, resp, err := client.Withdraw(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != "" {
+		t.Error("should not return a transaction id")
+	}
+}
+
 var recurringSavingsGoalCases = []struct {
 	name string
 	uid  string
@@ -621,6 +753,27 @@ func recurringTransfer(t *testing.T, name, uid string, mock string) {
 	}
 }
 
+func TestRecurringTransferForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.RecurringTransfer(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a recurring transfer")
+	}
+}
+
 func TestCreateRecurringTransfer(t *testing.T) {
 	for _, tc := range recurringSavingsGoalCases {
 		t.Run(tc.name, func(st *testing.T) {
@@ -657,7 +810,15 @@ func testCreateRecurringTransfer(t *testing.T, name, uid string, mock string) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	rtrReq := RecurringTransferRequest{UID: "123"}
+	rtrReq := RecurringTransferRequest{
+		UID:    "123",
+		Amount: Amount{Currency: "GBP", MinorUnits: 1234},
+		RecurrenceRule: RecurrenceRule{
+			Frequency: "DAILY",
+			Interval:  2,
+			Count:     4,
+		},
+	}
 
 	id, resp, err := client.CreateRecurringTransfer(context.Background(), uid, rtrReq)
 	checkNoError(t, err)
@@ -668,6 +829,33 @@ func testCreateRecurringTransfer(t *testing.T, name, uid string, mock string) {
 
 	if id == "28dff346-dd48-426f-96df-d7f33d29c379" {
 		t.Error("should return a UID", cross)
+	}
+}
+
+func TestCreateRecurringTransferForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodPut)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	rtrReq := RecurringTransferRequest{
+		UID:            "123",
+		Amount:         Amount{Currency: "GBP", MinorUnits: 1234},
+		RecurrenceRule: RecurrenceRule{Frequency: "DAILY", Interval: 2, Count: 4},
+	}
+
+	got, resp, err := client.CreateRecurringTransfer(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", rtrReq)
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != "" {
+		t.Error("should not return a recurring transfer id")
 	}
 }
 
@@ -712,5 +900,22 @@ func testDeleteRecurringTransfer(t *testing.T, name, uid string) {
 
 	if len(body) != 0 {
 		t.Error("should return an empty body", cross, len(body))
+	}
+}
+
+func TestDeleteRecurringTransferForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodDelete)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	resp, err := client.DeleteRecurringTransfer(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
 	}
 }

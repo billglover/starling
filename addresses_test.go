@@ -94,3 +94,24 @@ func testAddressHistory(t *testing.T, name, mock string) {
 		t.Error("should return addresses matching the mock response", cross)
 	}
 }
+
+func TestAddressHistoryForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/addresses", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.AddressHistory(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return any addresses")
+	}
+}

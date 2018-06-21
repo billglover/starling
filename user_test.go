@@ -87,3 +87,24 @@ func testCurrentUser(t *testing.T, name, mock string) {
 		t.Error("should return an identity matching the mock response", cross)
 	}
 }
+
+func TestCurrentUserForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/me", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.CurrentUser(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a user")
+	}
+}

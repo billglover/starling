@@ -84,6 +84,27 @@ func testDirectDebits(t *testing.T, name, mock string) {
 	}
 }
 
+func TestDDMandatesForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/direct-debit/mandates", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.DirectDebitMandates(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return direct-debit mandates")
+	}
+}
+
 var ddMandateCases = []struct {
 	name string
 	uid  string
@@ -142,6 +163,27 @@ func testDDMandate(t *testing.T, name, uid, mock string) {
 	}
 }
 
+func TestDDMandateForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/direct-debit/mandates/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.DirectDebitMandate(context.Background(), "949404bd-d32e-4f1e-9759-4d6caee3137c")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a direct-debit mandate")
+	}
+}
+
 var deleteDDMandateCases = []struct {
 	name string
 	uid  string
@@ -187,5 +229,22 @@ func testDeleteDDMandate(t *testing.T, name, uid string) {
 
 	if len(body) != 0 {
 		t.Error("should return an empty body", cross, len(body))
+	}
+}
+
+func TestDDMandateDeleteForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/direct-debit/mandates/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodDelete)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	resp, err := client.DeleteDirectDebitMandate(context.Background(), "949404bd-d32e-4f1e-9759-4d6caee3137c")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
 	}
 }
