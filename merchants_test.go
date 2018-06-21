@@ -61,6 +61,27 @@ func testMerchant(t *testing.T, name, uid, mock string) {
 	}
 }
 
+func TestMerchantForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/merchants/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Merchant(context.Background(), "949404bd-d32e-4f1e-9759-4d6caee3137c")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a merchant")
+	}
+}
+
 var merchantLocationCases = []struct {
 	name string
 	mUID string
@@ -127,5 +148,26 @@ func testMerchantLocation(t *testing.T, name, mUID, lUID, mock string) {
 
 	if !reflect.DeepEqual(got, merLoc) {
 		t.Error("should return a merchant matching the mock response", cross)
+	}
+}
+
+func TestMerchantLocationForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/merchants/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.MerchantLocation(context.Background(), "949404bd-d32e-4f1e-9759-4d6caee3137c", "949404bd-d32e-4f1e-9759-4d6caee3137c")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a merchant location")
 	}
 }
