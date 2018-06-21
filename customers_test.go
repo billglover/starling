@@ -88,3 +88,24 @@ func testCustomer(t *testing.T, name, mock string) {
 		t.Error("should return an identity matching the mock response", cross)
 	}
 }
+
+func TestCustomerForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v1/customers", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Customer(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a customer")
+	}
+}
