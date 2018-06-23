@@ -226,6 +226,30 @@ func TestDo(t *testing.T) {
 			tc.Error("should not return a response", cross)
 		}
 	})
+
+	t.Run("GET request that returns a forbidden response", func(tc *testing.T) {
+		client, mux, _, teardown := setup()
+		defer teardown()
+
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			checkMethod(tc, r, http.MethodGet)
+			w.WriteHeader(http.StatusForbidden)
+		})
+
+		req, _ := client.NewRequest("GET", ".", nil)
+		resp, err := client.Do(context.Background(), req, nil)
+
+		checkStatus(tc, resp, http.StatusForbidden)
+		checkHasError(tc, err)
+		if _, ok := err.(AuthError); ok == false {
+			t.Errorf("should return a starling.AuthError: %T", err)
+		}
+		if err, ok := err.(Error); ok == true && err.Temporary() == true {
+			t.Errorf("should not return a temporary error")
+		}
+
+	})
+
 }
 
 // Setup establishes a test Server that can be used to provide mock responses during testing.

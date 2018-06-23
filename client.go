@@ -131,6 +131,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 	// of the standard response. Others respond with a standardised error structure.
 	if c := resp.StatusCode; c >= 300 {
 
+		// Handle auth errors
+		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+			err := AuthError(http.StatusText(resp.StatusCode))
+			return resp, err
+		}
+
 		// Try parsing the response using the standard error schema. If this fails we wrap the parsing
 		// error and return. Otherwise return the errors included in the API response payload.
 		var e = Errors{}
