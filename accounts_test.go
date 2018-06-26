@@ -9,6 +9,61 @@ import (
 	"testing"
 )
 
+var accountsTC = []struct {
+	name  string
+	count int
+	mock  string
+}{
+	{
+		name:  "single account",
+		count: 1,
+		mock: `{
+					"accounts": [
+				 		{
+							"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
+							"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
+							"currency": "GBP",
+							"createdAt": "2017-05-24T07:43:46.664Z"
+						}
+					]
+				}`,
+	},
+}
+
+func TestAccounts(t *testing.T) {
+	for _, tc := range accountsTC {
+		t.Run(tc.name, func(st *testing.T) {
+			testAccounts(st, tc.name, tc.count, tc.mock)
+		})
+	}
+}
+
+func testAccounts(t *testing.T, name string, count int, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v2/accounts", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.Accounts(context.Background())
+	checkNoError(t, err)
+
+	if len(got) != count {
+		t.Error("should return the correct number of accounts", got)
+	}
+
+	want := &accounts{}
+	json.Unmarshal([]byte(mock), want)
+
+	if !reflect.DeepEqual(got, want.Accounts) {
+		t.Error("should return an account matching the mock response")
+		t.Error(got)
+		t.Error(want)
+	}
+}
+
 var accountTestCases = []struct {
 	name string
 	mock string
