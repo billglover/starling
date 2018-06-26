@@ -9,64 +9,46 @@ import (
 	"testing"
 )
 
-var accountTestCases = []struct {
+var accountsTC = []struct {
 	name string
 	mock string
 }{
 	{
-		name: "sample account",
+		name: "single account",
 		mock: `{
-			"_links": {
-				"card": {
-					"href": "api/v1/cards",
-					"templated": false
-				},
-				"customer": {
-					"href": "api/v1/customers",
-					"templated": false
-				},
-				"mandates": {
-					"href": "/api/v1/direct-debit/mandates",
-					"templated": false
-				},
-				"payees": {
-					"href": "api/v1/contacts",
-					"templated": false
-				},
-				"transactions": {
-					"href": "api/v1/transactions?from={fromDate}&to={toDate}",
-					"templated": true
+			"accounts": [
+				{
+					"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
+					"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
+					"currency": "GBP",
+					"createdAt": "2017-05-24T07:43:46.664Z"
 				}
-			},
-			"id": "6f5a3548-f25d-4dfe-9f8e-3078fe8bfa2a",
-			"name": "6d2aa528-b9d1-4083-ae7c-53d460cd8d88 GBP",
-			"number": "04829435",
-			"accountNumber": "04829435",
-			"sortCode": "608371",
-			"currency": "GBP",
-			"iban": "GB28SRLG60837104829435",
-			"bic": "SRLGGB2L",
-			"createdAt": "2017-03-09T17:58:15.848Z"
-		}`,
+			]
+	  }`,
 	},
 	{
-		name: "sample account without HAL wrapper",
+		name: "two accounts",
 		mock: `{
-			"id": "6f5a3548-f25d-4dfe-9f8e-3078fe8bfa2a",
-			"name": "6d2aa528-b9d1-4083-ae7c-53d460cd8d88 GBP",
-			"number": "04829435",
-			"accountNumber": "04829435",
-			"sortCode": "608371",
-			"currency": "GBP",
-			"iban": "GB28SRLG60837104829435",
-			"bic": "SRLGGB2L",
-			"createdAt": "2017-03-09T17:58:15.848Z"
-		}`,
+			"accounts": [
+				{
+					"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
+					"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
+					"currency": "GBP",
+					"createdAt": "2017-05-24T07:43:46.664Z"
+				},
+				{
+					"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
+					"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
+					"currency": "GBP",
+					"createdAt": "2017-05-24T07:43:46.664Z"
+				}
+			]
+	  }`,
 	},
 }
 
 func TestAccount(t *testing.T) {
-	for _, tc := range accountTestCases {
+	for _, tc := range accountsTC {
 		t.Run(tc.name, func(st *testing.T) {
 			testAccount(st, tc.name, tc.mock)
 		})
