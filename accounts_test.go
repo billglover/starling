@@ -18,11 +18,15 @@ var accountsTC = []struct {
 		name:  "single account",
 		count: 1,
 		mock: `{
-			"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
-			"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
-			"currency": "GBP",
-			"createdAt": "2017-05-24T07:43:46.664Z"
-  		}`,
+					"accounts": [
+				 		{
+							"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
+							"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
+							"currency": "GBP",
+							"createdAt": "2017-05-24T07:43:46.664Z"
+						}
+					]
+				}`,
 	},
 }
 
@@ -47,14 +51,16 @@ func testAccounts(t *testing.T, name string, count int, mock string) {
 	checkNoError(t, err)
 
 	if len(got) != count {
-		t.Error("should return the correct number of accounts")
+		t.Error("should return the correct number of accounts", got)
 	}
 
-	want := []Account{}
+	want := &accounts{}
 	json.Unmarshal([]byte(mock), want)
 
-	if !reflect.DeepEqual(got, want) {
-		t.Error("should return an account matching the mock response", cross)
+	if !reflect.DeepEqual(got, want.Accounts) {
+		t.Error("should return an account matching the mock response")
+		t.Error(got)
+		t.Error(want)
 	}
 }
 

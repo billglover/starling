@@ -17,6 +17,19 @@ type Account struct {
 	CreatedAt     string `json:"createdAt"`
 }
 
+// AccountSummary represents the basic account details
+type AccountSummary struct {
+	UID             string `json:"accountUid"`
+	DefaultCategory string `json:"defaultCategory"`
+	Currency        string `json:"currency"`
+	CreatedAt       string `json:"createdAt"`
+}
+
+// Accounts is a list containing all accounts for a customer
+type accounts struct {
+	Accounts []AccountSummary `json:"accounts"`
+}
+
 // Account returns the the account details for the current customer.
 func (c *Client) Account(ctx context.Context) (*Account, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v1/accounts", nil)
@@ -30,6 +43,21 @@ func (c *Client) Account(ctx context.Context) (*Account, *http.Response, error) 
 		return act, resp, err
 	}
 	return act, resp, nil
+}
+
+// Accounts returns the the accounts held by the current user.
+func (c *Client) Accounts(ctx context.Context) ([]AccountSummary, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/accounts", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var acts accounts
+	resp, err := c.Do(ctx, req, &acts)
+	if err != nil {
+		return nil, resp, err
+	}
+	return acts.Accounts, resp, nil
 }
 
 // Balance represents the balance on an account
