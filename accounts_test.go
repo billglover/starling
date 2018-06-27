@@ -84,6 +84,27 @@ func testAccounts(t *testing.T, name string, count int, mock string) {
 	}
 }
 
+func TestAccountsForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v2/accounts", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Accounts(context.Background())
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return an account")
+	}
+}
+
 var accountTestCases = []struct {
 	name string
 	mock string
