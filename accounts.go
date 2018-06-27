@@ -60,6 +60,26 @@ func (c *Client) Accounts(ctx context.Context) ([]AccountSummary, *http.Response
 	return acts.Accounts, resp, nil
 }
 
+// AccountID represents the identifiers for an individual account
+type AccountID struct {
+	ID     string `json:"accountIdentifier"`
+	BankID string `json:"bankIdentifier"`
+	IBAN   string `json:"iban"`
+	BIC    string `json:"bic"`
+}
+
+// AccountID returns the identifiers for an individual account
+func (c *Client) AccountID(ctx context.Context, uid string) (*AccountID, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/accounts/"+uid+"/identifiers", nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var actID *AccountID
+	resp, err := c.Do(ctx, req, &actID)
+	return actID, resp, err
+}
+
 // Balance represents the balance on an account
 type Balance struct {
 	Cleared     float64 `json:"clearedBalance"`
