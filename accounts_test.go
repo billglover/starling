@@ -28,6 +28,26 @@ var accountsTC = []struct {
 					]
 				}`,
 	},
+	{
+		name:  "two personal accounts",
+		count: 2,
+		mock: `{
+					"accounts": [
+				 		{
+							"accountUid": "24492cc9-77dd-4155-87a2-ec2580daf139",
+							"defaultCategory": "8d8c0f3b-f685-49ed-835e-db2ff8cef703",
+							"currency": "GBP",
+							"createdAt": "2017-05-24T07:43:46.664Z"
+						},
+						{
+							"accountUid": "654BB6AB-3C10-49C2-9D4E-D49968772BB0",
+							"defaultCategory": "09e7e421-1afc-483a-98be-0b9da90f9a57",
+							"currency": "GBP",
+							"createdAt": "2017-05-24T07:43:46.664Z"
+						}
+					]
+				}`,
+	},
 }
 
 func TestAccounts(t *testing.T) {
