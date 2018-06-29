@@ -1,12 +1,33 @@
 package starling
 
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"reflect"
+	"testing"
+)
+
 var feedTC = []struct {
 	name string
+	act  string
+	cat  string
 	mock string
 }{
 	{
-		name: "multiple transactions",
-		mock: `
+		name: "no transactions",
+		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
+		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		mock: `{
+		"feedItems": []
+		}`,
+	},
+	{
+		name: "single transaction",
+		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
+		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		mock: `{
 		"feedItems": [
 			 {
 				  "feedItemUid": "dbb59f1c-39e6-4558-87ba-11c142965393",
@@ -35,6 +56,8 @@ var feedTC = []struct {
 	},
 	{
 		name: "multiple transactions",
+		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
+		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
 		mock: `{
 			"feedItems": [
 				 {
@@ -106,4 +129,66 @@ var feedTC = []struct {
 			]
 	  }`,
 	},
+}
+
+func TestFeed(t *testing.T) {
+	for _, tc := range feedTC {
+		t.Run(tc.name, func(t *testing.T) {
+			testFeed(t, tc.name, tc.act, tc.cat, tc.mock)
+		})
+	}
+}
+
+func testFeed(t *testing.T, name, act, cat, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v2/feed/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		if r.URL.Path != "/api/v2/feed/account/"+act+"/category/"+cat {
+			t.Error("should sent a request to the correct path")
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.Feed(context.Background(), act, cat)
+	checkNoError(t, err)
+
+	want := &feed{}
+	json.Unmarshal([]byte(mock), want)
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if len(got) != len(want.Items) {
+		t.Error("should return the correct number of items")
+	}
+	if !reflect.DeepEqual(got, want.Items) {
+		t.Error("should return a slice of feed items matching the mock response")
+		t.Error(got)
+		t.Error(want)
+	}
+}
+
+func TestFeedForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v2/feed/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.Feed(context.Background(), "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0", "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return a slice of items")
+	}
 }

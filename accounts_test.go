@@ -159,8 +159,6 @@ func testAccountIDs(t *testing.T, name, uid, mock string) {
 
 	if !reflect.DeepEqual(got, want) {
 		t.Error("should return an AccountID matching the mock response")
-		t.Error(got)
-		t.Error(want)
 	}
 }
 
