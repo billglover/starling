@@ -168,8 +168,6 @@ func testFeed(t *testing.T, name, act, cat, mock string) {
 	}
 	if !reflect.DeepEqual(got, want.Items) {
 		t.Error("should return a slice of feed items matching the mock response")
-		t.Error(got)
-		t.Error(want)
 	}
 }
 
@@ -190,5 +188,103 @@ func TestFeedForbidden(t *testing.T) {
 
 	if got != nil {
 		t.Error("should not return a slice of items")
+	}
+}
+
+var itemTC = []struct {
+	name string
+	act  string
+	cat  string
+	itm  string
+	mock string
+}{
+	{
+		name: "card transaction",
+		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
+		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		itm:  "dbb59f1c-39e6-4558-87ba-11c142965393",
+		mock: `{
+			"feedItemUid": "dbb59f1c-39e6-4558-87ba-11c142965393",
+			"categoryUid": "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+			"amount": {
+				"currency": "GBP",
+				"minorUnits": 32
+			},
+			"sourceAmount": {
+				"currency": "GBP",
+				"minorUnits": 32
+			},
+			"direction": "OUT",
+			"transactionTime": "2018-06-28T07:16:28.364Z",
+			"source": "MASTER_CARD",
+			"sourceSubType": "CHIP_AND_PIN",
+			"status": "SETTLED",
+			"counterPartyType": "MERCHANT",
+			"counterPartyUid": "e6dbe57e-7c23-4015-97a4-4afbbf7faa23",
+			"reference": "ATM 111072\\35 REGENT ST), LONDON\\LONDON\\SW1Y 4ND  00 GBR",
+			"country": "GB",
+			"spendingCategory": "HOLIDAYS"
+		}`,
+	},
+}
+
+func TestFeedItem(t *testing.T) {
+	for _, tc := range itemTC {
+		t.Run(tc.name, func(t *testing.T) {
+			testFeedItem(t, tc.name, tc.act, tc.cat, tc.itm, tc.mock)
+		})
+	}
+}
+
+func testFeedItem(t *testing.T, name, act, cat, itm, mock string) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v2/feed/", func(w http.ResponseWriter, r *http.Request) {
+		checkMethod(t, r, http.MethodGet)
+
+		if r.URL.Path != "/api/v2/feed/account/"+act+"/category/"+cat+"/"+itm {
+			t.Error("should sent a request to the correct path")
+		}
+
+		fmt.Fprint(w, mock)
+	})
+
+	got, _, err := client.FeedItem(context.Background(), act, cat, itm)
+	checkNoError(t, err)
+
+	want := new(Item)
+	json.Unmarshal([]byte(mock), want)
+
+	if got == nil {
+		t.Fatal("should not return 'nil'", cross)
+	}
+
+	if !reflect.DeepEqual(got, want) {
+		t.Error("should return an item matching the mock response")
+	}
+
+	if got.FeedItemUID != want.FeedItemUID {
+		t.Error("should return the requested item")
+	}
+}
+
+func TestFeedItemForbidden(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/api/v2/feed/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+	})
+
+	got, resp, err := client.FeedItem(context.Background(), "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0", "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0", "dbb59f1c-39e6-4558-87ba-11c142965393")
+	checkHasError(t, err)
+
+	if resp.StatusCode != http.StatusForbidden {
+		t.Error("should return HTTP 403 status")
+	}
+
+	if got != nil {
+		t.Error("should not return an item")
 	}
 }
