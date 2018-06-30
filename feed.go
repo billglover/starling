@@ -30,7 +30,9 @@ type Item struct {
 	SpendingCategory         string    `json:"spendingCategory"`
 }
 
-// Feed returns a slice of Items for a given account and category
+// Feed returns a slice of Items for a given account and category. It returns an error if unable
+// to retrieve the feed.
+// Note: Feed uses the v2 API which is still under active development.
 func (c *Client) Feed(ctx context.Context, act, cat string) ([]Item, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v2/feed/account/"+act+"/category/"+cat, nil)
 	if err != nil {
@@ -45,7 +47,9 @@ func (c *Client) Feed(ctx context.Context, act, cat string) ([]Item, *http.Respo
 	return f.Items, resp, nil
 }
 
-// FeedItem returns a feed Item
+// FeedItem returns a feed Item for a given account and category. It returns an error if unable to
+// retrieve the feed Item.
+// Note: FeedItem uses the v2 API which is still under active development.
 func (c *Client) FeedItem(ctx context.Context, act, cat, itm string) (*Item, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v2/feed/account/"+act+"/category/"+cat+"/"+itm, nil)
 	if err != nil {
