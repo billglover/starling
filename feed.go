@@ -44,3 +44,18 @@ func (c *Client) Feed(ctx context.Context, act, cat string) ([]Item, *http.Respo
 	}
 	return f.Items, resp, nil
 }
+
+// FeedItem returns a feed Item
+func (c *Client) FeedItem(ctx context.Context, act, cat, itm string) (*Item, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/feed/account/"+act+"/category/"+cat+"/"+itm, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var i Item
+	resp, err := c.Do(ctx, req, &i)
+	if err != nil {
+		return nil, resp, err
+	}
+	return &i, resp, nil
+}
