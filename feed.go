@@ -30,11 +30,24 @@ type Item struct {
 	SpendingCategory         string    `json:"spendingCategory"`
 }
 
-// Feed returns a slice of Items for a given account and category
-func (c *Client) Feed(ctx context.Context, act, cat string) ([]Item, *http.Response, error) {
+// FeedOpts defines options that can be passed when requesting a feed
+type FeedOpts struct {
+	Since time.Time
+}
+
+// Feed returns a slice of Items for a given account and category. It returns an error if unable
+// to retrieve the feed.
+// Note: Feed uses the v2 API which is still under active development.
+func (c *Client) Feed(ctx context.Context, act, cat string, opts *FeedOpts) ([]Item, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v2/feed/account/"+act+"/category/"+cat, nil)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if opts != nil {
+		q := req.URL.Query()
+		q.Add("changesSince", opts.Since.Format(time.RFC3339Nano))
+		req.URL.RawQuery = q.Encode()
 	}
 
 	var f feed
@@ -45,7 +58,9 @@ func (c *Client) Feed(ctx context.Context, act, cat string) ([]Item, *http.Respo
 	return f.Items, resp, nil
 }
 
-// FeedItem returns a feed Item
+// FeedItem returns a feed Item for a given account and category. It returns an error if unable to
+// retrieve the feed Item.
+// Note: FeedItem uses the v2 API which is still under active development.
 func (c *Client) FeedItem(ctx context.Context, act, cat, itm string) (*Item, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v2/feed/account/"+act+"/category/"+cat+"/"+itm, nil)
 	if err != nil {

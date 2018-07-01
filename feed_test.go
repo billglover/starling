@@ -7,13 +7,15 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 )
 
 var feedTC = []struct {
-	name string
-	act  string
-	cat  string
-	mock string
+	name  string
+	act   string
+	cat   string
+	since time.Time
+	mock  string
 }{
 	{
 		name: "no transactions",
@@ -129,17 +131,49 @@ var feedTC = []struct {
 			]
 	  }`,
 	},
+	{
+		name:  "transaction since",
+		act:   "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
+		cat:   "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		since: time.Now(),
+		mock: `{
+		"feedItems": [
+			 {
+				  "feedItemUid": "dbb59f1c-39e6-4558-87ba-11c142965393",
+				  "categoryUid": "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+				  "amount": {
+						"currency": "GBP",
+						"minorUnits": 32
+				  },
+				  "sourceAmount": {
+						"currency": "GBP",
+						"minorUnits": 32
+				  },
+				  "direction": "OUT",
+				  "transactionTime": "2018-06-28T07:16:28.364Z",
+				  "source": "MASTER_CARD",
+				  "sourceSubType": "CHIP_AND_PIN",
+				  "status": "SETTLED",
+				  "counterPartyType": "MERCHANT",
+				  "counterPartyUid": "e6dbe57e-7c23-4015-97a4-4afbbf7faa23",
+				  "reference": "ATM 111072\\35 REGENT ST), LONDON\\LONDON\\SW1Y 4ND  00 GBR",
+				  "country": "GB",
+				  "spendingCategory": "HOLIDAYS"
+			 }
+			 ]
+		}`,
+	},
 }
 
 func TestFeed(t *testing.T) {
 	for _, tc := range feedTC {
 		t.Run(tc.name, func(t *testing.T) {
-			testFeed(t, tc.name, tc.act, tc.cat, tc.mock)
+			testFeed(t, tc.name, tc.act, tc.cat, tc.mock, tc.since)
 		})
 	}
 }
 
-func testFeed(t *testing.T, name, act, cat, mock string) {
+func testFeed(t *testing.T, name, act, cat, mock string, since time.Time) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -150,10 +184,23 @@ func testFeed(t *testing.T, name, act, cat, mock string) {
 			t.Error("should sent a request to the correct path")
 		}
 
+		params := r.URL.Query()
+
+		if time.Time.IsZero(since) == false {
+			if got, want := params.Get("changesSince"), since.Format(time.RFC3339Nano); got != want {
+				t.Errorf("should include 'changesSince=%s' query string parameter %s 'changesSince=%s'", want, cross, got)
+			}
+		}
+
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.Feed(context.Background(), act, cat)
+	opts := &FeedOpts{}
+	if time.Time.IsZero(since) == false {
+		opts.Since = since
+	}
+
+	got, _, err := client.Feed(context.Background(), act, cat, opts)
 	checkNoError(t, err)
 
 	want := &feed{}
@@ -179,7 +226,7 @@ func TestFeedForbidden(t *testing.T) {
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	got, resp, err := client.Feed(context.Background(), "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0", "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0")
+	got, resp, err := client.Feed(context.Background(), "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0", "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0", nil)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
