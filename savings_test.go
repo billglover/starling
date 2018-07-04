@@ -269,9 +269,9 @@ func TestPutSavingsGoalForbidden(t *testing.T) {
 	}
 }
 
-// TestAddMoney confirms that the client is able to make a request to add money to a savings goal and parse
+// TestTransferToSavingsGoal confirms that the client is able to make a request to add money to a savings goal and parse
 // the successful response from the API.
-func TestAddMoney(t *testing.T) {
+func TestTransferToSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -304,7 +304,7 @@ func TestAddMoney(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	id, resp, err := client.AddMoney(context.Background(), goalUID, mockAmount)
+	id, resp, err := client.TransferToSavingsGoal(context.Background(), goalUID, mockAmount)
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -321,7 +321,7 @@ func TestAddMoney(t *testing.T) {
 	}
 }
 
-func TestAddMoney_BadRequest(t *testing.T) {
+func TestTransferToSavingsGoal_BadRequest(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -338,7 +338,7 @@ func TestAddMoney_BadRequest(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	_, resp, err := client.AddMoney(context.Background(), goalUID, mockAmount)
+	_, resp, err := client.TransferToSavingsGoal(context.Background(), goalUID, mockAmount)
 	if err == nil {
 		t.Fatal("should return an error")
 	}
@@ -355,7 +355,7 @@ func TestAddMoney_BadRequest(t *testing.T) {
 	}
 }
 
-func TestAddMoneyForbidden(t *testing.T) {
+func TestTransferToSavingsGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -366,7 +366,7 @@ func TestAddMoneyForbidden(t *testing.T) {
 
 	amt := Amount{Currency: "GBP", MinorUnits: 1050}
 
-	id, resp, err := client.AddMoney(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
+	id, resp, err := client.TransferToSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
