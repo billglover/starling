@@ -127,9 +127,9 @@ func (c *Client) CreateSavingsGoal(ctx context.Context, uid string, sgReq Saving
 	return resp, nil
 }
 
-// AddMoney transfers money into a savings goal. It returns the http response in case this is required for further
+// TransferToSavingsGoal transfers money into a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount into the savings goal.
-func (c *Client) AddMoney(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
+func (c *Client) TransferToSavingsGoal(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
 	txnUID, err := uuid.NewRandom()
 	if err != nil {
 		return "", nil, err
