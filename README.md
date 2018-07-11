@@ -80,3 +80,8 @@ func main() {
 ## Starling Bank Developer Documentation
 
 * [Developer Documentation](https://developer.starlingbank.com/)
+
+## Contributors
+
+* [@tuckerwales](https://github.com/billglover/starling/commits?author=tuckerwales)
+* [@billglover](https://github.com/billglover/starling/commits?author=billglover)
