@@ -534,8 +534,8 @@ func TestSavingsGoalPhotoForbidden(t *testing.T) {
 	}
 }
 
-// TestWithdraw confirms that the client is able to make a request to withdraw money from a savings goal.
-func TestWithdraw(t *testing.T) {
+// TestTransferFromSavingsGoal confirms that the client is able to make a request to withdraw money from a savings goal.
+func TestTransferFromSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -573,7 +573,7 @@ func TestWithdraw(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	id, resp, err := client.Withdraw(context.Background(), goalUID, mockAmount)
+	id, resp, err := client.TransferFromSavingsGoal(context.Background(), goalUID, mockAmount)
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -590,7 +590,7 @@ func TestWithdraw(t *testing.T) {
 	}
 }
 
-func TestWithdraw_InsufficientFunds(t *testing.T) {
+func TestTransferFromSavingsGoal_InsufficientFunds(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -627,7 +627,7 @@ func TestWithdraw_InsufficientFunds(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	_, resp, err := client.Withdraw(context.Background(), goalUID, mockAmount)
+	_, resp, err := client.TransferFromSavingsGoal(context.Background(), goalUID, mockAmount)
 	if err == nil {
 		t.Fatal("should return an error when making the request", cross)
 	}
@@ -637,7 +637,7 @@ func TestWithdraw_InsufficientFunds(t *testing.T) {
 	}
 }
 
-func TestWithdrawForbidden(t *testing.T) {
+func TestTransferFromSavingsGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -648,7 +648,7 @@ func TestWithdrawForbidden(t *testing.T) {
 
 	amt := Amount{Currency: "GBP", MinorUnits: 1050}
 
-	got, resp, err := client.Withdraw(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
+	got, resp, err := client.TransferFromSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {

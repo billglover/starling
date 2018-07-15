@@ -148,9 +148,9 @@ func (c *Client) TransferToSavingsGoal(ctx context.Context, goalUID string, a Am
 	return tuResp.UID, resp, nil
 }
 
-// Withdraw transfers money out of a savings goal. It returns the http response in case this is required for further
+// TransferFromSavingsGoal transfers money out of a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount out of the savings goal.
-func (c *Client) Withdraw(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
+func (c *Client) TransferFromSavingsGoal(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
 	txnUID, err := uuid.NewRandom()
 	if err != nil {
 		return "", nil, err
