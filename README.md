@@ -32,7 +32,7 @@ import (
 )
 
 func main() {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{ACCESS_TOKEN}}"})
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: "{{YOUR_ACCESS_TOKEN}}"})
 	ctx := context.Background()
 	tc := oauth2.NewClient(ctx, ts)
 
