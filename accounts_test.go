@@ -274,34 +274,76 @@ var balanceTestCases = []struct {
 	{
 		name: "positive balance",
 		mock: `{
-			"clearedBalance": 15260.82,
-			"effectiveBalance": 15260.82,
-			"pendingTransactions": 0,
-			"availableToSpend": 15260.82,
-			"currency": "GBP",
-			"amount": 15260.82
+			"clearedBalance": {
+				"currency": "GBP",
+				"minorUnits": 1526082
+			},
+			"effectiveBalance": {
+				"currency": "GBP",
+				"minorUnits": 1526082
+			},
+			"pendingTransactions": {
+				"currency": "GBP",
+				"minorUnits": 0
+			},
+			"availableToSpend": {
+				"currency": "GBP",
+				"minorUnits": 1526082
+			},
+			"amount": {
+				"currency": "GBP",
+				"minorUnits": 1526082
+			}
 		}`,
 	},
 	{
 		name: "negative balance",
 		mock: `{
-			"clearedBalance": -15260.82,
-			"effectiveBalance": -15260.82,
-			"pendingTransactions": 0,
-			"availableToSpend": 0,
-			"currency": "GBP",
-			"amount": -15260.82
+			"clearedBalance": {
+				"currency": "GBP",
+				"minorUnits": -1526082
+			},
+			"effectiveBalance": {
+				"currency": "GBP",
+				"minorUnits": -1526082
+			},
+			"pendingTransactions": {
+				"currency": "GBP",
+				"minorUnits": 0
+			},
+			"availableToSpend": {
+				"currency": "GBP",
+				"minorUnits": 0
+			},
+			"amount": {
+				"currency": "GBP",
+				"minorUnits": -1526082
+			}
 		}`,
 	},
 	{
 		name: "very large balance",
 		mock: `{
-			"clearedBalance": -15260.82,
-			"effectiveBalance": -15260.82,
-			"pendingTransactions": 0,
-			"availableToSpend": 0,
-			"currency": "GBP",
-			"amount": 1.797693134862315708145274237317043567981e+308
+			"clearedBalance": {
+				"currency": "GBP",
+				"minorUnits": -1526082
+			},
+			"effectiveBalance": {
+				"currency": "GBP",
+				"minorUnits": -1526082
+			},
+			"pendingTransactions": {
+				"currency": "GBP",
+				"minorUnits": 0
+			},
+			"availableToSpend": {
+				"currency": "GBP",
+				"minorUnits": 0
+			},
+			"amount": {
+				"currency": "GBP",
+				"minorUnits": 9223372036854775807
+			}
 		}`,
 	},
 }
@@ -309,21 +351,21 @@ var balanceTestCases = []struct {
 func TestAccountBalance(t *testing.T) {
 	for _, tc := range balanceTestCases {
 		t.Run(tc.name, func(st *testing.T) {
-			testAccountBalance(st, tc.name, tc.mock)
+			testAccountBalance(st, tc.name, "2c7a379d-c0d8-4541-8520-ca41cc26d56a", tc.mock)
 		})
 	}
 }
 
-func testAccountBalance(t *testing.T, name, mock string) {
+func testAccountBalance(t *testing.T, name, uid, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/accounts/balance", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/accounts/"+uid+"/balance", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.AccountBalance(context.Background())
+	got, _, err := client.AccountBalance(context.Background(), uid)
 	checkNoError(t, err)
 
 	want := &Balance{}
@@ -359,12 +401,12 @@ func TestBalanceForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/accounts/balance", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/accounts/2c7a379d-c0d8-4541-8520-ca41cc26d56a/balance", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	got, resp, err := client.AccountBalance(context.Background())
+	got, resp, err := client.AccountBalance(context.Background(), "2c7a379d-c0d8-4541-8520-ca41cc26d56a")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
