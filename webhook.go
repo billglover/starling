@@ -20,6 +20,7 @@ type WebHookPayload struct {
 	AccountHolderUID       string    `json:"accountHolderUid"`
 	WebhookType            string    `json:"webhookType"`
 	CustomerUID            string    `json:"customerUid"`
+	Direction              string    `json:"direction"`
 }
 
 // Validate takes an http request and a web-hook secret and validates the
