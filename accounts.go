@@ -32,7 +32,7 @@ type accounts struct {
 
 // Account returns the the account details for the current customer.
 func (c *Client) Account(ctx context.Context) (*Account, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/accounts", nil)
+	req, err := c.NewRequest("GET", "/api/v2/accounts", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -69,8 +69,8 @@ type AccountID struct {
 }
 
 // AccountID returns the identifiers for an individual account
-func (c *Client) AccountID(ctx context.Context, uid string) (*AccountID, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v2/accounts/"+uid+"/identifiers", nil)
+func (c *Client) AccountID(ctx context.Context, accountUID string) (*AccountID, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/accounts/"+accountUID+"/identifiers", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -92,8 +92,8 @@ type Balance struct {
 }
 
 // AccountBalance returns the the account balance for the current customer.
-func (c *Client) AccountBalance(ctx context.Context) (*Balance, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/accounts/balance", nil)
+func (c *Client) AccountBalance(ctx context.Context, accountUID string) (*Balance, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/accounts/"+accountUID+"/balance", nil)
 	if err != nil {
 		return nil, nil, err
 	}

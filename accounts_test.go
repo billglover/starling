@@ -251,7 +251,7 @@ func testAccount(t *testing.T, name, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/accounts", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, mock)
 	})
@@ -338,7 +338,7 @@ func TestAccountForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/accounts", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
