@@ -12,14 +12,20 @@ import (
 
 // WebHookPayload defines the structure of the Starling web hook payload
 type WebHookPayload struct {
-	WebhookNotificationUID string    `json:"webhookNotificationUid"`
-	TransactionTimestamp   time.Time `json:"transactionTimestamp"`
-	TransactionAmount      Amount    `json:"transactionAmount"`
-	SourceAmount           Amount    `json:"sourceAmount"`
-	Description            string    `json:"description"`
-	AccountHolderUID       string    `json:"accountHolderUid"`
-	WebhookType            string    `json:"webhookType"`
-	CustomerUID            string    `json:"customerUid"`
+	WebhookNotificationUID string            `json:"webhookNotificationUid"`
+	TransactionTimestamp   time.Time         `json:"transactionTimestamp"`
+	TransactionAmount      CurrencyAndAmount `json:"transactionAmount"`
+	SourceAmount           CurrencyAndAmount `json:"sourceAmount"`
+	Description            string            `json:"description"`
+	AccountHolderUID       string            `json:"accountHolderUid"`
+	WebhookType            string            `json:"webhookType"`
+	CustomerUID            string            `json:"customerUid"`
+}
+
+// CurrencyAndAmount defined the structure of the transaction and sournce amount contents
+type CurrencyAndAmount struct {
+	Currency   string `json:"currency"`
+	MinorUnits int64  `json:"minorUnits"`
 }
 
 // Validate takes an http request and a web-hook secret and validates the
