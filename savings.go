@@ -67,8 +67,8 @@ type RecurringTransferRequest struct {
 // in case this is required for further processing. It is possible that the user has no savings goals
 // in which case a nil value will be returned. An error will be returned if unable to retrieve goals
 // from the API.
-func (c *Client) SavingsGoals(ctx context.Context) ([]SavingsGoal, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/savings-goals", nil)
+func (c *Client) SavingsGoals(ctx context.Context, accountUID string) ([]SavingsGoal, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/account/"+accountUID+"/savings-goals", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -85,8 +85,8 @@ func (c *Client) SavingsGoals(ctx context.Context) ([]SavingsGoal, *http.Respons
 // SavingsGoal returns an individual savings goal based on a UID. It also returns the http response
 // in case this is required for further processing. An error will be returned if unable to retrieve
 // goals from the API.
-func (c *Client) SavingsGoal(ctx context.Context, uid string) (*SavingsGoal, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid, nil)
+func (c *Client) SavingsGoal(ctx context.Context, accountUID string, uid string) (*SavingsGoal, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/account/"+accountUID+"/savings-goals/"+uid, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -103,8 +103,8 @@ func (c *Client) SavingsGoal(ctx context.Context, uid string) (*SavingsGoal, *ht
 // CreateSavingsGoal creates an individual savings goal based on a UID. It returns the http response
 // in case this is required for further processing. An error will be returned if the API is unable
 // to create the goal.
-func (c *Client) CreateSavingsGoal(ctx context.Context, uid string, sgReq SavingsGoalRequest) (*http.Response, error) {
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid, sgReq)
+func (c *Client) CreateSavingsGoal(ctx context.Context, accountUID string, uid string, sgReq SavingsGoalRequest) (*http.Response, error) {
+	req, err := c.NewRequest("PUT", "/api/v2/account/"+accountUID+"/savings-goals/"+uid, sgReq)
 	if err != nil {
 		return nil, err
 	}
@@ -129,13 +129,13 @@ func (c *Client) CreateSavingsGoal(ctx context.Context, uid string, sgReq Saving
 
 // TransferToSavingsGoal transfers money into a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount into the savings goal.
-func (c *Client) TransferToSavingsGoal(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
+func (c *Client) TransferToSavingsGoal(ctx context.Context, accountUID string, goalUID string, a Amount) (string, *http.Response, error) {
 	txnUID, err := uuid.NewRandom()
 	if err != nil {
 		return "", nil, err
 	}
 
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/add-money/"+txnUID.String(), topUpRequest{Amount: a})
+	req, err := c.NewRequest("PUT", "/api/v2/account/"+accountUID+"/savings-goals/"+goalUID+"/add-money/"+txnUID.String(), topUpRequest{Amount: a})
 	if err != nil {
 		return "", nil, err
 	}
@@ -150,13 +150,13 @@ func (c *Client) TransferToSavingsGoal(ctx context.Context, goalUID string, a Am
 
 // TransferFromSavingsGoal transfers money out of a savings goal. It returns the http response in case this is required for further
 // processing. An error will be returned if the API is unable to transfer the amount out of the savings goal.
-func (c *Client) TransferFromSavingsGoal(ctx context.Context, goalUID string, a Amount) (string, *http.Response, error) {
+func (c *Client) TransferFromSavingsGoal(ctx context.Context, accountUID string, goalUID string, a Amount) (string, *http.Response, error) {
 	txnUID, err := uuid.NewRandom()
 	if err != nil {
 		return "", nil, err
 	}
 
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+goalUID+"/withdraw-money/"+txnUID.String(), topUpRequest{Amount: a})
+	req, err := c.NewRequest("PUT", "/api/v2/account/"+accountUID+"/savings-goals/"+goalUID+"/withdraw-money/"+txnUID.String(), topUpRequest{Amount: a})
 	if err != nil {
 		return "", nil, err
 	}
@@ -171,8 +171,8 @@ func (c *Client) TransferFromSavingsGoal(ctx context.Context, goalUID string, a 
 
 // DeleteSavingsGoal deletes a savings goal for the current customer. It returns http.StatusNoContent
 // on success. No payload is returned.
-func (c *Client) DeleteSavingsGoal(ctx context.Context, uid string) (*http.Response, error) {
-	req, err := c.NewRequest("DELETE", "/api/v1/savings-goals/"+uid, nil)
+func (c *Client) DeleteSavingsGoal(ctx context.Context, accountUID string, uid string) (*http.Response, error) {
+	req, err := c.NewRequest("DELETE", "/api/v2/account/"+accountUID+"/savings-goals/"+uid, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -184,8 +184,8 @@ func (c *Client) DeleteSavingsGoal(ctx context.Context, uid string) (*http.Respo
 // SavingsGoalPhoto returns the photo for savings goal based on a UID. It also returns the http response
 // in case this is required for further processing. An error will be returned if unable to retrieve
 // the photo from the API.
-func (c *Client) SavingsGoalPhoto(ctx context.Context, uid string) (*Photo, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid+"/photo", nil)
+func (c *Client) SavingsGoalPhoto(ctx context.Context, accountUID string, uid string) (*Photo, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/account/"+accountUID+"/savings-goals/"+uid+"/photo", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -202,8 +202,8 @@ func (c *Client) SavingsGoalPhoto(ctx context.Context, uid string) (*Photo, *htt
 // RecurringTransfer returns the recurring savings for savings goal based on a UID. It also returns
 // the http response in case this is required for further processing. An error will be returned if
 // unable to retrieve the recurring savings set-up from the API.
-func (c *Client) RecurringTransfer(ctx context.Context, uid string) (*RecurringTransferRequest, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/savings-goals/"+uid+"/recurring-transfer", nil)
+func (c *Client) RecurringTransfer(ctx context.Context, accountUID string, uid string) (*RecurringTransferRequest, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/account/"+accountUID+"/savings-goals/"+uid+"/recurring-transfer", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -220,8 +220,8 @@ func (c *Client) RecurringTransfer(ctx context.Context, uid string) (*RecurringT
 // CreateRecurringTransfer sets up the recurring transfer for a savings goal. It takes the UID of the savings goal, along with a RecurringTransferRequest
 // and returns the UID of the recurring transfer. It also returns the http response in case this is required for further processing. An error is returned
 // on failure.
-func (c *Client) CreateRecurringTransfer(ctx context.Context, uid string, rtr RecurringTransferRequest) (string, *http.Response, error) {
-	req, err := c.NewRequest("PUT", "/api/v1/savings-goals/"+uid+"/recurring-transfer", rtr)
+func (c *Client) CreateRecurringTransfer(ctx context.Context, accountUID string, uid string, rtr RecurringTransferRequest) (string, *http.Response, error) {
+	req, err := c.NewRequest("PUT", "/api/v2/account/"+accountUID+"/savings-goals/"+uid+"/recurring-transfer", rtr)
 	if err != nil {
 		return "", nil, err
 	}
@@ -236,8 +236,8 @@ func (c *Client) CreateRecurringTransfer(ctx context.Context, uid string, rtr Re
 
 // DeleteRecurringTransfer deletes the recurring transfer for a savings goal. It takes the UID of the savings goal and returns no content. It returns the
 // http response in case this is required for further processing. An error is returned on failure.
-func (c *Client) DeleteRecurringTransfer(ctx context.Context, uid string) (*http.Response, error) {
-	req, err := c.NewRequest("DELETE", "/api/v1/savings-goals/"+uid+"/recurring-transfer", nil)
+func (c *Client) DeleteRecurringTransfer(ctx context.Context, accountUID string, uid string) (*http.Response, error) {
+	req, err := c.NewRequest("DELETE", "/api/v2/account/"+accountUID+"/savings-goals/"+uid+"/recurring-transfer", nil)
 	if err != nil {
 		return nil, err
 	}
