@@ -1,4 +1,4 @@
-module lildude/starling
+module github.com/lildude/starling
 
 go 1.15
 
