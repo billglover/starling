@@ -278,6 +278,7 @@ var balanceTestCases = []struct {
 			"effectiveBalance": 15260.82,
 			"pendingTransactions": 0,
 			"availableToSpend": 15260.82,
+			"acceptedOverdraft": 0,
 			"currency": "GBP",
 			"amount": 15260.82
 		}`,
@@ -289,6 +290,7 @@ var balanceTestCases = []struct {
 			"effectiveBalance": -15260.82,
 			"pendingTransactions": 0,
 			"availableToSpend": 0,
+			"acceptedOverdraft": 0,
 			"currency": "GBP",
 			"amount": -15260.82
 		}`,
@@ -300,6 +302,7 @@ var balanceTestCases = []struct {
 			"effectiveBalance": -15260.82,
 			"pendingTransactions": 0,
 			"availableToSpend": 0,
+			"acceptedOverdraft": 0,
 			"currency": "GBP",
 			"amount": 1.797693134862315708145274237317043567981e+308
 		}`,
@@ -318,12 +321,12 @@ func testAccountBalance(t *testing.T, name, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/accounts/balance", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/accounts/2c7a379d-c0d8-4541-8520-ca41cc26d56a/balance", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.AccountBalance(context.Background())
+	got, _, err := client.AccountBalance(context.Background(), "2c7a379d-c0d8-4541-8520-ca41cc26d56a")
 	checkNoError(t, err)
 
 	want := &Balance{}
@@ -359,12 +362,12 @@ func TestBalanceForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/accounts/balance", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/accounts/2c7a379d-c0d8-4541-8520-ca41cc26d56a/balance", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	got, resp, err := client.AccountBalance(context.Background())
+	got, resp, err := client.AccountBalance(context.Background(), "2c7a379d-c0d8-4541-8520-ca41cc26d56a")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
