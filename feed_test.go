@@ -21,6 +21,7 @@ var feedTC = []struct {
 		name: "no transactions",
 		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
 		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		since: time.Now(),
 		mock: `{
 		"feedItems": []
 		}`,
@@ -29,6 +30,7 @@ var feedTC = []struct {
 		name: "single transaction",
 		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
 		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		since: time.Now(),
 		mock: `{
 		"feedItems": [
 			 {
@@ -60,6 +62,7 @@ var feedTC = []struct {
 		name: "multiple transactions",
 		act:  "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0",
 		cat:  "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0",
+		since: time.Now(),
 		mock: `{
 			"feedItems": [
 				 {
@@ -195,12 +198,7 @@ func testFeed(t *testing.T, name, act, cat, mock string, since time.Time) {
 		fmt.Fprint(w, mock)
 	})
 
-	opts := &FeedOpts{}
-	if time.Time.IsZero(since) == false {
-		opts.Since = since
-	}
-
-	got, _, err := client.Feed(context.Background(), act, cat, opts)
+	got, _, err := client.Feed(context.Background(), act, cat, since)
 	checkNoError(t, err)
 
 	want := &feed{}
@@ -226,7 +224,7 @@ func TestFeedForbidden(t *testing.T) {
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	got, resp, err := client.Feed(context.Background(), "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0", "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0", nil)
+	got, resp, err := client.Feed(context.Background(), "30aa7ab8-4389-4658-a4f8-0bc6d0015ba0", "c423ab8d-9a6a-44b2-8db6-ac6000fe58e0", time.Now())
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
