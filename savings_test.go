@@ -19,6 +19,7 @@ func TestSavingsGoals(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	mock := `{
 		"savingsGoalList": [
 		  {
@@ -37,12 +38,12 @@ func TestSavingsGoals(t *testing.T) {
 		]
 	  }`
 
-	mux.HandleFunc("/api/v1/savings-goals", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "GET")
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.SavingsGoals(context.Background())
+	got, _, err := client.SavingsGoals(context.Background(), accountUID)
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -69,6 +70,7 @@ func TestGetSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	// Define our mock response and handler
 	mock := `{
 		"uid": "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b",
@@ -84,12 +86,12 @@ func TestGetSavingsGoal(t *testing.T) {
 		"savedPercentage": 50
 	}`
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "GET")
 		fmt.Fprint(w, mock)
 	})
 
-	got, _, err := client.SavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	got, _, err := client.SavingsGoal(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -114,12 +116,13 @@ func TestSavingsGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	goal, resp, err := client.SavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	goal, resp, err := client.SavingsGoal(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -136,6 +139,7 @@ func TestPutSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	uid := "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b"
 	mockReq := SavingsGoalRequest{
 		Name:     "test",
@@ -152,7 +156,7 @@ func TestPutSavingsGoal(t *testing.T) {
 		"errors": []
 	  }`
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
 		var sg = SavingsGoalRequest{}
@@ -174,7 +178,7 @@ func TestPutSavingsGoal(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	resp, err := client.CreateSavingsGoal(context.Background(), uid, mockReq)
+	resp, err := client.CreateSavingsGoal(context.Background(), accountUID, uid, mockReq)
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -190,6 +194,7 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	uid := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
 	mockReq := SavingsGoalRequest{
 		Name:     "test",
@@ -210,7 +215,7 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 		]
 	}`
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
 		var sg = SavingsGoalRequest{}
@@ -232,7 +237,7 @@ func TestPutSavingsGoal_ValidateError(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	resp, err := client.CreateSavingsGoal(context.Background(), uid, mockReq)
+	resp, err := client.CreateSavingsGoal(context.Background(), accountUID, uid, mockReq)
 	if err == nil {
 		t.Fatal("expected an error to be returned", cross)
 	}
@@ -246,7 +251,8 @@ func TestPutSavingsGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodPut)
 		w.WriteHeader(http.StatusForbidden)
 	})
@@ -261,7 +267,7 @@ func TestPutSavingsGoalForbidden(t *testing.T) {
 		Base64EncodedPhoto: "",
 	}
 
-	resp, err := client.CreateSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", goal)
+	resp, err := client.CreateSavingsGoal(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", goal)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -275,6 +281,7 @@ func TestTransferToSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
 	txnUID := "28dff346-dd48-426f-96df-d7f33d29c379"
 	mockResp := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
@@ -282,7 +289,7 @@ func TestTransferToSavingsGoal(t *testing.T) {
 	mockAmount := Amount{Currency: "GBP", MinorUnits: 1050}
 	mockReq := topUpRequest{Amount: mockAmount}
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
 		var tu = topUpRequest{}
@@ -304,7 +311,7 @@ func TestTransferToSavingsGoal(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	id, resp, err := client.TransferToSavingsGoal(context.Background(), goalUID, mockAmount)
+	id, resp, err := client.TransferToSavingsGoal(context.Background(), accountUID, goalUID, mockAmount)
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -325,20 +332,21 @@ func TestTransferToSavingsGoal_BadRequest(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
 	mockAmount := Amount{Currency: "GBP", MinorUnits: 1050}
 	mockResp := `[
 		"UNKNOWN_CATEGORY"
 	]`
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(w, mockResp)
 	})
 
-	_, resp, err := client.TransferToSavingsGoal(context.Background(), goalUID, mockAmount)
+	_, resp, err := client.TransferToSavingsGoal(context.Background(), accountUID, goalUID, mockAmount)
 	if err == nil {
 		t.Fatal("should return an error")
 	}
@@ -359,14 +367,15 @@ func TestTransferToSavingsGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodPut)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
 	amt := Amount{Currency: "GBP", MinorUnits: 1050}
 
-	id, resp, err := client.TransferToSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
+	id, resp, err := client.TransferToSavingsGoal(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -400,19 +409,20 @@ func TestDeleteSavingsGoal(t *testing.T) {
 func testDeleteSavingsGoal(t *testing.T, name, uid string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodDelete)
 
 		reqUID := path.Base(r.URL.Path)
 		if reqUID != uid {
-			t.Error("should send a request with the correct UID", cross, reqUID)
+			t.Error("should send a request with the correct UID", accountUID, cross, reqUID)
 		}
 
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	resp, err := client.DeleteSavingsGoal(context.Background(), uid)
+	resp, err := client.DeleteSavingsGoal(context.Background(), accountUID, uid)
 	checkNoError(t, err)
 
 	if resp.StatusCode != http.StatusNoContent {
@@ -431,12 +441,13 @@ func TestDeleteGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodDelete)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	resp, err := client.DeleteSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	resp, err := client.DeleteSavingsGoal(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -455,7 +466,7 @@ var savingsGoalPhotoCases = []struct {
 		mock: `{
 			"_links": {
 				 "self": {
-					  "href": "api/v1/savings-goals/72011c4b-d42b-4709-8511-b7f01669e46f/photo",
+					  "href": "api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/72011c4b-d42b-4709-8511-b7f01669e46f/photo",
 					  "templated": false
 				 }
 			},
@@ -476,7 +487,8 @@ func testSavingsGoalPhoto(t *testing.T, name, uid string, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 
 		resource := path.Base(r.URL.Path)
@@ -494,7 +506,7 @@ func testSavingsGoalPhoto(t *testing.T, name, uid string, mock string) {
 		fmt.Fprintln(w, mock)
 	})
 
-	photo, resp, err := client.SavingsGoalPhoto(context.Background(), uid)
+	photo, resp, err := client.SavingsGoalPhoto(context.Background(), accountUID, uid)
 	checkNoError(t, err)
 
 	if resp.StatusCode != http.StatusOK {
@@ -517,12 +529,13 @@ func TestSavingsGoalPhotoForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	got, resp, err := client.SavingsGoalPhoto(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	got, resp, err := client.SavingsGoalPhoto(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -539,6 +552,7 @@ func TestTransferFromSavingsGoal(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
 	txnUID := "28dff346-dd48-426f-96df-d7f33d29c379"
 	mockResp := `{"transferUid":"28dff346-dd48-426f-96df-d7f33d29c379","success":true,"errors":[]}`
@@ -546,7 +560,7 @@ func TestTransferFromSavingsGoal(t *testing.T) {
 	mockAmount := Amount{Currency: "GBP", MinorUnits: 1050}
 	mockReq := withdrawalRequest{Amount: mockAmount}
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
 		var wr = withdrawalRequest{}
@@ -573,7 +587,7 @@ func TestTransferFromSavingsGoal(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	id, resp, err := client.TransferFromSavingsGoal(context.Background(), goalUID, mockAmount)
+	id, resp, err := client.TransferFromSavingsGoal(context.Background(), accountUID, goalUID, mockAmount)
 	if err != nil {
 		t.Fatal("should be able to make the request", cross, err)
 	}
@@ -594,13 +608,14 @@ func TestTransferFromSavingsGoal_InsufficientFunds(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
 	goalUID := "d8770f9d-4ee9-4cc1-86e1-83c26bcfcc4f"
 	mockResp := `["INSUFFICIENT_FUNDS"]`
 
 	mockAmount := Amount{Currency: "GBP", MinorUnits: 10000000}
 	mockReq := withdrawalRequest{Amount: mockAmount}
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, "PUT")
 
 		var wr = withdrawalRequest{}
@@ -627,7 +642,7 @@ func TestTransferFromSavingsGoal_InsufficientFunds(t *testing.T) {
 		fmt.Fprintln(w, mockResp)
 	})
 
-	_, resp, err := client.TransferFromSavingsGoal(context.Background(), goalUID, mockAmount)
+	_, resp, err := client.TransferFromSavingsGoal(context.Background(), accountUID, goalUID, mockAmount)
 	if err == nil {
 		t.Fatal("should return an error when making the request", cross)
 	}
@@ -641,14 +656,15 @@ func TestTransferFromSavingsGoalForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodPut)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
 	amt := Amount{Currency: "GBP", MinorUnits: 1050}
 
-	got, resp, err := client.TransferFromSavingsGoal(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
+	got, resp, err := client.TransferFromSavingsGoal(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", amt)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -716,7 +732,8 @@ func recurringTransfer(t *testing.T, name, uid string, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 
 		resource := path.Base(r.URL.Path)
@@ -734,7 +751,7 @@ func recurringTransfer(t *testing.T, name, uid string, mock string) {
 		fmt.Fprintln(w, mock)
 	})
 
-	recSav, resp, err := client.RecurringTransfer(context.Background(), uid)
+	recSav, resp, err := client.RecurringTransfer(context.Background(), accountUID, uid)
 	checkNoError(t, err)
 
 	if resp.StatusCode != http.StatusOK {
@@ -757,12 +774,13 @@ func TestRecurringTransferForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	got, resp, err := client.RecurringTransfer(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	got, resp, err := client.RecurringTransfer(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -786,14 +804,15 @@ func testCreateRecurringTransfer(t *testing.T, name, uid string, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodPut)
 
 		resource := path.Base(r.URL.Path)
 		reqUID := path.Base(path.Dir(r.URL.Path))
 
 		if reqUID != uid {
-			t.Error("should send a request with the correct UID", cross, reqUID)
+			t.Error("should send a request with the correct UID", accountUID, cross, reqUID)
 		}
 
 		if resource != "recurring-transfer" {
@@ -820,7 +839,7 @@ func testCreateRecurringTransfer(t *testing.T, name, uid string, mock string) {
 		},
 	}
 
-	id, resp, err := client.CreateRecurringTransfer(context.Background(), uid, rtrReq)
+	id, resp, err := client.CreateRecurringTransfer(context.Background(), accountUID, uid, rtrReq)
 	checkNoError(t, err)
 
 	if resp.StatusCode != http.StatusOK {
@@ -836,7 +855,8 @@ func TestCreateRecurringTransferForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodPut)
 		w.WriteHeader(http.StatusForbidden)
 	})
@@ -847,7 +867,7 @@ func TestCreateRecurringTransferForbidden(t *testing.T) {
 		RecurrenceRule: RecurrenceRule{Frequency: "DAILY", Interval: 2, Count: 4},
 	}
 
-	got, resp, err := client.CreateRecurringTransfer(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", rtrReq)
+	got, resp, err := client.CreateRecurringTransfer(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b", rtrReq)
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {
@@ -871,7 +891,8 @@ func testDeleteRecurringTransfer(t *testing.T, name, uid string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodDelete)
 
 		resource := path.Base(r.URL.Path)
@@ -888,7 +909,7 @@ func testDeleteRecurringTransfer(t *testing.T, name, uid string) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	resp, err := client.DeleteRecurringTransfer(context.Background(), uid)
+	resp, err := client.DeleteRecurringTransfer(context.Background(), accountUID, uid)
 	checkNoError(t, err)
 
 	if resp.StatusCode != http.StatusNoContent {
@@ -907,12 +928,13 @@ func TestDeleteRecurringTransferForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
+	accountUID := "24492cc9-77dd-4155-87a2-ec2580daf139"
+	mux.HandleFunc("/api/v2/account/24492cc9-77dd-4155-87a2-ec2580daf139/savings-goals/", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodDelete)
 		w.WriteHeader(http.StatusForbidden)
 	})
 
-	resp, err := client.DeleteRecurringTransfer(context.Background(), "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
+	resp, err := client.DeleteRecurringTransfer(context.Background(), accountUID, "e43d3060-2c83-4bb9-ac8c-c627b9c45f8b")
 	checkHasError(t, err)
 
 	if resp.StatusCode != http.StatusForbidden {

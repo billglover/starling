@@ -30,25 +30,17 @@ type Item struct {
 	SpendingCategory         string    `json:"spendingCategory"`
 }
 
-// FeedOpts defines options that can be passed when requesting a feed
-type FeedOpts struct {
-	Since time.Time
-}
-
 // Feed returns a slice of Items for a given account and category. It returns an error if unable
 // to retrieve the feed.
-// Note: Feed uses the v2 API which is still under active development.
-func (c *Client) Feed(ctx context.Context, act, cat string, opts *FeedOpts) ([]Item, *http.Response, error) {
+func (c *Client) Feed(ctx context.Context, act, cat string, since time.Time) ([]Item, *http.Response, error) {
 	req, err := c.NewRequest("GET", "/api/v2/feed/account/"+act+"/category/"+cat, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if opts != nil {
-		q := req.URL.Query()
-		q.Add("changesSince", opts.Since.Format(time.RFC3339Nano))
-		req.URL.RawQuery = q.Encode()
-	}
+	q := req.URL.Query()
+	q.Add("changesSince", since.Format(time.RFC3339Nano))
+	req.URL.RawQuery = q.Encode()
 
 	var f feed
 	resp, err := c.Do(ctx, req, &f)

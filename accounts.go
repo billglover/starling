@@ -32,7 +32,7 @@ type accounts struct {
 
 // Account returns the the account details for the current customer.
 func (c *Client) Account(ctx context.Context) (*Account, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/accounts", nil)
+	req, err := c.NewRequest("GET", "/api/v2/accounts", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -69,8 +69,8 @@ type AccountID struct {
 }
 
 // AccountID returns the identifiers for an individual account
-func (c *Client) AccountID(ctx context.Context, uid string) (*AccountID, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v2/accounts/"+uid+"/identifiers", nil)
+func (c *Client) AccountID(ctx context.Context, accountUID string) (*AccountID, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/accounts/"+accountUID+"/identifiers", nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -82,17 +82,18 @@ func (c *Client) AccountID(ctx context.Context, uid string) (*AccountID, *http.R
 
 // Balance represents the balance on an account
 type Balance struct {
-	Cleared     Amount `json:"clearedBalance"`
-	Effective   Amount `json:"effectiveBalance"`
-	PendingTxns Amount `json:"pendingTransactions"`
-	Available   Amount `json:"availableToSpend"`
-	Overdraft   Amount `json:"acceptedOverdraft"`
-	Amount      Amount `json:"amount"`
+	Cleared     float64 `json:"clearedBalance"`
+	Effective   float64 `json:"effectiveBalance"`
+	PendingTxns float64 `json:"pendingTransactions"`
+	Available   float64 `json:"availableToSpend"`
+	Overdraft   float64 `json:"acceptedOverdraft"`
+	Currency    string  `json:"currency"`
+	Amount      float64 `json:"amount"`
 }
 
 // AccountBalance returns the the account balance for the current customer.
-func (c *Client) AccountBalance(ctx context.Context, uid string) (*Balance, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v2/accounts/"+uid+"/balance", nil)
+func (c *Client) AccountBalance(ctx context.Context, accountUID string) (*Balance, *http.Response, error) {
+	req, err := c.NewRequest("GET", "/api/v2/accounts/"+accountUID+"/balance", nil)
 	if err != nil {
 		return nil, nil, err
 	}

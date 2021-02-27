@@ -21,3 +21,4 @@ vendor/
 
 # Ignore distribution directory
 .dist/
+.env

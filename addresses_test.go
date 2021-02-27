@@ -17,10 +17,12 @@ var addressesTestCases = []struct {
 		name: "single address",
 		mock: `{
 			"current": {
-				"streetAddress": "3rd Floor",
-				"city": "London",
-				"country": "GBR",
-				"postcode": " EC2M 2PP"
+				"line1": "1A Admiralty Arch",
+				"line2": "The Mall",
+				"line3": "City of Westminster",
+				"postTown": "London",
+				"countryCode": "GB",
+				"postCode": "SW1A 2WH"
 			},
 			"previous": []
 		}`,
@@ -29,16 +31,20 @@ var addressesTestCases = []struct {
 		name: "single previous address",
 		mock: `{
 			"current": {
-				"streetAddress": "3rd Floor",
-				"city": "London",
-				"country": "GBR",
-				"postcode": " EC2M 2PP"
+				"line1": "1A Admiralty Arch",
+				"line2": "The Mall",
+				"line3": "City of Westminster",
+				"postTown": "London",
+				"countryCode": "GB",
+				"postCode": "SW1A 2WH"
 			},
 			"previous": [{
-				"streetAddress": "3rd Floor",
-				"city": "London",
-				"country": "GBR",
-				"postcode": " EC2M 2PP"
+				"line1": "1A Admiralty Arch",
+				"line2": "The Mall",
+				"line3": "City of Westminster",
+				"postTown": "London",
+				"countryCode": "GB",
+				"postCode": "SW1A 2WH"
 			}]
 		}`,
 	},
@@ -46,22 +52,28 @@ var addressesTestCases = []struct {
 		name: "multiple previous addresses",
 		mock: `{
 			"current": {
-				"streetAddress": "3rd Floor",
-				"city": "London",
-				"country": "GBR",
-				"postcode": " EC2M 2PP"
+				"line1": "1A Admiralty Arch",
+				"line2": "The Mall",
+				"line3": "City of Westminster",
+				"postTown": "London",
+				"countryCode": "GB",
+				"postCode": "SW1A 2WH"
 			},
 			"previous": [{
-				"streetAddress": "3rd Floor",
-				"city": "London",
-				"country": "GBR",
-				"postcode": " EC2M 2PP"
+				"line1": "1A Admiralty Arch",
+				"line2": "The Mall",
+				"line3": "City of Westminster",
+				"postTown": "London",
+				"countryCode": "GB",
+				"postCode": "SW1A 2WH"
 			},
 			{
-				"streetAddress": "3rd Floor",
-				"city": "London",
-				"country": "GBR",
-				"postcode": " EC2M 2PP"
+				"line1": "1A Admiralty Arch",
+				"line2": "The Mall",
+				"line3": "City of Westminster",
+				"postTown": "London",
+				"countryCode": "GB",
+				"postCode": "SW1A 2WH"
 			}]
 		}`,
 	},
@@ -79,7 +91,7 @@ func testAddressHistory(t *testing.T, name, mock string) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/addresses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/addresses", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, mock)
 	})
@@ -99,7 +111,7 @@ func TestAddressHistoryForbidden(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/api/v1/addresses", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v2/addresses", func(w http.ResponseWriter, r *http.Request) {
 		checkMethod(t, r, http.MethodGet)
 		w.WriteHeader(http.StatusForbidden)
 	})
