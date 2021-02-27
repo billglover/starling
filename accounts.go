@@ -82,13 +82,11 @@ func (c *Client) AccountID(ctx context.Context, accountUID string) (*AccountID, 
 
 // Balance represents the balance on an account
 type Balance struct {
-	Cleared     float64 `json:"clearedBalance"`
-	Effective   float64 `json:"effectiveBalance"`
-	PendingTxns float64 `json:"pendingTransactions"`
-	Available   float64 `json:"availableToSpend"`
-	Overdraft   float64 `json:"acceptedOverdraft"`
-	Currency    string  `json:"currency"`
-	Amount      float64 `json:"amount"`
+	Cleared     Amount `json:"clearedBalance"`
+	Effective   Amount `json:"effectiveBalance"`
+	PendingTxns Amount `json:"pendingTransactions"`
+	Overdraft   Amount `json:"acceptedOverdraft"`
+	Amount      Amount `json:"amount"`
 }
 
 // AccountBalance returns the the account balance for the current customer.
