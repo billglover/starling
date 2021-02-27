@@ -274,37 +274,51 @@ var balanceTestCases = []struct {
 	{
 		name: "positive balance",
 		mock: `{
-			"clearedBalance": 15260.82,
-			"effectiveBalance": 15260.82,
-			"pendingTransactions": 0,
-			"availableToSpend": 15260.82,
-			"acceptedOverdraft": 0,
-			"currency": "GBP",
-			"amount": 15260.82
+			"clearedBalance": {
+				"currency": "GBP",
+    		"minorUnits": 1526082
+			},
+			"effectiveBalance": {
+				"currency": "GBP",
+    		"minorUnits": 1526082
+			},
+			"pendingTransactions": {
+				"currency": "GBP",
+    		"minorUnits": 0
+			},
+			"acceptedOverdraft": {
+				"currency": "GBP",
+    		"minorUnits": 0
+			},
+			"amount": {
+				"currency": "GBP",
+    		"minorUnits": 1526082
+			}
 		}`,
 	},
 	{
 		name: "negative balance",
 		mock: `{
-			"clearedBalance": -15260.82,
-			"effectiveBalance": -15260.82,
-			"pendingTransactions": 0,
-			"availableToSpend": 0,
-			"acceptedOverdraft": 0,
-			"currency": "GBP",
-			"amount": -15260.82
-		}`,
-	},
-	{
-		name: "very large balance",
-		mock: `{
-			"clearedBalance": -15260.82,
-			"effectiveBalance": -15260.82,
-			"pendingTransactions": 0,
-			"availableToSpend": 0,
-			"acceptedOverdraft": 0,
-			"currency": "GBP",
-			"amount": 1.797693134862315708145274237317043567981e+308
+			"clearedBalance": {
+				"currency": "GBP",
+    		"minorUnits": -1526082
+			},
+			"effectiveBalance": {
+				"currency": "GBP",
+    		"minorUnits": -1526082
+			},
+			"pendingTransactions": {
+				"currency": "GBP",
+    		"minorUnits": 0
+			},
+			"acceptedOverdraft": {
+				"currency": "GBP",
+    		"minorUnits": 0
+			},
+			"amount": {
+				"currency": "GBP",
+    		"minorUnits": -1526082
+			}
 		}`,
 	},
 }

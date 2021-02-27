@@ -42,3 +42,24 @@ func Example_account() {
 		fmt.Println(txn.TransactionTime, txn.Amount, txn.Amount.Currency, txn.Direction)
 	}
 }
+
+func Example_balance() {
+	godotenv.Load(".env")
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: os.Getenv("STARLING_DEV_TOKEN")})
+	ctx := context.Background()
+	tc := oauth2.NewClient(ctx, ts)
+
+	baseURL, _ := url.Parse(starling.ProdURL)
+	opts := starling.ClientOptions{BaseURL: baseURL}
+	client := starling.NewClientWithOptions(tc, opts)
+	acct, _, err := client.Accounts(ctx)
+	if err != nil {
+		log.Fatalf("Whoops: %v", err)
+	}
+
+	bal, _, err := client.AccountBalance(ctx, acct[0].UID)
+	if err != nil {
+		log.Fatalf("Whoops: %v", err)
+	}
+	fmt.Printf("%v", bal)
+}
