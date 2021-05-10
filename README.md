@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/billglover/starling.svg?branch=master)](https://travis-ci.com/billglover/starling)
 
-This is an unofficial Go client for the Starling Bank API.
+This is an unofficial Go client for the Starling Bank API and a fork of the original package at <https://github.com/billglover/starling>.
 
 Both the Starling Bank API itself and this package are under active development and, whilst we try to keep breaking changes to a minimum, we cannot guarantee a stable interface. We use [Semantic Versioning](https://semver.org) to quantify changes from one release to the next.
 
@@ -13,7 +13,7 @@ Both the Starling Bank API itself and this package are under active development 
 Use Go to fetch the latest version of the package.
 
 ```shell
-go get -u 'github.com/billglover/starling'
+go get -u 'github.com/lildude/starling'
 ```
 
 ## Usage
@@ -27,7 +27,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/billglover/starling"
+    "github.com/lildude/starling"
     "golang.org/x/oauth2"
 )
 
@@ -56,7 +56,7 @@ import (
     "fmt"
     "net/url"
 
-    "github.com/billglover/starling"
+    "github.com/lildude/starling"
     "golang.org/x/oauth2"
 )
 
@@ -83,5 +83,6 @@ func main() {
 
 ## Contributors
 
-* [@tuckerwales](https://github.com/billglover/starling/commits?author=tuckerwales)
-* [@billglover](https://github.com/billglover/starling/commits?author=billglover)
+* [@lildude](https://github.com/lildude/starling/commits?author=lildude)
+* [@tuckerwales](https://github.com/lildude/starling/commits?author=tuckerwales)
+* [@billglover](https://github.com/lildude/starling/commits?author=billglover)

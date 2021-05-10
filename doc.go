@@ -3,7 +3,7 @@ Package starling provides a client for using the Starling API.
 
 Usage:
 
-	import "github.com/billglover/starling"
+	import "github.com/lildude/starling"
 
 Construct a new Starling client, then call various methods on the API to access
 different functions of the Starling API. For example:
