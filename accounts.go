@@ -80,20 +80,40 @@ func (c *Client) AccountID(ctx context.Context, uid string) (*AccountID, *http.R
 	return actID, resp, err
 }
 
-// Balance represents the balance on an account
 type Balance struct {
-	Cleared     float64 `json:"clearedBalance"`
-	Effective   float64 `json:"effectiveBalance"`
-	PendingTxns float64 `json:"pendingTransactions"`
-	Available   float64 `json:"availableToSpend"`
-	Overdraft   float64 `json:"acceptedOverdraft"`
-	Currency    string  `json:"currency"`
-	Amount      float64 `json:"amount"`
+	ClearedBalance struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"clearedBalance"`
+	EffectiveBalance struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"effectiveBalance"`
+	PendingTransactions struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"pendingTransactions"`
+	AcceptedOverdraft struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"acceptedOverdraft"`
+	Amount struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"amount"`
+	TotalClearedBalance struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"totalClearedBalance"`
+	TotalEffectiveBalance struct {
+		Currency   string `json:"currency"`
+		MinorUnits int    `json:"minorUnits"`
+	} `json:"totalEffectiveBalance"`
 }
 
 // AccountBalance returns the the account balance for the current customer.
-func (c *Client) AccountBalance(ctx context.Context) (*Balance, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/accounts/balance", nil)
+func (c *Client) AccountBalance(ctx context.Context, uid string) (*Balance, *http.Response, error) {
+    req, err := c.NewRequest("GET", "/api/v2/accounts/"+uid+"/balance", nil)
 	if err != nil {
 		return nil, nil, err
 	}
