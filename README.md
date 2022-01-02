@@ -1,5 +1,7 @@
 # Starling
 
+Note: the project is now four years old and I believe the Starling API has moved on significantly and so this client may no longer function. I archived the project to reflect this. See https://developer.starlingbank.com as a good starting point for Starling development.
+
 [![Build Status](https://travis-ci.com/billglover/starling.svg?branch=master)](https://travis-ci.com/billglover/starling)
 
 This is an unofficial Go client for the Starling Bank API.
