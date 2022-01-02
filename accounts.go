@@ -80,20 +80,18 @@ func (c *Client) AccountID(ctx context.Context, uid string) (*AccountID, *http.R
 	return actID, resp, err
 }
 
-// Balance represents the balance on an account
 type Balance struct {
-	Cleared     float64 `json:"clearedBalance"`
-	Effective   float64 `json:"effectiveBalance"`
-	PendingTxns float64 `json:"pendingTransactions"`
-	Available   float64 `json:"availableToSpend"`
-	Overdraft   float64 `json:"acceptedOverdraft"`
-	Currency    string  `json:"currency"`
-	Amount      float64 `json:"amount"`
+	Cleared CurrencyAndAmount `json:"clearedBalance"`
+	Effective CurrencyAndAmount `json:"effectiveBalance"`
+	PendingTxns CurrencyAndAmount `json:"pendingTransactions"`
+	OverDraft CurrencyAndAmount `json:"acceptedOverdraft"`
+	Amount CurrencyAndAmount `json:"amount"`
+	TotalCleared CurrencyAndAmount `json:"totalClearedBalance"`
+	TotalEffective CurrencyAndAmount `json:"totalEffectiveBalance"`
 }
-
 // AccountBalance returns the the account balance for the current customer.
-func (c *Client) AccountBalance(ctx context.Context) (*Balance, *http.Response, error) {
-	req, err := c.NewRequest("GET", "/api/v1/accounts/balance", nil)
+func (c *Client) AccountBalance(ctx context.Context, uid string) (*Balance, *http.Response, error) {
+    req, err := c.NewRequest("GET", "/api/v2/accounts/"+uid+"/balance", nil)
 	if err != nil {
 		return nil, nil, err
 	}
